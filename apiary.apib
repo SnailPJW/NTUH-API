@@ -4,12 +4,12 @@ HOST: http://www.wantoto.com
 # 台大醫院行動醫療資訊系統API
 台大醫院行動醫療資訊系統API。
 版本 1.0
-# 所有API [/{?UserID,SessionKey}]
+# 所有API [/{?user_id,session_key}]
 所有API都須檢查Session Key是否過期，過期則回傳 401
 ## 所有API[GET]
 + Parameters
-    + UserID (string) ... 使用者帳號
-    + SessionKey (string) ... 使用者登入 Session Key
+    + user_id (string) ... 使用者帳號
+    + session_key (string) ... 使用者登入 Session Key
 
 + Response 401 (application/json)
 
@@ -19,11 +19,11 @@ HOST: http://www.wantoto.com
 
 # Group 病患清單
 病患清單相關API
-## 列出所有病患 [/patients/{?UserID,SessionKey}]
+## 列出所有病患 [/patients/{?patient_id,ward}]
 ### 列出所有病患 [GET]
 + Parameters
-
-    + UserID (string) ... 使用者帳號
+    + patient_id (string)
+    + ward (string)
 
 + Response 200 (application/json)
 
