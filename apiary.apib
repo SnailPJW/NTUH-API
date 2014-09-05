@@ -1,32 +1,63 @@
 FORMAT: 1A
 HOST: http://www.wantoto.com
 
-# 台大醫院行動醫療資訊系統API
-台大醫院行動醫療資訊系統API。使用 RESTful 架構規劃。
-版本 0.1
-# 所有API [/{?user_id,session_key}]
-所有API都須檢查Session Key是否過期，過期則回傳 401。所有字串編碼皆為UTF-8。
-## 所有API[GET]
+# 台大醫院行動醫療資訊系統 Web Service 0.1
+採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
+
+# 登入取得 SessionKey [/SessionKey/?EpmNo,Password]
+## Get session key[POST]
 + Parameters
-    + user_id (string) ... 使用者帳號
-    + session_key (string) ... 使用者登入 Session Key
+    + EpmNo (string) ... 使用者帳號
+    + Password (string) ... 使用者密碼
+
++ Response 200 (application/json)
+
+        {
+            "SessionKey": "51ADFDA9C02D4E1E9930D88A26963612"
+        }
 
 + Response 401 (application/json)
 
         {
-            "error": "unauthorized"
+            "ErrorMessage": "帳號密碼錯誤" //錯誤訊息[String]
+        }
+
+# 所有 Web Service [/{?SessionKey}]
+所有 Web Service 都須帶入 Session Key 檢查是否過期與是否具有存取權限。
+過期則回傳 401；無存取權限則回傳 403。
+## 所有API[GET]
++ Parameters
+    + SessionKey (string) ... 使用者登入 Session Key
+
++ Response 401 (application/json)
+
+        {
+            "ErrorMeassage": "Session Key 過期"
+        }
+        
++ Response 403 (application/json)
+
+        {
+            "ErrorMeassage": "無存取權限"
         }
 
 # Group 病患清單
-病患清單相關API
-## 病患清單 [/patients/{?patient_id,ward,doctor_id}]
+病患清單相關 Web Service
+## 病患清單 [/patients/{?PatientID,PersonID,WardCode,EpmNo,EpmNoConsult,EpmNoStarred,ORCode,ERCode,OPDCode,ExamRoomCode}]
 ### 列出所有病患 [GET]
-可傳入病歷號、病房、 醫師員編等參數，回傳符合參數條件之病患
+可傳入病歷號、身分證號、病房、醫師員編、手術房號、急診科別、門診科別、檢查科室等參數，回傳符合參數條件之病患
 + Parameters
-    + patient_id (string, optional) ... 病歷號
-    + ward (string, optional) ... 病房 (ex:5W3)
-    + doctor_id (string, optional) ... 醫師員編
-
+    + PatientID (string, optional) ... 病歷號
+    + PersonID (string, optional) ... 身分證號
+    + WardCode (string, optional) ... 病房 (ex:5W3)
+    + EpmNo (string, optional) ... 醫師員編 (依照醫師員編顯示個人病患)
+    + EpmNoConsult (string, optional) ... 醫師員編 (依照醫師員編顯示照會病患)
+    + EpmNoStarred (string, optional) ... 醫師員編 (依照醫師員編顯示追蹤病患)
+    + ORCode (string, optional) ... 手術房號
+    + ERCode (string, optional) ... 急診科別
+    + OPDCode (string, optional) ... 門診科別
+    + ExamRoomCode (string, optional) ... 檢查科室
+    
 + Response 200 (application/json)
 
         [
