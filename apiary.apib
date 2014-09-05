@@ -46,7 +46,7 @@ HOST: http://www.wantoto.com
 病患清單相關 Web Service
 ## 病患清單 [/patients/{?PatientID,PersonID,WardCode,EpmNo,EpmNoConsult,EpmNoStarred,ORCode,ERCode,OPDCode,ExamRoomCode}]
 ### 查詢病患清單 [GET]
-可傳入病歷號、身分證號、病房、醫師員編、手術房號、急診科別、門診科別、檢查科室等參數，回傳符合參數條件之病患
+可傳入病歷號、身分證號、病房、醫師員編、開刀房號、急診科別、門診科別、檢查科室等參數，回傳符合參數條件之病患
 + Parameters
     + PatientID (string, optional) ... 病歷號
     + PersonID (string, optional) ... 身分證號
@@ -54,7 +54,7 @@ HOST: http://www.wantoto.com
     + EpmNo (string, optional) ... 醫師員編 (依照醫師員編顯示個人病患)
     + EpmNoConsult (string, optional) ... 醫師員編 (依照醫師員編顯示照會病患)
     + EpmNoStarred (string, optional) ... 醫師員編 (依照醫師員編顯示追蹤病患)
-    + ORCode (string, optional) ... 手術房號
+    + ORCode (string, optional) ... 開刀房號
     + ERCode (string, optional) ... 急診科別
     + OPDCode (string, optional) ... 門診科別
     + ExamRoomCode (string, optional) ... 檢查科室
@@ -90,5 +90,17 @@ HOST: http://www.wantoto.com
                 "HospCode" = "T0",  //醫院代碼[string]
                 "WardCode" = "01A1",   //病房代碼[string]
                 "DisplayName" = "01A1",    //顯示名稱[string]
+            }
+        ]
+        
+## 開刀房號 [/ORs/]
+### 查詢所有開刀房 [GET]
++ Response 200 (application/json)
+
+        [   //手術房資訊陣列
+            {   //手術房資訊
+                "HospCode" = "T0",  //醫院代碼[string]
+                "ORCode" = "1",   //開刀房代碼[string]
+                "DisplayName" = "1",    //顯示名稱[string]
             }
         ]
