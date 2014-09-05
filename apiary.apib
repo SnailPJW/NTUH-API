@@ -112,7 +112,46 @@ HOST: http://www.wantoto.com
         [   //門診科別資訊陣列
             {   //門診科別資訊
                 "HospCode" = "T0",  //醫院代碼[string]
-                "OPDCode" = "ENT",   //門診科別代碼[string]
+                "OPDCode" = "MED",   //門診科別代碼[string]
+                "DisplayName" = "內科部",    //顯示名稱[string]
+                "Children" =[
+                                {
+                                    "HospCode" = "T0",  //醫院代碼[string]
+                                    "OPDCode" = "MED_AM",   //門診科別代碼[string]
+                                    "DisplayName" = "內科部 上午",    //顯示名稱[string]
+                                    "Children" =[
+                                                    {
+                                                        "HospCode" = "T0",  //醫院代碼[string]
+                                                        "OPDCode" = "MED_AM_01",   //門診科別代碼[string]
+                                                        "DisplayName" = "01診 王OO 腎臟科",    //顯示名稱[string]
+                                                    }
+                                                ]
+                                },
+                                {
+                                    "HospCode" = "T0",  //醫院代碼[string]
+                                    "OPDCode" = "MED_PM",   //門診科別代碼[string]
+                                    "DisplayName" = "內科部 下午",    //顯示名稱[string]
+                                    "Children" =[
+                                                    {
+                                                        "HospCode" = "T0",  //醫院代碼[string]
+                                                        "OPDCode" = "MED_PM_01",   //門診科別代碼[string]
+                                                        "DisplayName" = "01診 葉OO 不分科",    //顯示名稱[string]
+                                                    }
+                                                ]
+                                }
+                            ]
+            }
+        ]
+
+## 檢查科室 [/ExamRooms/]
+### 查詢所有檢查科室 [GET]
++ Response 200 (application/json)
+
+        [   //門診科別資訊陣列
+            {   //門診科別資訊
+                "HospCode" = "T0",  //醫院代碼[string]
+                "ExamRoomCode" = "ENT",   //檢查科室代碼[string]
                 "DisplayName" = "耳鼻喉科",    //顯示名稱[string]
             }
         ]
+
