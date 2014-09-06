@@ -14,15 +14,15 @@ HOST: http://www.wantoto.com
 
         {
             "Content" : {
-                "SessionKey": "51ADFDA9C02D4E1E9930D88A26963612"
+                "SessionKey" : "51ADFDA9C02D4E1E9930D88A26963612"
             }
         }
     
 + Response 401 (application/json)
 
         {
-            "Message" : "帳號密碼錯誤", //錯誤訊息[String]
-            "Error" : 100 //錯誤代碼 [Int]
+            "Message" : "帳號密碼錯誤", //錯誤訊息[string]
+            "Error" : 100 //錯誤代碼 [number]
         }
 
 # Group 所有 Web Service 通則
@@ -32,29 +32,29 @@ HOST: http://www.wantoto.com
 過期則回傳 401；無存取權限則回傳 403。
 + Parameters
     + SessionKey (string) ... 使用者登入 Session Key
-    + Offset = `0` (int, optional) ... 資料偏移數，當Content為陣列時使用
+    + Offset = `0` (number, optional) ... 資料偏移數，當Content為陣列時使用
     
 + Response 200 (application/json)
         
         {
             "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
-            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[Int] 
-            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[Int]
-            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[Int] 
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
 + Response 401 (application/json)
 
         {
-            "Message" : "Session Key 過期", //錯誤訊息[String]
-            "Error" :  200 //錯誤代碼 [Int]
+            "Message" : "Session Key 過期", //錯誤訊息[string]
+            "Error" :  200 //錯誤代碼 [number]
         }
         
 + Response 403 (application/json)
 
         {
-            "Message" : "無存取權限", //錯誤訊息[String]
-            "Error" :  300 //錯誤代碼 [Int]
+            "Message" : "無存取權限", //錯誤訊息[string]
+            "Error" :  300 //錯誤代碼 [number]
         }
 
 # Group 病患清單
@@ -85,7 +85,7 @@ HOST: http://www.wantoto.com
                     "PatientID" : "12345678",   //病歷號[string]
                     "PersionID" : "A123456789",  //身分證號[string]
                     "inpatient_info" : {   //住院資訊
-                        "BedInfoString" : "5W3 01-01",    //病房病床號[string]
+                        "BedInfostring" : "5W3 01-01",    //病房病床號[string]
                         "InDate" : 1406938026, //入院日期[double]（以時間序號表示，使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
                         "VS" : "葉小菜" //主治醫師[string]
                     },
@@ -95,9 +95,9 @@ HOST: http://www.wantoto.com
                     ],
                     "LatestPacsReportDateTime" : 
             },
-            "Limit" : 50, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 50 //此次Query總筆數[Int] 
+            "Limit" : 50, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 50 //此次Query總筆數[number] 
         ]
 
 ## 病房號 [/Wards]
@@ -113,9 +113,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "Limit" : 32, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 32 //此次Query總筆數[Int] 
+            "Limit" : 32, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 32 //此次Query總筆數[number] 
         }
         
 ## 開刀房號 [/ORs]
@@ -131,9 +131,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 50 //此次Query總筆數[Int] 
+            "Limit" : 50, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 50 //此次Query總筆數[number] 
         }
         
 ## 急診科別 [/ERs]
@@ -154,9 +154,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 50 //此次Query總筆數[Int] 
+            "Limit" : 50, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 50 //此次Query總筆數[number] 
         }
     
 ## 門診科別 [/OPDs]
@@ -173,9 +173,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 50 //此次Query總筆數[Int] 
+            "Limit" : 50, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 50 //此次Query總筆數[number] 
         }
 
 ## 門診科別層級 [/OPDs/{OPDCode}]
@@ -205,9 +205,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 50 //此次Query總筆數[Int] 
+            "Limit" : 50, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 50 //此次Query總筆數[number] 
         }
 
 + Request MED_A (text/plain)
@@ -225,9 +225,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 50 //此次Query總筆數[Int] 
+            "Limit" : 50, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 50 //此次Query總筆數[number] 
         }
 
 ## 檢查科室 [/ExamRooms]
@@ -244,9 +244,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 50 //此次Query總筆數[Int] 
+            "Limit" : 50, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 50 //此次Query總筆數[number] 
         ]
 
 ## 檢查科室層級 [/ExamRooms/{ExamRoomCode}]
@@ -278,9 +278,9 @@ HOST: http://www.wantoto.com
                     "DisplayName" : "[檢查照會] 肺功能室 晚上",    //顯示名稱[string]
                 }
             ],
-            "Limit" : 3, //最大回傳筆數[Int] 
-            "Offset" : 0, //回傳資料偏移數[Int]
-            "Total" : 3 //此次Query總筆數[Int] 
+            "Limit" : 3, //最大回傳筆數[number] 
+            "Offset" : 0, //回傳資料偏移數[number]
+            "Total" : 3 //此次Query總筆數[number] 
         ]
 
 # Group 病患資料
