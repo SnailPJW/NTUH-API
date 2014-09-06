@@ -13,13 +13,16 @@ HOST: http://www.wantoto.com
 + Response 200 (application/json)
 
         {
-            "SessionKey": "51ADFDA9C02D4E1E9930D88A26963612"
+            "Content" = {
+                "SessionKey": "51ADFDA9C02D4E1E9930D88A26963612"
+            }
         }
-
+    
 + Response 401 (application/json)
 
         {
-            "ErrorMessage": "帳號密碼錯誤" //錯誤訊息[String]
+            "Message" = "帳號密碼錯誤", //錯誤訊息[String]
+            "Error" = 100 //錯誤代碼 [Int]
         }
 
 # Group 所有 Web Service 通則
@@ -33,13 +36,15 @@ HOST: http://www.wantoto.com
 + Response 401 (application/json)
 
         {
-            "ErrorMessage": "Session Key 過期"
+            "Message" = "Session Key 過期", //錯誤訊息[String]
+            "Error" =  200 //錯誤代碼 [Int]
         }
         
 + Response 403 (application/json)
 
         {
-            "ErrorMessage": "無存取權限"
+            "Message" = "無存取權限", //錯誤訊息[String]
+            "Error" =  300 //錯誤代碼 [Int]
         }
 
 # Group 病患清單
