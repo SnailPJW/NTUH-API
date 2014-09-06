@@ -4,7 +4,7 @@ HOST: http://www.wantoto.com
 # 台大醫院行動醫療資訊系統 Web Service 0.1
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
-# 登入與取得 SessionKey [/SessionKey/?EpmNo,Password]
+# 登入與取得 SessionKey [/SessionKey{?EpmNo,Password}]
 ## 取得 session key[POST]
 + Parameters
     + EpmNo (string) ... 使用者帳號
@@ -26,12 +26,22 @@ HOST: http://www.wantoto.com
         }
 
 # Group 所有 Web Service 通則
-## Session Key [/{?SessionKey}]
+## Session Key [/{?SessionKey,Offset}]
 ### 驗證 Session Key [GET]
 所有 Web Service 都須帶入 Session Key 檢查是否過期與是否具有存取權限。
-過期則回傳 401；無存取權限則回傳 403。
+過期則回傳 401；無存取權限則回傳 403。另為保留未來擴充性
 + Parameters
     + SessionKey (string) ... 使用者登入 Session Key
+    + Offset = `0` (int, optional) ... 資料偏移數，當Content為陣列時使用
+    
++ Response 200 (application/json)
+        
+        {
+            "Content" = [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" = 50, //最大回傳筆數，當Content為陣列時需回傳[Int] 
+            "Offset" = 0, //回傳資料偏移數，當Content為陣列時需回傳[Int]
+            "Total" = 100 //此次Query總筆數，當Content為陣列時需回傳[Int] 
+        }
 
 + Response 401 (application/json)
 
@@ -49,7 +59,7 @@ HOST: http://www.wantoto.com
 
 # Group 病患清單
 病患清單相關 Web Service
-## 病患清單 [/patients/{?PatientID,PersonID,WardCode,EpmNo,EpmNoConsult,EpmNoStarred,ORCode,ERCode,OPDCode,ExamRoomCode}]
+## 病患清單 [/patients{?PatientID,PersonID,WardCode,EpmNo,EpmNoConsult,EpmNoStarred,ORCode,ERCode,OPDCode,ExamRoomCode}]
 ### 查詢病患清單 [GET]
 可傳入病歷號、身分證號、病房、醫師員編、開刀房號、急診科別、門診科別、檢查科室等參數，回傳符合參數條件之病患
 + Parameters
@@ -66,87 +76,131 @@ HOST: http://www.wantoto.com
     
 + Response 200 (application/json)
 
-        [
-            {   //病患資訊
-                "name" = "王小明",  //病患姓名[string]
-                "gender" = 1,   //性別[int]（男性：1;女性：0）
-                "birthday" = 1406938026,    //出生日期[double]（以時間序號表示，使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
-                "patient_id" = "12345678"   //病歷號[string]
-                "LD_No" = "A123456789"  //身分證號[string]
-                "inpatient_info" = 
-                {   //住院資訊
-                    "ward" = "5W3 01-01",    //病房病床號[string]
-                    "in_date" = 1406938026, //入院日期[double]（以時間序號表示，使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
-                    "visiting_staff" = "葉小菜" //主治醫師[string]
-                }
-                "tag" = 
-                [   //特殊標記[string array] (ex:DNR,...)
-                    "DNR"
-                ]
+        {
+            "Content" = [
+                {   //病患資訊
+                    "name" = "王小明",  //病患姓名[string]
+                    "gender" = 1,   //性別[int]（男性：1;女性：0）
+                    "birthday" = 1406938026,    //出生日期[double]（以時間序號表示，使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
+                    "patient_id" = "12345678",   //病歷號[string]
+                    "LD_No" = "A123456789",  //身分證號[string]
+                    "inpatient_info" = {   //住院資訊
+                        "ward" = "5W3 01-01",    //病房病床號[string]
+                        "in_date" = 1406938026, //入院日期[double]（以時間序號表示，使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
+                        "visiting_staff" = "葉小菜" //主治醫師[string]
+                    }
+                    "tag" = [   //特殊標記[string array] (ex:DNR,...)
+                        "DNR"
+                    ]
             }
         ]
 
-## 病房號 [/Wards/]
+## 病房號 [/Wards]
 ### 查詢所有病房 [GET]
 + Response 200 (application/json)
 
-        [   //病房資訊陣列
-            {   //病房資訊
-                "HospCode" = "T0",  //醫院代碼[string]
-                "WardCode" = "01A1",   //病房代碼[string]
-                "DisplayName" = "01A1",    //顯示名稱[string]
-            }
-        ]
+        {
+            "Content" = [   //病房資訊陣列
+                {   //病房資訊
+                    "HospCode" = "T0",  //醫院代碼[string]
+                    "WardCode" = "01A1",   //病房代碼[string]
+                    "DisplayName" = "01A1"    //顯示名稱[string]
+                },
+                ...
+            ],
+            "Limit" = 32, //最大回傳筆數[Int] 
+            "Offset" = 0, //回傳資料偏移數[Int]
+            "Total" = 32 //此次Query總筆數[Int] 
+        }
         
-## 開刀房號 [/ORs/]
+## 開刀房號 [/ORs]
 ### 查詢開刀房 [GET]
 + Response 200 (application/json)
 
-        [   //手術房資訊陣列
-            {   //手術房資訊
-                "HospCode" = "T0",  //醫院代碼[string]
-                "ORCode" = "1",   //開刀房代碼[string]
-                "DisplayName" = "1",    //顯示名稱[string]
-            }
-        ]
+         {
+            "Comtent"[   //手術房資訊陣列
+                {   //手術房資訊
+                    "HospCode" = "T0",  //醫院代碼[string]
+                    "ORCode" = "1",   //開刀房代碼[string]
+                    "DisplayName" = "1"    //顯示名稱[string]
+                },
+                ...
+            ],
+            "Limit" = 50, //最大回傳筆數[Int] 
+            "Offset" = 0, //回傳資料偏移數[Int]
+            "Total" = 50 //此次Query總筆數[Int] 
+        }
     
-## 門診科別 [/OPDs/]
+## 門診科別 [/OPDs]
 ### 查詢今日門診科別 [GET]
 + Response 200 (application/json)
 
-        [   //門診科別資訊陣列
-            {   //門診科別資訊
-                "HospCode" = "T0",  //醫院代碼[string]
-                "OPDCode" = "MED",   //門診科別代碼[string]
-                "DisplayName" = "內科部",    //顯示名稱[string]
-                "Children" =[
-                                {
-                                    "HospCode" = "T0",  //醫院代碼[string]
-                                    "OPDCode" = "MED_A",   //門診科別代碼[string]
-                                    "DisplayName" = "內科部 上午",    //顯示名稱[string]
-                                    "Children" =[
-                                                    {
-                                                        "HospCode" = "T0",  //醫院代碼[string]
-                                                        "OPDCode" = "MED_A_01",   //門診科別代碼[string]
-                                                        "DisplayName" = "01診 王OO 腎臟科",    //顯示名稱[string]
-                                                    }
-                                                ]
-                                },
-                                {
-                                    "HospCode" = "T0",  //醫院代碼[string]
-                                    "OPDCode" = "MED_P",   //門診科別代碼[string]
-                                    "DisplayName" = "內科部 下午",    //顯示名稱[string]
-                                    "Children" =[
-                                                    {
-                                                        "HospCode" = "T0",  //醫院代碼[string]
-                                                        "OPDCode" = "MED_P_01",   //門診科別代碼[string]
-                                                        "DisplayName" = "01診 葉OO 不分科",    //顯示名稱[string]
-                                                    }
-                                                ]
-                                }
-                            ]
-            }
-        ]
+        {
+            "Content" = [   //門診科別資訊陣列
+                {   //門診科別資訊
+                    "HospCode" = "T0",  //醫院代碼[string]
+                    "OPDCode" = "MED",   //門診科別代碼[string]
+                    "DisplayName" = "內科部",    //顯示名稱[string]
+                    "ChildrenPath" = "/OPDs/MED"   //下一層內容連結，無下層則不回傳[string]
+                },
+                ...
+            ],
+            "Limit" = 50, //最大回傳筆數[Int] 
+            "Offset" = 0, //回傳資料偏移數[Int]
+            "Total" = 50 //此次Query總筆數[Int] 
+        }
+
+## 門診科別層級 [/OPDs/{OPDCode}]
+### 查詢今日門診科別 [GET]
++ Parameters 
+   + OPDCode (string, `MED`) ... 門診代號
+
++ Request MED (text/plain)
+
+        "OPDCode" = "MED"
+
++ Response 200 (application/json)
+        
+        {
+            "Content" = [   //門診科別資訊陣列
+                {
+                    "HospCode" = "T0",  //醫院代碼[string]
+                    "OPDCode" = "MED_A",   //門診科別代碼[string]
+                    "DisplayName" = "內科部 上午",    //顯示名稱[string]
+                    "ChildrenPath" = "/OPDs/MED_A"   //下一層內容連結，無下層則不回傳[string]
+                },
+                {
+                    "HospCode" = "T0",  //醫院代碼[string]
+                    "OPDCode" = "MED_P",   //門診科別代碼[string]
+                    "DisplayName" = "內科部 下午",    //顯示名稱[string]
+                    "ChildrenPath" = "/OPDs/MED_P"   //下一層內容連結，無下層則不回傳[string]
+                },
+                ...
+            ],
+            "Limit" = 50, //最大回傳筆數[Int] 
+            "Offset" = 0, //回傳資料偏移數[Int]
+            "Total" = 50 //此次Query總筆數[Int] 
+        }
+
++ Request MED_A (text/plain)
+
+        "OPDCode" = "MED_A"
+
++ Response 200 (application/json)
+        
+        {
+            "Content" = [   //門診科別資訊陣列
+                {   //門診科別資訊
+                    "HospCode" = "T0",  //醫院代碼[string]
+                    "OPDCode" = "MED_A_01",   //門診科別代碼[string]
+                    "DisplayName" = "01診 王OO 腎臟科",    //顯示名稱[string]
+                },
+                ...
+            ],
+            "Limit" = 50, //最大回傳筆數[Int] 
+            "Offset" = 0, //回傳資料偏移數[Int]
+            "Total" = 50 //此次Query總筆數[Int] 
+        }
 
 ## 檢查科室 [/ExamRooms/]
 ### 查詢檢查科室 [GET]
