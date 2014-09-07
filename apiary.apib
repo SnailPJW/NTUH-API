@@ -29,7 +29,11 @@ HOST: http://www.wantoto.com
 ## Session Key [/{?SessionKey,Offset}]
 ### 驗證 Session Key [GET]
 所有 Web Service 都須帶入 Session Key 檢查是否過期與是否具有存取權限。
+
 過期則回傳 401；無存取權限則回傳 403。
+
+所有資料回傳時間，皆以時間序號表示，以秒為單位。
+(使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
 + Parameters
     + SessionKey (string) ... 使用者登入 Session Key
     + Offset = `0` (number, optional) ... 資料偏移數，當Content為陣列時使用
@@ -77,29 +81,32 @@ HOST: http://www.wantoto.com
 + Response 200 (application/json)
 
         {
-            "Content" : [
+            "Content" : [   //病患資訊陣列
                 {   //病患資訊
                     "PatName" : "王小明",  //病患姓名[string]
                     "PatSexCode" : "M",   //性別[string]（男性："M";女性："F"）
-                    "PatBirthday" : 1406938026,    //出生日期[double]（以時間序號表示，使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
+                    "PatBirthday" : 1406938026,    //出生日期[number(date)]
                     "PatientID" : "12345678",   //病歷號[string]
-                    "PersionID" : "A123456789",  //身分證號[string]
+                    "PersionID" : "A123456789",  //身分證號[number]
                     "inpatient_info" : {   //住院資訊
                         "BedInfostring" : "5W3 01-01",    //病房病床號[string]
-                        "InDate" : 1406938026, //入院日期[double]（以時間序號表示，使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
+                        "InDate" : 1406938026, //入院日期[number(date)]
                         "VS" : "葉小菜" //主治醫師[string]
                     },
                     "SpecialTag" : [   //特殊標記[string array] (ex:DNR,...)
                         "DNR",
                         ...
                     ],
-                    "LatestPacsReportDateTime" : 
-            },
+                    "LatestPacsReportDateTime" : 1406938026, //最新影像時間[number(date)]
+                    "LatestLISReportDateTime" : 1406938026, //最新報告時間[number(date)]
+                },
+                ...
+            ],
             "Limit" : 50, //最大回傳筆數[number] 
             "Offset" : 0, //回傳資料偏移數[number]
             "Total" : 50 //此次Query總筆數[number] 
-        ]
-
+        }
+        
 ## 病房號 [/Wards]
 ### 查詢所有病房 [GET]
 + Response 200 (application/json)
@@ -283,5 +290,16 @@ HOST: http://www.wantoto.com
             "Total" : 3 //此次Query總筆數[number] 
         ]
 
-# Group 病患資料
+# Group 病歷資料
+## 病患醫療基本資料 [/Patients/{PatientID}]
+### 取得病患醫療基本資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
 
