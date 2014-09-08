@@ -88,13 +88,15 @@ HOST: http://www.wantoto.com
                     "PatBirthday" : 1406938026,    //出生日期[number(date)]
                     "PatientID" : "12345678",   //病歷號[string]
                     "PersionID" : "A123456789",  //身分證號[number]
-                    "inpatient_info" : {   //住院資訊
-                        "BedInfostring" : "5W3 01-01",    //病房病床號[string]
-                        "InDate" : 1406938026, //入院日期[number(date)]
-                        "VS" : "葉小菜" //主治醫師[string]
-                    },
+                    "BedInfo" : "5W3 01-01",    //病房病床號(住院與急診)[string]
+                    "InDate" : 1406938026, //入院日期(住院與急診)，非住院或在急診則回傳 null [number(date)]
+                    "VS" : "葉小菜" //主治醫師[string]
+                    "Status" : "住院中" //狀態[string]
                     "SpecialTag" : [   //特殊標記[string array] (ex:DNR,...)
-                        "DNR",
+                        {
+                            "TagCode" : "DNR",
+                            "DisplayName" : "DNR"
+                        },
                         ...
                     ],
                     "LatestPacsReportDateTime" : 1406938026, //最新影像時間[number(date)]
