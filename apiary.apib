@@ -25,7 +25,7 @@ HOST: http://www.wantoto.com
             "Error" : 100 //錯誤代碼 [number]
         }
 
-# Group 所有 Web Service 通則
+# Group Web Service 通則
 ## Session Key [/{?SessionKey,Offset}]
 ### 驗證 Session Key [GET]
 所有 Web Service 都須帶入 Session Key 檢查是否過期與是否具有存取權限。
@@ -61,7 +61,7 @@ HOST: http://www.wantoto.com
             "Error" :  300 //錯誤代碼 [number]
         }
 
-# Group 病患清單
+# Group 病患清單 Patient List
 病患清單相關 Web Service
 ## 病患清單 [/patients{?PatientID,PersonID,WardCode,EpmNo,EpmNoConsult,EpmNoStarred,ORCode,ERCode,OPDCode,ExamRoomCode}]
 ### 查詢病患清單 [GET]
@@ -292,7 +292,7 @@ HOST: http://www.wantoto.com
             "Total" : 3 //此次Query總筆數[number] 
         ]
 
-# Group 病歷資料
+# Group 病歷資料 Medical Record
 ## @病患醫療基本資料 [/Patients/{PatientID}]
 ### 取得病患醫療基本資料 [GET]
 + Parameters 
