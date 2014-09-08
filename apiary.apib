@@ -304,7 +304,7 @@ HOST: http://www.wantoto.com
         }
 
 ## 病歷資料 Web Service 通則 [/Patients/{PatientID}/{DataPath}{?StartDate,EndDate}]
-### 取得病歷 [GET]
+### 取得病歷資料 [GET]
 + Parameters
     + PatientID (string) ... 病歷號
     + DataPath (string) ... 各項病歷資料路徑
@@ -319,8 +319,117 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 病患醫 [/Patients/{PatientID}/LabData/Report]
-### 取得病患醫療基本資料 [GET]
+## 檢驗報告-清單報告 [/Patients/{PatientID}/LabReport/Report]
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 檢驗報告-累積報告 [/Patients/{PatientID}/LabReport/AccmulatedReport]
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 檢驗報告-綠單報告 [/Patients/{PatientID}/LabReport/GreenReport]
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 報告系統 [/Patients/{PatientID}/OtherReport]
+檢驗報告之外的其他報告
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 生命徵象 [/Patients/{PatientID}/TPR]
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 非處方醫囑 [/Patients/{PatientID}/Order]
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 處方醫囑 [/Patients/{PatientID}/Medication]
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 手術紀錄 [/Patients/{PatientID}/OPNote]
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 病程紀錄 [/Patients/{PatientID}/ProgresNote]
+### 取得病歷資料 [GET]
+
++ Response 200 (application/json)
+        
+        {
+            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
+            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
+            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+        }
+
+## 電子病歷 [/Patients/{PatientID}/EMR]
+### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
