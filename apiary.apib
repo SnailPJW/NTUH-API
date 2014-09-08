@@ -293,7 +293,7 @@ HOST: http://www.wantoto.com
         ]
 
 # Group 病歷資料
-## 病患醫療基本資料 [/Patients/{PatientID}]
+## @病患醫療基本資料 [/Patients/{PatientID}]
 ### 取得病患醫療基本資料 [GET]
 + Parameters 
     + PatientID (string) ... 病歷號
@@ -321,7 +321,7 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 檢驗報告-清單報告 [/Patients/{PatientID}/LabReport/Report]
+## @檢驗報告-清單報告 [/Patients/{PatientID}/LabReport/Report]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -333,7 +333,7 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 檢驗報告-累積報告 [/Patients/{PatientID}/LabReport/AccmulatedReport]
+## @檢驗報告-累積報告 [/Patients/{PatientID}/LabReport/AccmulatedReport]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -345,7 +345,7 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 檢驗報告-綠單報告 [/Patients/{PatientID}/LabReport/GreenReport]
+## @檢驗報告-綠單報告 [/Patients/{PatientID}/LabReport/GreenReport]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -357,20 +357,39 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 報告系統 [/Patients/{PatientID}/OtherReport]
+## @報告系統 [/Patients/{PatientID}/OtherReport]
 檢驗報告之外的其他報告
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "Content" : {
+                "Column" : [    //欄位資訊
+                    {
+                        "ColumnCode" : "Date",  //欄位代碼
+                        "DisplayName" : "報告時間", //欄位顯示名稱
+                        "Action" : "SortDesc",
+                        "DateFormat" : "yyyy-MM-dd hh:mm"
+                    },
+                    {
+                        "ColumnCode" : "Date",  
+                        "DisplayName" : "報告時間", 
+                        "Action" : "SortDesc",
+                        "DateFormat" : "yyyy-MM-dd hh:mm"
+                    },
+                ],
+                "Data" : [
+                ],
+                "Filter" : [
+                ]
+            },
             "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
             "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 生命徵象 [/Patients/{PatientID}/TPR]
+## @生命徵象 [/Patients/{PatientID}/TPR]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -382,7 +401,7 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 非處方醫囑 [/Patients/{PatientID}/Order]
+## @非處方醫囑 [/Patients/{PatientID}/Order]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -394,7 +413,7 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 處方醫囑 [/Patients/{PatientID}/Medication]
+## @處方醫囑 [/Patients/{PatientID}/Medication]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -406,7 +425,7 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 手術紀錄 [/Patients/{PatientID}/OPNote]
+## @手術紀錄 [/Patients/{PatientID}/OPNote]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -418,7 +437,7 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 病程紀錄 [/Patients/{PatientID}/ProgresNote]
+## @病程紀錄 [/Patients/{PatientID}/ProgresNote]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -430,7 +449,7 @@ HOST: http://www.wantoto.com
             "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
         }
 
-## 電子病歷 [/Patients/{PatientID}/EMR]
+## @電子病歷 [/Patients/{PatientID}/EMR]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
