@@ -4,29 +4,29 @@ HOST: http://www.wantoto.com
 # 台大醫院行動醫療資訊系統 Web Service 0.1
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
-# 登入與取得 SessionKey [/SessionKey{?EpmNo,Password}]
+# 登入與取得 SessionKey [/sessionKey{?epmNo,password}]
 ## 取得 session key[POST]
 + Parameters
-    + EpmNo (string) ... 使用者帳號
-    + Password (string) ... 使用者密碼
+    + epmNo (string) ... 使用者帳號
+    + password (string) ... 使用者密碼
 
 + Response 200 (application/json)
 
         {
-            "Content" : {
-                "SessionKey" : "51ADFDA9C02D4E1E9930D88A26963612" //Session key [string]
+            "content" : {
+                "sessionKey" : "51ADFDA9C02D4E1E9930D88A26963612" //Session key [string]
             }
         }
     
 + Response 401 (application/json)
 
         {
-            "Message" : "帳號密碼錯誤", //錯誤訊息[string]
-            "Error" : 100 //錯誤代碼 [number]
+            "message" : "帳號密碼錯誤", //錯誤訊息[string]
+            "error" : 101 //錯誤代碼 [number]
         }
 
 # Group Web Service 通則
-## Session Key [/{?SessionKey,Offset}]
+## Session Key [/{?sessionKey,offset,limit}]
 ### 驗證 Session Key [GET]
 所有 Web Service 都須帶入 Session Key 檢查是否過期與是否具有存取權限。
 
@@ -35,96 +35,97 @@ HOST: http://www.wantoto.com
 所有資料回傳時間，皆以時間序號表示，以秒為單位。
 (使用 1 January 1970, GMT為基準時間 http://zh.wikipedia.org/wiki/Help:%E6%99%82%E9%96%93%E5%BA%8F%E8%99%9F）
 + Parameters
-    + SessionKey (string) ... 使用者登入 Session Key
-    + Offset = `0` (number, optional) ... 資料偏移數，當Content為陣列時使用
+    + sessionKey (string) ... 使用者登入 Session Key
+    + offset = `0` (number, optional) ... 資料偏移數，需與 limit 一起傳入，當content為陣列或collection時使用
+    + limit (number, optional) ... 最大回傳筆數，需與 offset 一起傳入，當content為陣列或collection時使用
     
 + Response 200 (application/json)
         
         {
-            "Content" : [], //回傳內容(可以是單一物件，也可以是陣列)
-            "Limit" : 50, //最大回傳筆數，當Content為陣列時需回傳[number] 
-            "Offset" : 0, //回傳資料偏移數，當Content為陣列時需回傳[number]
-            "Total" : 100 //此次Query總筆數，當Content為陣列時需回傳[number] 
+            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
+            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
+            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
         }
 
 + Response 401 (application/json)
 
         {
-            "Message" : "Session Key 過期", //錯誤訊息[string]
-            "Error" :  200 //錯誤代碼 [number]
+            "message" : "Session Key 過期", //錯誤訊息[string]
+            "error" :  102 //錯誤代碼 [number]
         }
         
 + Response 403 (application/json)
 
         {
-            "Message" : "無存取權限", //錯誤訊息[string]
-            "Error" :  300 //錯誤代碼 [number]
+            "message" : "無存取權限", //錯誤訊息[string]
+            "error" :  103 //錯誤代碼 [number]
         }
 
 # Group 病患清單 Patient List
 病患清單相關 Web Service
-## 病患清單 [/patients{?PatientID,PersonID,WardCode,EpmNo,EpmNoConsult,EpmNoStarred,ORCode,ERCode,OPDCode,ExamRoomCode}]
+## 病患清單 [/patients{?patientID,personID,wardCode,epmNo,epmNoConsult,epmNoStarred,ORCode,ERCode,OPDCode,examRoomCode}]
 ### 查詢病患清單 [GET]
 可傳入病歷號、身分證號、病房、醫師員編、開刀房號、急診科別、門診科別、檢查科室等參數，回傳符合參數條件之病患
 + Parameters
-    + PatientID (string, optional) ... 病歷號
-    + PersonID (string, optional) ... 身分證號
-    + WardCode (string, optional, `5W3`) ... 病房號
-    + EpmNo (string, optional) ... 醫師員編 (依照醫師員編顯示個人病患)
-    + EpmNoConsult (string, optional) ... 醫師員編 (依照醫師員編顯示照會病患)
-    + EpmNoStarred (string, optional) ... 醫師員編 (依照醫師員編顯示追蹤病患)
+    + patientID (string, optional) ... 病歷號
+    + personID (string, optional) ... 身分證號
+    + wardCode (string, optional, `5W3`) ... 病房號
+    + epmNo (string, optional) ... 醫師員編 (依照醫師員編顯示個人病患)
+    + epmNoConsult (string, optional) ... 醫師員編 (依照醫師員編顯示照會病患)
+    + epmNoStarred (string, optional) ... 醫師員編 (依照醫師員編顯示追蹤病患)
     + ORCode (string, optional) ... 開刀房號
     + ERCode (string, optional) ... 急診科別
     + OPDCode (string, optional) ... 門診科別
-    + ExamRoomCode (string, optional) ... 檢查科室
+    + examRoomCode (string, optional) ... 檢查科室
     
 + Response 200 (application/json)
 
         {
-            "Content" : [   //病患資訊陣列
+            "content" : [   //病患資訊陣列
                 {   //病患資訊
-                    "PatName" : "王小明",  //病患姓名[string]
-                    "PatSexCode" : "M",   //性別[string]（男性："M";女性："F"）
-                    "PatBirthday" : 1406938026,    //出生日期[number(date)]
-                    "PatientID" : "12345678",   //病歷號[string]
-                    "PersionID" : "A123456789",  //身分證號[number]
-                    "BedInfo" : "5W3 01-01",    //病房病床號(住院與急診)[string]
-                    "InDate" : 1406938026, //入院日期(住院與急診)，非住院或在急診則回傳 null [number(date)]
+                    "patName" : "王小明",  //病患姓名[string]
+                    "patSexCode" : "M",   //性別[string]（男性："M";女性："F"）
+                    "patBirthday" : 1406938026,    //出生日期[number(date)]
+                    "patientID" : "12345678",   //病歷號[string]
+                    "persionID" : "A123456789",  //身分證號[number]
+                    "bedInfo" : "5W3 01-01",    //病房病床號(住院與急診)[string]
+                    "inDate" : 1406938026, //入院日期(住院與急診)，非住院或在急診則回傳 null [number(date)]
                     "VS" : "葉小菜" //主治醫師[string]
-                    "Status" : "住院中" //狀態[string]
-                    "SpecialTag" : [   //特殊標記[string array] (ex:DNR,...)
+                    "status" : "住院中" //狀態[string]
+                    "specialTag" : [   //特殊標記[string array] (ex:DNR,...)
                         {
-                            "TagCode" : "DNR",
-                            "DisplayName" : "DNR"
+                            "tagCode" : "DNR",
+                            "displayName" : "DNR"
                         },
                         ...
                     ],
-                    "LatestPacsReportDateTime" : 1406938026, //最新影像時間[number(date)]
-                    "LatestLISReportDateTime" : 1406938026, //最新報告時間[number(date)]
+                    "latestPacsReportDateTime" : 1406938026, //最新影像時間[number(date)]
+                    "latestLISReportDateTime" : 1406938026, //最新報告時間[number(date)]
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[number] 
-            "Offset" : 0, //回傳資料偏移數[number]
-            "Total" : 50 //此次Query總筆數[number] 
+            "limit" : 50, //最大回傳筆數[number] 
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50 //此次Query總筆數[number] 
         }
         
-## 病房號 [/Wards]
+## 病房號 [/wards]
 ### 查詢所有病房 [GET]
 + Response 200 (application/json)
 
         {
-            "Content" : [   //病房資訊陣列
+            "content" : [   //病房資訊陣列
                 {   //病房資訊
-                    "HospCode" : "T0",  //醫院代碼[string]
-                    "WardCode" : "01A1",   //病房代碼[string]
-                    "DisplayName" : "01A1"    //顯示名稱[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
+                    "wardCode" : "01A1",   //病房代碼[string]
+                    "displayName" : "01A1"    //顯示名稱[string]
                 },
                 ...
             ],
-            "Limit" : 32, //最大回傳筆數[number] 
-            "Offset" : 0, //回傳資料偏移數[number]
-            "Total" : 32 //此次Query總筆數[number] 
+            "limit" : 50, //最大回傳筆數[number] 
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50 //此次Query總筆數[number] 
         }
         
 ## 開刀房號 [/ORs]
@@ -132,17 +133,17 @@ HOST: http://www.wantoto.com
 + Response 200 (application/json)
 
          {
-            "Comtent"[   //手術房資訊陣列
+            "content"[   //手術房資訊陣列
                 {   //手術房資訊
-                    "HospCode" : "T0",  //醫院代碼[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
                     "ORCode" : "1",   //開刀房代碼[string]
-                    "DisplayName" : "1"    //顯示名稱[string]
+                    "displayName" : "1"    //顯示名稱[string]
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[number] 
-            "Offset" : 0, //回傳資料偏移數[number]
-            "Total" : 50 //此次Query總筆數[number] 
+            "limit" : 50, //最大回傳筆數[number] 
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50 //此次Query總筆數[number] 
         }
         
 ## 急診科別 [/ERs]
@@ -150,22 +151,22 @@ HOST: http://www.wantoto.com
 + Response 200 (application/json)
 
          {
-            "Comtent"[   //急診科別資訊陣列
+            "content"[   //急診科別資訊陣列
                 {   //急診科別資訊
-                    "HospCode" : "T0",  //醫院代碼[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
                     "ERCode" : "ALL",   //急診科別代碼[string]
-                    "DisplayName" : "不分科"    //顯示名稱[string]
+                    "displayName" : "不分科"    //顯示名稱[string]
                 },
                 {   //急診科別資訊
-                    "HospCode" : "T0",  //醫院代碼[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
                     "ERCode" : "MED",   //急診科別代碼[string]
-                    "DisplayName" : "非外傷"    //顯示名稱[string]
+                    "displayName" : "非外傷"    //顯示名稱[string]
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[number] 
-            "Offset" : 0, //回傳資料偏移數[number]
-            "Total" : 50 //此次Query總筆數[number] 
+            "limit" : 50, //最大回傳筆數[number] 
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50 //此次Query總筆數[number] 
         }
     
 ## 門診科別 [/OPDs]
@@ -173,18 +174,18 @@ HOST: http://www.wantoto.com
 + Response 200 (application/json)
 
         {
-            "Content" : [   //門診科別資訊陣列
+            "content" : [   //門診科別資訊陣列
                 {   //門診科別資訊
-                    "HospCode" : "T0",  //醫院代碼[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
                     "OPDCode" : "MED",   //門診科別代碼[string]
-                    "DisplayName" : "內科部",    //顯示名稱[string]
-                    "ChildrenPath" : "/OPDs/MED"   //下一層內容連結，無下層則不回傳[string]
+                    "displayName" : "內科部",    //顯示名稱[string]
+                    "childPath" : "/OPDs/MED"   //下一層內容連結，無下層則不回傳[string]
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[number] 
-            "Offset" : 0, //回傳資料偏移數[number]
-            "Total" : 50 //此次Query總筆數[number] 
+            "limit" : 50, //最大回傳筆數[number] 
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50 //此次Query總筆數[number] 
         }
 
 ## 門診科別層級 [/OPDs/{OPDCode}]
@@ -199,24 +200,24 @@ HOST: http://www.wantoto.com
 + Response 200 (application/json)
         
         {
-            "Content" : [   //門診科別資訊陣列
+            "content" : [   //門診科別資訊陣列
                 {
-                    "HospCode" : "T0",  //醫院代碼[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
                     "OPDCode" : "MED_A",   //門診科別代碼[string]
-                    "DisplayName" : "內科部 上午",    //顯示名稱[string]
-                    "ChildrenPath" : "/OPDs/MED_A"   //下一層內容連結，無下層則不回傳[string]
+                    "displayName" : "內科部 上午",    //顯示名稱[string]
+                    "childPath" : "/OPDs/MED_A"   //下一層內容連結，無下層則不回傳[string]
                 },
                 {
-                    "HospCode" : "T0",  //醫院代碼[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
                     "OPDCode" : "MED_P",   //門診科別代碼[string]
-                    "DisplayName" : "內科部 下午",    //顯示名稱[string]
-                    "ChildrenPath" : "/OPDs/MED_P"   //下一層內容連結，無下層則不回傳[string]
+                    "displayName" : "內科部 下午",    //顯示名稱[string]
+                    "childPath" : "/OPDs/MED_P"   //下一層內容連結，無下層則不回傳[string]
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[number] 
-            "Offset" : 0, //回傳資料偏移數[number]
-            "Total" : 50 //此次Query總筆數[number] 
+            "limit" : 50, //最大回傳筆數[number] 
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50 //此次Query總筆數[number] 
         }
 
 + Request MED_A (text/plain)
@@ -226,46 +227,46 @@ HOST: http://www.wantoto.com
 + Response 200 (application/json)
         
         {
-            "Content" : [   //門診科別資訊陣列
+            "content" : [   //門診科別資訊陣列
                 {   //門診科別資訊
-                    "HospCode" : "T0",  //醫院代碼[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
                     "OPDCode" : "MED_A_01",   //門診科別代碼[string]
-                    "DisplayName" : "01診 王OO 腎臟科",    //顯示名稱[string]
+                    "displayName" : "01診 王OO 腎臟科",    //顯示名稱[string]
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[number] 
-            "Offset" : 0, //回傳資料偏移數[number]
-            "Total" : 50 //此次Query總筆數[number] 
+            "limit" : 50, //最大回傳筆數[number] 
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50 //此次Query總筆數[number] 
         }
 
-## 檢查科室 [/ExamRooms]
+## 檢查科室 [/examRooms]
 ### 查詢檢查科室 [GET]
 + Response 200 (application/json)
 
         {
-            "Content" : [   //檢查科別資訊陣列
+            "content" : [   //檢查科別資訊陣列
                 {   //檢查科別資訊
-                    "HospCode" : "T0",  //醫院代碼[string]
-                    "ExamRoomCode" : "000CPFT0",   //檢查科室代碼[string]
-                    "DisplayName" : "[檢查照會] 肺功能室",    //顯示名稱[string]
-                    "ChildrenPath" : "/ExamRooms/000CPFT0"   //下一層內容連結，無下層則不回傳[string]
+                    "hospCode" : "T0",  //醫院代碼[string]
+                    "examRoomCode" : "000CPFT0",   //檢查科室代碼[string]
+                    "displayName" : "[檢查照會] 肺功能室",    //顯示名稱[string]
+                    "childPath" : "/examRooms/000CPFT0"   //下一層內容連結，無下層則不回傳[string]
                 },
                 ...
             ],
-            "Limit" : 50, //最大回傳筆數[number] 
-            "Offset" : 0, //回傳資料偏移數[number]
-            "Total" : 50 //此次Query總筆數[number] 
+            "limit" : 50, //最大回傳筆數[number] 
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50 //此次Query總筆數[number] 
         ]
 
-## 檢查科室層級 [/ExamRooms/{ExamRoomCode}]
+## 檢查科室層級 [/examRooms/{examRoomCode}]
 ### 查詢檢查科室 [GET]
 + Parameters 
-   + ExamRoomCode (string, `000CPFT0`) ... 檢查科室代碼
+   + examRoomCode (string, `000CPFT0`) ... 檢查科室代碼
    
 + Request MED (text/plain)
 
-        "ExamRoomCode" : "000CPFT0"
+        "examRoomCode" : "000CPFT0"
         
 + Response 200 (application/json)
 
