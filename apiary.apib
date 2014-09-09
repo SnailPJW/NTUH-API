@@ -27,7 +27,7 @@ HOST: http://www.wantoto.com
 
 # Group Web Service 通則
 ## Session Key [/{?sessionKey,offset,limit}]
-### 驗證 Session Key [GET]
+### 驗證 Session Key 與資料分頁參數[GET]
 所有 Web Service 都須帶入 Session Key 檢查是否過期與是否具有存取權限。
 
 過期則回傳 401；無存取權限則回傳 403。
