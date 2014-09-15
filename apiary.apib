@@ -4,7 +4,7 @@ HOST: http://www.wantoto.com
 # 台大醫院行動醫療資訊系統 Web Service 0.1
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
-# 登入與取得 SessionKey [/sessionKey{?epmNo,password}]
+# 9/15-登入與取得 SessionKey [/sessionKey{?epmNo,password}]
 ## 取得 session key[POST]
 + Parameters
     + epmNo (string) ... 使用者帳號
@@ -14,6 +14,7 @@ HOST: http://www.wantoto.com
 
         {
             "content" : {
+                "epmName" : "葉小菜"    //員工姓名[string]
                 "sessionKey" : "51ADFDA9C02D4E1E9930D88A26963612" //Session key [string]
             }
         }
@@ -26,7 +27,7 @@ HOST: http://www.wantoto.com
         }
 
 # Group Web Service 通則
-## Session Key [/{?sessionKey,offset,limit}]
+## 通則 [/{?sessionKey,offset,limit}]
 ### 驗證 Session Key 與資料分頁參數[GET]
 所有 Web Service 都須帶入 Session Key 檢查是否過期與是否具有存取權限。
 
@@ -91,7 +92,10 @@ HOST: http://www.wantoto.com
                     "persionID" : "A123456789",  //身分證號[number]
                     "bedInfo" : "5W3 01-01",    //病房病床號(住院與急診)[string]
                     "inDate" : 1406938026, //入院日期(住院與急診)，非住院或在急診則回傳 null [number(date)]
-                    "VS" : "葉小菜" //主治醫師[string]
+                    "_epm_VS" : {   //主治醫師(如遇回傳資料為醫師者，變數皆為_epm_開頭)[string]
+                        "epmNo" : "111281", //醫師員編[string]
+                        "name" : "葉小菜" 
+                    },
                     "status" : "住院中" //狀態[string]
                     "specialTag" : [   //特殊標記[string array] (ex:DNR,...)
                         {
@@ -311,14 +315,16 @@ HOST: http://www.wantoto.com
 + Parameters
     + patientID (string) ... 病歷號
     + dataPath (string) ... 各項病歷資料路徑
-    + startDate = `入院日` (string, optional, `1406938026`) ... Query 開始日期，以時間序號表示 (包含此日期)
+    + startDate = `入院日` (string, optional, `1406938026`) ... Query 起始日期，以時間序號表示 (包含此日期)
     + endDate = `今日` (string, optional, `1406938026`) ... Query 結束日期，以時間序號表示 (包含此日期)
 + Response 200 (application/json)
         
         {
             "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
+            "limit" : 50, //最大回傳筆數，當client傳入與content為陣列或collection時需回傳[number] 
+            "offset" : 0, //回傳資料偏移數，當client傳入與content為陣列或collection時需回傳傳[number]
             "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
         }
 
@@ -329,6 +335,8 @@ HOST: http://www.wantoto.com
         
         {
             "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
             "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
             "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
             "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
@@ -341,6 +349,8 @@ HOST: http://www.wantoto.com
         
         {
             "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
             "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
             "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
             "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
@@ -353,12 +363,14 @@ HOST: http://www.wantoto.com
         
         {
             "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
             "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
             "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
             "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
         }
 
-## 報告系統 [/patients/{patientID}/otherReport]
+## 9/15-報告系統 [/patients/{patientID}/otherReport]
 檢驗報告之外的其他報告
 ### 取得病歷資料 [GET]
 
@@ -368,13 +380,13 @@ HOST: http://www.wantoto.com
             "content" : {
                 "field" : [    //欄位資訊
                     {
+                        "fieldCode" : "items",  
+                        "displayName" : "檢查項目"
+                    },
+                    {
                         "fieldCode" : "date",  //欄位代碼[string]
                         "displayName" : "報告時間", //欄位顯示名稱[string]
                         "dateFormat" : "yyyy-MM-dd hh:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
-                    },
-                    {
-                        "fieldCode" : "items",  
-                        "displayName" : "檢查項目"
                     },
                     {
                         "fieldCode" : "type",  
@@ -387,20 +399,20 @@ HOST: http://www.wantoto.com
                             "date" : 1406938026,
                             "item" : "Chest PA View (Standing)",
                             "type" : "影核醫"
-                        }
+                        },
                         "filterCode" : [    //篩選類別
                             "image"
-                        ]
+                        ],
                         "report" : {    //如有報告則回傳
                             "reportType" : "HTML",  //報告型態，HTML或PDF
-                            "reportPath" : "/ImageReport/{ImageReportID}"   //報告路徑
+                            "reportPath" : "/imageReport/{imageReportID}"   //報告路徑
                         }
                     },
                     ...
                 ],
                 "filter" : [
                     {
-                        "filterCode" : "Image",
+                        "filterCode" : "image",
                         "displayName" : "影核醫"
                     },
                     {
@@ -412,87 +424,458 @@ HOST: http://www.wantoto.com
                 "limit" : 50, //最大回傳筆數傳[number] 
                 "offset" : 0, //回傳資料偏移數[number]
                 "total" : 100 //此次Query總筆數[number]
-            }
+            },
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026 Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## @生命徵象 [/patients/{patientID}/TPR]
+## 9/15-生命徵象 [/patients/{patientID}/TPR]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
+            "content" : {
+                "TPR" : [   //TPR 圖表資料
+                    {   //每次TPR紀錄
+                        "date" : 1406938026,    //紀錄時間[nubmer(date)]
+                        "breathing" : 20,   //呼吸[number,optional]
+                        "temperature" : 37.5,   //體溫[number,optional]
+                        "heartRate" : 59,    //心跳[number,optional]
+                        "bloodPressure" : { //血壓
+                            "systolic" : 116,    //收縮壓[number,optional]
+                            "diastolic" : 69    //舒張壓[number,optional]
+                        }    
+                    },
+                    ...
+                ],
+                "IO" : [    //IO資料
+                    {   //欄位資料
+                        "fieldName" : "血壓", //欄位名稱[string]
+                        "data" : [
+                            {
+                                "date" : 1406938026,    //資料時間[number(date)]
+                                "data" : "125/75"   //資料內容[string]
+                            },
+                            ...
+                        ]
+                    },
+                    {   //欄位資料
+                        "fieldName" : "身高", //欄位名稱[string]
+                        "unit" : "cm",  //單位，有單位時回傳[string,optional]
+                        "data" : [
+                            {
+                                "date" : 1406938026,    //資料時間[number(date)]
+                                "data" : "173"   //資料內容[string]
+                            },
+                            {
+                                "date" : 1406948026,    //資料時間[number(date)]
+                                "data" : "173.5"   //資料內容[string]
+                            },
+                            ...
+                        ]
+                    },
+                ],
+                "medication" : [
+                    {
+                        "drugName" : "Magnesium Oxide", //學名[string]
+                        "itemName" : "MgO", //品名[string]
+                        "itemUnit" : "250 mg/tab", //劑量單位[string]
+                        "medicationID" : "MET4FB18", //藥品八碼[string]
+                        "dose" : "2 tab", //劑量[string]
+                        "approach" : "PO", //途徑[string]
+                        "frequency" : "BID", //頻次[string]
+                        "orderDate" : 1406938026, //開立日期[number(date)]
+                        "startDate" : 1406938026, //用藥開始日期[number(date)]
+                        "endDate" : 1406938026, //用藥結束日期[number(date)]
+                        "_epm_order" : { //開立醫師
+                            "epmNo" : "23454353",
+                            "name" : "葉小菜"
+                        },
+                        "note" : "自費 特殊醫囑: For scrotal ulcers", //備註[string]
+                        "category" : "other", //處方類別。ex:"anti"(抗生素)、"anodyne"(止痛藥)、"other"(其他)[string]
+                        "drugInfoPath" : "/medication/{medicationID}",  //藥物資訊連結[string]
+                        "drugRecord" : [    //Query期間所有給藥記錄
+                            {
+                                "date" : 1406938026, //日期[number(date)]
+                                "status" : "taken", //用藥狀態。ex:"taken"(已給藥)、"pending"(未處理)、"failure"(未給藥)[string]
+                                "note" : "", //護理給藥備註[string]
+                                "executor" : "張小珍 護理師" //執行人員[string]
+                            },
+                            ...
+                        ]
+                    },
+                    ...
+                ]
+            },
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026 Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## @非處方醫囑 [/patients/{patientID}/order]
+## 9/15-非處方醫囑 [/patients/{patientID}/order]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
+            "content" : {
+                "field" : [    //欄位資訊
+                    {
+                        "fieldCode" : "order",  
+                        "displayName" : "醫令內容"
+                    },
+                    {
+                        "fieldCode" : "startDate",  //欄位代碼[string]
+                        "displayName" : "開始時間", //欄位顯示名稱[string]
+                        "dateFormat" : "yyyy-MM-dd"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
+                    },
+                    {
+                        "fieldCode" : "endDate",  //欄位代碼[string]
+                        "displayName" : "結束時間", //欄位顯示名稱[string]
+                        "dateFormat" : "yyyy-MM-dd"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
+                    },
+                    {
+                        "fieldCode" : "_epm_doctor",  
+                        "displayName" : "確認醫師"
+                    },
+                    {
+                        "fieldCode" : "status",  
+                        "displayName" : "狀態"
+                    },
+                    {
+                        "fieldCode" : "orderDate",  
+                        "displayName" : "開立時間",
+                        "dateFormat" : "yyyy-MM-dd mm:ss"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
+                    }
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳
+                            "order" : "Chest PA View (Standing)",
+                            "startDate" : 1406938026,
+                            "endDate" : 1406938026,
+                            "_epm_doctor" : { 
+                                "epmNo" : "23454353",
+                                "name" : "葉小菜"
+                            },
+                            "status" : "已完成",
+                            "orderDate" : 1406938026
+                        },
+                        "filterCode" : [    //篩選類別
+                            "image"
+                        ],
+                        "report" : {    //如有報告則回傳
+                            "reportType" : "HTML",  //報告型態，HTML或PDF
+                            "reportPath" : "/ImageReport/{ImageReportID}"   //報告路徑
+                        }
+                    },
+                    ...
+                ],
+                "filter" : [
+                    {
+                        "filterCode" : "order",
+                        "displayName" : "醫囑"
+                    },
+                    {
+                        "filterCode" : "medication",
+                        "displayName" : "處方"
+                    },
+                    {
+                        "filterCode" : "lab",
+                        "displayName" : "檢驗"
+                    },
+                    {
+                        "filterCode" : "image",
+                        "displayName" : "影醫"
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number] 
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            },
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026 Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## @處方醫囑 [/patients/{patientID}/medication]
+## 9/15-處方醫囑 [/patients/{patientID}/medication]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "content" : [
+                {
+                    "drugName" : "Magnesium Oxide", //學名[string]
+                    "itemName" : "MgO", //品名[string]
+                    "itemUnit" : "250 mg/tab", //劑量單位[string]
+                    "medicationID" : "MET4FB18", //藥品八碼[string]
+                    "dose" : "2 tab", //劑量[string]
+                    "approach" : "PO", //途徑[string]
+                    "frequency" : "BID", //頻次[string]
+                    "orderDate" : 1406938026, //開立日期[number(date)]
+                    "startDate" : 1406938026, //用藥開始日期[number(date)]
+                    "endDate" : 1406938026, //用藥結束日期[number(date)]
+                    "_epm_order" : { //開立醫師
+                        "epmNo" : "23454353",
+                        "name" : "葉小菜"
+                    },
+                    "note" : "自費 特殊醫囑: For scrotal ulcers", //備註[string]
+                    "category" : "prolonged", //處方類別。ex:"prolonged"(長期)、"stat"(臨時)、"cancel"(取消)、"own"(自備藥)[string]
+                    "drugInfoPath" : "/medication/{medicationID}",  //藥物資訊連結[string]
+                    "drugRecord" : [    //Query期間所有給藥記錄
+                        {
+                            "date" : 1406938026, //日期[number(date)]
+                            "status" : "taken", //用藥狀態。ex:"taken"(已給藥)、"pending"(未處理)、"failure"(未給藥)[string]
+                            "note" : "", //護理給藥備註[string]
+                            "executor" : "張小珍 護理師" //執行人員[string]
+                        },
+                        ...
+                    ]
+                },
+                ...
+            ],
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
             "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
             "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
             "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
         }
 
-## @藥物資訊 [/medication/{medicationID}]
+## 9/15-藥物資訊 [/medication/{medicationID}]
 ### 取得藥物資訊 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : {}
+            "content" : {
+                "drugName" : "Mecobalamin", //學名[string]
+                "itemName" : "Methycobal Capsule 500 mcg / cap", //品名[string]
+                "chineseName" : "彌可保膠囊", //中文名[string]
+                "aliases" : "", //別名[string]
+                "formulations" : "硬膠囊", //劑型[string]
+                "medicationID" : "MET4FB18" //藥品八碼[string]
+                "pharmaClassification" : "VIII. Hematological Agents\r1. Agents Used to Treat Deficiency Anemia" //藥理分類，如需換行換行符號為"\r"[string]
+                "usualDose" : "Peripheral neuropathies:\rPO, 500 mcg tid.", //常用劑量[string]
+                "indications" : "末梢性神經障礙", //適應症[string]
+                "maxDose" : "BID", // 最大劑量[string]
+                "PregnantClassification" : "", //懷孕分級[string]
+                "Contraindications" : "", //禁忌[string]
+                "role" : "補充維他命Ｂ１２", //作用[string]
+                "drugSafetyAlert" : "", //藥物安全警訊[string]
+                "sideEffects" : "可能引起胃部不適、過敏反應等。", //副作用[string]
+                "precautions" : "", //注意事項[string]
+                "storage" : "≦ 30 ℃ & protect from light.", //儲存方法[string]
+                "DrugDealers" : "衛采製藥股份有限公司", //藥商[string]
+                "appearanceImages" : [ //藥品外觀圖片連結
+                    "https://dept.ntuh.gov.tw/phar/DrugImage/New/s/MET4FB18-A.JPG",
+                    "https://dept.ntuh.gov.tw/phar/DrugImage/New/s/MET4FB18-B.JPG"
+                ]
+            }
         }
 
 
-## @手術紀錄 [/patients/{patientID}/OPNote]
+## 9/15-手術紀錄 [/patients/{patientID}/OPNote]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
+            "content" : {
+                "field" : [    //欄位資訊
+                    {
+                        "fieldCode" : "OPType",  
+                        "displayName" : "術式"
+                    },
+                    {
+                        "fieldCode" : "dept",  
+                        "displayName" : "科部"
+                    },
+                    {
+                        "fieldCode" : "date",  //欄位代碼[string]
+                        "displayName" : "手術開始時間", //欄位顯示名稱[string]
+                        "dateFormat" : "yyyy-MM-dd hh:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
+                    },
+                    {
+                        "fieldCode" : "_epm_doctor",  
+                        "displayName" : "醫師"
+                    },
+                    {
+                        "fieldCode" : "status",  
+                        "displayName" : "狀態"
+                    }
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳
+                            "OPType" : "1. Subxiphoid drainage with sternal... ",
+                            "dept" : "外科部",
+                            "date" : 1406938026,
+                            "_epm_doctor" : {
+                                "epmNo" : "123342"
+                                "name" : "葉小菜"
+                            },
+                            "status" : "V"
+                        },
+                        "report" : {    //如有報告則回傳
+                            "reportType" : "HTML",  //報告型態，HTML或PDF
+                            "reportPath" : "/OPNote/{OPNoteID}"   //報告路徑
+                        }
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number] 
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            }
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## @病程紀錄 [/patients/{patientID}/progressNote]
+## 9/15-病程紀錄 [/patients/{patientID}/progressNote]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
+            "content" : {
+                "field" : [    //欄位資訊
+                    {
+                        "fieldCode" : "type",  
+                        "displayName" : "類別"
+                    },
+                    {
+                        "fieldCode" : "date",  //欄位代碼[string]
+                        "displayName" : "報告時間", //欄位顯示名稱[string]
+                        "dateFormat" : "yyyy-MM-dd hh:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
+                    },
+                    {
+                        "fieldCode" : "status",  
+                        "displayName" : "狀態"
+                    }
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳
+                            "date" : 1406938026,
+                            "status" : "V",
+                            "type" : "Admission Note"
+                        },
+                        "filterCode" : [    //篩選類別
+                            "ADM"
+                        ],
+                        "report" : {    //如有報告則回傳
+                            "reportType" : "HTML",  //報告型態，HTML或PDF
+                            "reportPath" : "/progressNote/{progressNoteID}"   //報告路徑
+                        }
+                    },
+                    ...
+                ],
+                "filter" : [
+                    {
+                        "filterCode" : "ADM",
+                        "displayName" : "Admission Note"
+                    },
+                    {
+                        "filterCode" : "PRO",
+                        "displayName" : "Progress Note"
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number] 
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            }
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026 Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## @電子病歷 [/patients/{patientID}/EMR]
+## 9/15-電子病歷 [/patients/{patientID}/EMR]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
+            "content" : {
+                "field" : [    //欄位資訊
+                    {
+                        "fieldCode" : "item",  
+                        "displayName" : "項目"
+                    }
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳
+                            "item" : "置頂",
+                        },
+                        "children" : [  //有次階層時回傳
+                            {
+                                "content" : {   //依據欄位填入資料，無資料則不回傳
+                                    "item" : "病歷首頁及摘要",
+                                },
+                                "report" : {    //如有報告則回傳
+                                    "reportType" : "HTML",  //報告型態，HTML或PDF
+                                    "reportPath" : "/EMRReport/{EMRReportID}"   //報告路徑
+                                },
+                                "children" : [
+                                    {
+                                        "content" : {   //依據欄位填入資料，無資料則不回傳
+                                            "item" : "PDF病歷首頁及摘要",
+                                        },
+                                        "report" : {    //如有報告則回傳
+                                            "reportType" : "PDF",  //報告型態，HTML或PDF
+                                            "reportPath" : "/EMRReport/{EMRReportID}"   //報告路徑
+                                        }
+                                    },
+                                    ...
+                                ]
+                            },
+                            ...
+                        ]
+                    },
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳
+                            "item" : "住院",
+                        },
+                        "children" : [
+                            {
+                                "content" : {   //依據欄位填入資料，無資料則不回傳
+                                    "item" : "2014/06/25 外科部",
+                                },
+                                "children" : [
+                                    {
+                                        "content" : {   //依據欄位填入資料，無資料則不回傳
+                                            "item" : "出院病摘",
+                                        },
+                                        "report" : {    //如有報告則回傳
+                                            "reportType" : "HTML",  //報告型態，HTML或PDF
+                                            "reportPath" : "/EMRReport/{EMRReportID}"   //報告路徑
+                                        }
+                                        "children" : [
+                                            {
+                                                "content" : {   //依據欄位填入資料，無資料則不回傳
+                                                    "item" : "2014/06/25 葉小菜主治",
+                                                },
+                                                "report" : {    //如有報告則回傳
+                                                    "reportType" : "PDF",  //報告型態，HTML或PDF
+                                                    "reportPath" : "/EMRReport/{EMRReportID}"   //報告路徑
+                                                }
+                                            },
+                                            ...
+                                        ]
+                                    },
+                                    ...
+                                ]
+                            },
+                            ...
+                        ]
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number] 
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            },
+            "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026 Query 結束日期，以時間序號表示 (包含此日期)
         }
