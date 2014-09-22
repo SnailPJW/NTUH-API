@@ -1,20 +1,20 @@
 FORMAT: 1A
 HOST: http://www.wantoto.com
 
-# 台大醫院行動醫療資訊系統 Web Service 0.2
+# 台大醫院行動醫療資訊系統 Web Service 0.3
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
-# 9/15-登入與取得 SessionKey [/sessionKey{?epmNo,password}]
+# 9/22-登入與取得 SessionKey [/sessionKey{?empNo,password}]
 ## 取得 session key[POST]
 + Parameters
-    + epmNo (string) ... 使用者帳號
+    + empNo (string) ... 使用者帳號
     + password (string) ... 使用者密碼
 
 + Response 200 (application/json)
 
         {
             "content" : {
-                "epmName" : "葉小菜"    //員工姓名[string]
+                "empName" : "葉小菜"    //員工姓名[string]
                 "sessionKey" : "51ADFDA9C02D4E1E9930D88A26963612" //Session key [string]
             }
         }
@@ -65,16 +65,16 @@ HOST: http://www.wantoto.com
 
 # Group 病患清單 Patient List
 病患清單相關 Web Service
-## 病患清單 [/patients{?patientID,personID,wardCode,epmNo,epmNoConsult,epmNoStarred,ORCode,ERCode,OPDCode,examRoomCode}]
+## 9/22-病患清單 [/patients{?patientID,personID,wardCode,empNo,empNoConsult,empNoStarred,ORCode,ERCode,OPDCode,examRoomCode}]
 ### 查詢病患清單 [GET]
 可傳入病歷號、身分證號、病房、醫師員編、開刀房號、急診科別、門診科別、檢查科室等參數，回傳符合參數條件之病患
 + Parameters
     + patientID (string, optional) ... 病歷號
     + personID (string, optional) ... 身分證號
     + wardCode (string, optional, `5W3`) ... 病房號
-    + epmNo (string, optional) ... 醫師員編 (依照醫師員編顯示個人病患)
-    + epmNoConsult (string, optional) ... 醫師員編 (依照醫師員編顯示照會病患)
-    + epmNoStarred (string, optional) ... 醫師員編 (依照醫師員編顯示追蹤病患)
+    + empNo (string, optional) ... 醫師員編 (依照醫師員編顯示個人病患)
+    + empNoConsult (string, optional) ... 醫師員編 (依照醫師員編顯示照會病患)
+    + empNoStarred (string, optional) ... 醫師員編 (依照醫師員編顯示追蹤病患)
     + ORCode (string, optional) ... 開刀房號
     + ERCode (string, optional) ... 急診科別
     + OPDCode (string, optional) ... 門診科別
@@ -92,8 +92,8 @@ HOST: http://www.wantoto.com
                     "persionID" : "A123456789",  //身分證號[number]
                     "bedInfo" : "5W3 01-01",    //病房病床號(住院與急診)[string]
                     "inDate" : 1406938026, //入院日期(住院與急診)，非住院或在急診則回傳 null [number(date)]
-                    "_epm_VS" : {   //主治醫師(如遇回傳資料為醫師者，變數皆為_epm_開頭)[string]
-                        "epmNo" : "111281", //醫師員編[string]
+                    "_emp_VS" : {   //主治醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)[string]
+                        "empNo" : "111281", //醫師員編[string]
                         "name" : "葉小菜" 
                     },
                     "status" : "住院中" //狀態[string]
@@ -328,51 +328,226 @@ HOST: http://www.wantoto.com
             "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
         }
 
-## @檢驗報告-清單報告 [/patients/{patientID}/labReport/report]
+## 9/22-檢驗報告-清單報告 [/patients/{patientID}/labReport/report]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
             "content" : {
-                "data" : {
-                },
-                "filter" : {
-                }
+                "data" [
+                    {   //檢驗報告
+                        "specimen" : "BLOOD", //檢體[string]
+                        "lab" : "血液檢驗組血液室HE",    //檢驗單位[string]
+                        "requestNo" : "4025928",    //檢驗單號[string]
+                        "inspectionDate" : 1406938026,   //採檢時間[number(date)]
+                        "recordDate" : 1406938026,    //登入時間[number(date)]
+                        "reportDate" : 1406938026,   //最後報告時間[number(date)]                        
+                        "filterCode" : [    //篩選代碼
+                            "HE"
+                        ],
+                        "report" : {    //有額外報告時回傳
+                            "reportType" : "HTML",  //報告型態，HTML或PDF
+                            "reportPath" : "/labReport/{labReportID}"   //報告路徑
+                        },
+                        "table" : {
+                            "field" : [    //欄位資訊
+                                {
+                                    "fieldCode" : "item",  //欄位代碼[string]
+                                    "displayName" : "檢驗項目" //欄位顯示名稱[string]
+                                },
+                                {
+                                    "fieldCode" : "labValue",  
+                                    "displayName" : "檢驗值"
+                                },
+                                {
+                                    "fieldCode" : "unit",  
+                                    "displayName" : "單位"
+                                },
+                                {
+                                    "fieldCode" : "reference",  
+                                    "displayName" : "參考值"
+                                },
+                                {
+                                    "fieldCode" : "critical",  
+                                    "displayName" : "危急值"
+                                },
+                                {
+                                    "fieldCode" : "note",  
+                                    "displayName" : "說明"
+                                },
+                                {
+                                    "fieldCode" : "specialOrder",  
+                                    "displayName" : "特別醫囑"
+                                }
+                            ],
+                            "data" : [
+                                {
+                                    "content" : {   //依據欄位填入資料，無資料則不回傳
+                                        "item" : "RBC",
+                                        "labValue" : {   //若為檢驗數值則回傳object
+                                            "value" :"2.66",    //檢驗值[string]
+                                            "status" : "normal"    //檢驗值狀態。ex:"normal"(正常)、"abnormal"(異常)、"low"(過低)、"high"(過高)、"unknow"(無法判斷)[string]
+                                        },
+                                        "unit" : "M/ul",
+                                        "reference" : "4 ~ 5.52",
+                                        "critical" : "< 2.0 & > 7.0", 
+                                        "note" : "", 
+                                        "specialOrder" : ""                         
+                                    }
+                                },
+                                ...
+                            ],
+                        }
+                    },
+                    ...
+                ],
+                "filter" : [
+                    {
+                        "filterCode" : "HE",
+                        "displayName" : "血液檢驗組血液室HE"
+                    },
+                    {
+                        "filterCode" : "BC",
+                        "displayName" : "生化檢驗組BC"
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數，當client傳入與content為陣列或collection時需回傳[number] 
+                "offset" : 0, //回傳資料偏移數，當client傳入與content為陣列或collection時需回傳傳[number]
+                "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
             }, 
             "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
             "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
         }
 
-## @檢驗報告-累積報告 [/patients/{patientID}/labReport/accmulatedReport]
+## 9/22-檢驗報告-累積報告 [/patients/{patientID}/labReport/accmulatedReport]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "content" : {
+                "data" [
+                    {   
+                        "item" : "CBC+PLT BLOOD", //檢驗項目[string]
+                        "lab" : "血液檢驗組血液室HE",    //檢驗單位[string]
+                        "filterCode" : [    //篩選代碼
+                            "HE"
+                        ],
+                        "table" : {
+                            "field" : [    //欄位資訊
+                                {
+                                    "fieldCode" : "date",  //欄位代碼[string]
+                                    "displayName" : "檢驗時間", //欄位顯示名稱[string]
+                                    "dateFormat" : "yyyy-MM-dd hh:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
+                                },
+                                {
+                                    "fieldCode" : "WBC",  
+                                    "displayName" : "WBC(k/uL)"
+                                    "labInfo" : {   //檢驗項目相關資訊[string]
+                                        "reference" : "3.54 ~ 9.06" //參考值[string]
+                                    }
+                                    
+                                },
+                                ...
+                            ],
+                            "data" : [
+                                {
+                                    "reportDate" : 1406938026,  //報告時間[number(date)]
+                                    "content" : {   //依據欄位填入資料，無資料則不回傳
+                                        "date" : 1406938026,
+                                        "WBC" : {   //若為檢驗數值則回傳object
+                                            "value" :"4.05",    //檢驗值[string]
+                                            "status" : "normal",    //檢驗值狀態。ex:"normal"(正常)、"abnormal"(異常)、"low"(過低)、"high"(過高)、"unknow"(無法判斷)[string]
+                                            "note" : "123" //檢醫部註記，無資料則不回傳[sitrng]
+                                        },
+                                    },
+                                },
+                                ...
+                            ],
+                        }
+                    },
+                    ...
+                ],
+                "filter" : [
+                    {
+                        "filterCode" : "HE",
+                        "displayName" : "血液檢驗組血液室HE"
+                    },
+                    {
+                        "filterCode" : "BC",
+                        "displayName" : "生化檢驗組BC"
+                    },
+                    ...
+                ],
+            }, 
             "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
             "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
         }
 
-## @檢驗報告-綠單報告 [/patients/{patientID}/labReport/greenReport]
+## 9/22-檢驗報告-綠單報告 [/patients/{patientID}/labReport/greenReport]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
         
         {
-            "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
+            "content" : {
+                "data" [
+                    {   
+                        "item" : "Complete Blood Cell Count BLOOD", //綠單項目[string]
+                        "filterCode" : [    //篩選代碼
+                            "CBC"
+                        ],
+                        "table" : {
+                            "field" : [    //欄位資訊
+                                {
+                                    "fieldCode" : "date",  //欄位代碼[string]
+                                    "displayName" : "檢驗時間", //欄位顯示名稱[string]
+                                    "dateFormat" : "yyyy-MM-dd hh:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
+                                },
+                                {
+                                    "fieldCode" : "WBC",  
+                                    "displayName" : "WBC(k/uL)"
+                                    "labInfo" : {   //檢驗項目相關資訊[string]
+                                        "reference" : "3.54 ~ 9.06" //參考值[string]
+                                    }
+                                    
+                                },
+                                ...
+                            ],
+                            "data" : [
+                                {
+                                    "reportDate" : 1406938026,  //報告時間[number(date)]
+                                    "content" : {   //依據欄位填入資料，無資料則不回傳
+                                        "date" : 1406938026,
+                                        "WBC" : {   //若為檢驗數值則回傳object
+                                            "value" :"4.05",    //檢驗值[string]
+                                            "status" : "normal",    //檢驗值狀態。ex:"normal"(正常)、"abnormal"(異常)、"low"(過低)、"high"(過高)、"unknow"(無法判斷)[string]
+                                            "note" : "123" //檢醫部註記，無資料則不回傳[sitrng]
+                                        },
+                                    },
+                                },
+                                ...
+                            ],
+                        }
+                    },
+                    ...
+                ],
+                "filter" : [
+                    {
+                        "filterCode" : "CBC",
+                        "displayName" : "CBC"
+                    },
+                    {
+                        "filterCode" : "biochemistry",
+                        "displayName" : "Biochemistry"
+                    },
+                    ...
+                ],
+            }, 
             "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
             "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
-            "limit" : 50, //最大回傳筆數，當client傳入時需回傳[number] 
-            "offset" : 0, //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
         }
 
 ## 9/15-報告系統 [/patients/{patientID}/otherReport]
@@ -434,7 +609,7 @@ HOST: http://www.wantoto.com
             "endDate" : 1406938026 Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## 9/15-生命徵象 [/patients/{patientID}/TPR]
+## 9/22-生命徵象 [/patients/{patientID}/TPR]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -493,8 +668,8 @@ HOST: http://www.wantoto.com
                         "orderDate" : 1406938026, //開立日期[number(date)]
                         "startDate" : 1406938026, //用藥開始日期[number(date)]
                         "endDate" : 1406938026, //用藥結束日期[number(date)]
-                        "_epm_order" : { //開立醫師
-                            "epmNo" : "23454353",
+                        "_emp_order" : { //開立醫師
+                            "empNo" : "23454353",
                             "name" : "葉小菜"
                         },
                         "note" : "自費 特殊醫囑: For scrotal ulcers", //備註[string]
@@ -517,7 +692,7 @@ HOST: http://www.wantoto.com
             "endDate" : 1406938026 Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## 9/15-非處方醫囑 [/patients/{patientID}/order]
+## 9/22-非處方醫囑 [/patients/{patientID}/order]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -540,7 +715,7 @@ HOST: http://www.wantoto.com
                         "dateFormat" : "yyyy-MM-dd"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
                     },
                     {
-                        "fieldCode" : "_epm_doctor",  
+                        "fieldCode" : "_emp_doctor",  
                         "displayName" : "確認醫師"
                     },
                     {
@@ -559,8 +734,8 @@ HOST: http://www.wantoto.com
                             "order" : "Chest PA View (Standing)",
                             "startDate" : 1406938026,
                             "endDate" : 1406938026,
-                            "_epm_doctor" : { 
-                                "epmNo" : "23454353",
+                            "_emp_doctor" : { 
+                                "empNo" : "23454353",
                                 "name" : "葉小菜"
                             },
                             "status" : "已完成",
@@ -603,7 +778,7 @@ HOST: http://www.wantoto.com
             "endDate" : 1406938026 Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## 9/15-處方醫囑 [/patients/{patientID}/medication]
+## 9/22-處方醫囑 [/patients/{patientID}/medication]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -621,8 +796,8 @@ HOST: http://www.wantoto.com
                     "orderDate" : 1406938026, //開立日期[number(date)]
                     "startDate" : 1406938026, //用藥開始日期[number(date)]
                     "endDate" : 1406938026, //用藥結束日期[number(date)]
-                    "_epm_order" : { //開立醫師
-                        "epmNo" : "23454353",
+                    "_emp_order" : { //開立醫師
+                        "empNo" : "23454353",
                         "name" : "葉小菜"
                     },
                     "note" : "自費 特殊醫囑: For scrotal ulcers", //備註[string]
@@ -680,7 +855,7 @@ HOST: http://www.wantoto.com
         }
 
 
-## 9/15-手術紀錄 [/patients/{patientID}/OPNote]
+## 9/22-手術紀錄 [/patients/{patientID}/OPNote]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
@@ -702,7 +877,7 @@ HOST: http://www.wantoto.com
                         "dateFormat" : "yyyy-MM-dd hh:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
                     },
                     {
-                        "fieldCode" : "_epm_doctor",  
+                        "fieldCode" : "_emp_doctor",  
                         "displayName" : "醫師"
                     },
                     {
@@ -716,8 +891,8 @@ HOST: http://www.wantoto.com
                             "OPType" : "1. Subxiphoid drainage with sternal... ",
                             "dept" : "外科部",
                             "date" : 1406938026,
-                            "_epm_doctor" : {
-                                "epmNo" : "123342"
+                            "_emp_doctor" : {
+                                "empNo" : "123342"
                                 "name" : "葉小菜"
                             },
                             "status" : "V"
