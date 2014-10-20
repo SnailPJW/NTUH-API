@@ -91,13 +91,13 @@ HOST: http://www.wantoto.com
                     "chartNo" : "12345678",   //病歷號[string]
                     "persionID" : "A123456789",  //身分證號[number]
                     "bedInfo" : "5W3 01-01",    //病房病床號(住院與急診)[string]
-                    "inDate" : 1406938026, //入院日期(住院與急診)，非住院或在急診則回傳 null [number(date)]
-                    "_emp_VS" : {   //主治醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)[string]
+                    "inDate" : 1406938026, //入院日期(住院與急診)，非住院或在急診則不回傳 [number(date)]
+                    "_emp_VS" : {   //主治醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)，無資料則不回傳[string]
                         "empNo" : "111281", //醫師員編[string]
-                        "name" : "葉小菜" 
+                        "name" : "葉小菜" //醫師姓名[string]
                     },
                     "status" : "住院中" //狀態[string]
-                    "specialTag" : [   //特殊標記[string array] (ex:DNR,...)
+                    "specialTag" : [   //特殊標記，無資料則不回傳[string array] (ex:DNR,...)  
                         {
                             "tagCode" : "DNR",
                             "displayName" : "DNR"
