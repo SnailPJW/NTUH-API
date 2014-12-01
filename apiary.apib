@@ -299,7 +299,7 @@ HOST: http://www.wantoto.com
         ]
 
 # Group 病歷資料 Medical Record
-## 11/26 病患醫療基本資料 [/patients/{chartNo}{?startDate,endDate}]
+## 12/1 病患醫療基本資料 [/patients/{chartNo}{?startDate,endDate}]
 ### 取得病患醫療基本資料 [GET]
 + Parameters 
     + chartNo (string) ... 病歷號
@@ -311,7 +311,7 @@ HOST: http://www.wantoto.com
             "content" : {
                 "basic" : [
                     {
-                        "title" : "診斷",
+                        "title" : "Active Problem List",
                         "content" : [
                             {
                                 "item" : "Gastrointestinal stromal tumor, gastrointestinal",    //診斷[string]
@@ -413,21 +413,37 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ],
-                "order" : [
+                "order" : [    //抓本日 active 就好
                     {   
                         "startDate" : 1406938026,
                         "endDate" : 1406938026,
+                        "type" : "執行中"  //醫囑進度
                         "item" : "Chest PA View (Standing)",    //醫令內容[string]
+                        "report" : {    //如有報告則回傳
+                            "reportType" : "HTML",  //報告型態，HTML或PDF
+                            "reportPath" : "/report/{reportID}"   //報告路徑
+                        }
                     },
                     ...
                 ],
-                "medication" : [
+                "medication" : [    //抓本日 active 就好
                     {   
                         "startDate" : 1406938026,
                         "endDate" : 1406938026,
                         "item" : "Magnesium Oxide",    //學名[string]
                     },
                     ...
+                ],
+                "consult" : [    //會診資訊
+                    {
+                        "date" : 1406938026,   //會診時間[string]
+                        "item" : "xxx 會診資訊",    //會診資訊[string]
+                        "type" : "葉XX醫師" //會診醫師[string]
+                        "report" : {    //會診單
+                            "reportType" : "HTML",  //報告型態，HTML或PDF
+                            "reportPath" : "/report/{reportID}"   //報告路徑
+                        }
+                    }
                 ],
             } 
             "startDate" : 1406938026, Query 起始日期，以時間序號表示 (包含此日期)
