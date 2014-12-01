@@ -692,7 +692,7 @@ HOST: http://www.wantoto.com
             "endDate" : 1406938026, Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## 9/15-報告系統 [/patients/{chartNo}/otherReport]
+## 12/1-報告系統 [/patients/{chartNo}/otherReport]
 檢驗報告之外的其他報告
 ### 取得病歷資料 [GET]
 
@@ -704,6 +704,11 @@ HOST: http://www.wantoto.com
                     {
                         "fieldCode" : "item",  
                         "displayName" : "檢查項目"
+                    },
+                    {
+                        "fieldCode" : "examDate",  //欄位代碼[string]
+                        "displayName" : "檢查時間", //欄位顯示名稱[string]
+                        "dateFormat" : "yyyy-MM-dd hh:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
                     },
                     {
                         "fieldCode" : "date",  //欄位代碼[string]
@@ -718,6 +723,7 @@ HOST: http://www.wantoto.com
                 "data" : [
                     {
                         "content" : {   //依據欄位填入資料，無資料則不回傳
+                            "examDate" : 1406938026,
                             "date" : 1406938026,
                             "item" : "Chest PA View (Standing)",
                             "type" : "影核醫"
@@ -827,6 +833,7 @@ HOST: http://www.wantoto.com
                     {
                         "drugName" : "Magnesium Oxide", //學名[string]
                         "itemName" : "MgO", //品名[string]
+                        "combineName" : "Magnesium Oxide 250 mg/tab", //組合名[string]
                         "itemUnit" : "250 mg/tab", //劑量單位[string]
                         "filterCode" : [ //篩選代碼[string]
                             "antibiotic"
@@ -972,6 +979,7 @@ HOST: http://www.wantoto.com
                 {
                     "drugName" : "Magnesium Oxide", //學名[string]
                     "itemName" : "MgO", //品名[string]
+                    "combineName" : "Magnesium Oxide 250 mg/tab", //組合名[string]
                     "itemUnit" : "250 mg/tab", //劑量單位[string]
                     "filterCode" : [ //篩選代碼[string]
                         "antibiotic"
