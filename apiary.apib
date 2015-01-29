@@ -1,7 +1,7 @@
 FORMAT: 1A
 HOST: http://www.wantoto.com
 
-# 台大醫院行動醫療資訊系統 Web Service 0.8
+# 台大醫院行動醫療資訊系統 Web Service 0.9
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
 # 9/22-登入與取得 SessionKey [/sessionKey{?empNo,password}]
@@ -1352,6 +1352,29 @@ HOST: http://www.wantoto.com
             "total" : 100 //此次Query總筆數[number] 
         }
 
+
+# 1/29 - 取得 iPad 容量管理規則 [/device/storage_limit]
+## 取得iPad 容量警示參數[GET]
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "size": 1024, //size in mb [number]
+            }
+        }
+
+# 1/29 - 取得系統閒置自動登出管理規則 [/device/logout_limit]
+## 取得系統閒置自動登出時間[GET]
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "time": 3600, //time in seconds [number]
+            }
+        }
+    
 
 
 
