@@ -1,11 +1,12 @@
 FORMAT: 1A
 HOST: http://www.wantoto.com
 
-# 台大醫院行動醫療資訊系統 Web Service 1.13
+# 台大醫院行動醫療資訊系統 Web Service 1.15
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
-# 9/22-登入與取得 SessionKey [/sessionKey{?empNo,password}]
-## 取得 session key[GET]
+# 9/22-登入與取得 SessionKey
+## sessionKey [/sessionKey{?empNo,password}]
+### 取得 session key[GET]
 + Parameters
     + empNo (string) ... 使用者帳號
     + password (string) ... 使用者密碼
@@ -26,7 +27,7 @@ HOST: http://www.wantoto.com
             "error" : 101 //錯誤代碼 [number]
         }
 
-# Group Web Service 通則
+# Group Web Service 通則 {example}
 ## 通則 [/{?sessionKey,offset,limit}]
 ### 驗證 Session Key 與資料分頁參數[GET]
 所有 Web Service 都須帶入 Session Key 檢查是否過期與是否具有存取權限。
@@ -89,7 +90,7 @@ HOST: http://www.wantoto.com
                     "patSexCode" : "M",             //性別[string]（男性："M";女性："F"）
                     "patBirthday" : 1406938026,     //出生日期[number(timestamp)]
                     "chartNo" : "12345678",         //病歷號[string]
-                    "personID" : "A123456789",      //身分證號[number]
+                    "personID" : "A123456789",      //身分證號[string]
                     "bedInfo" : "5W3 01-01",        //病房病床號(住院與急診)，非住院或急診中則不回傳Key[string]
                     "inDate" : 1406938026,          //入院日期(住院或急診檢傷時間)，非住院或在急診則不回傳Key [number(timestamp)]
                     "triageLevels" : "1",           //檢傷分級，非急診則不回傳 Key [string]
@@ -115,8 +116,8 @@ HOST: http://www.wantoto.com
                     ],
                     "latestPacsReportDateTime" : 1406938026, //最新影像時間 [number(timestamp)]
                     "latestLISReportDateTime" : 1406938026,  //最新報告時間 [number(timestamp)]
-                    "accountIDSE" : "14T05267794",           //帳號 [String]
-                    "patClassCode" : "I"                     //門住急別 [String]
+                    "accountIDSE" : "14T05267794",           //帳號 [string, optional]
+                    "patClassCode" : "I"                     //門住急別 [string]
                 },
                 ...
             ],
@@ -321,7 +322,7 @@ HOST: http://www.wantoto.com
             "content" : {
                 "basic" : [
                     {
-                        "title" : "Active Problem List",
+                        "title" : "Active Problem List",                                        // [string, optional]
                         "content" : [
                             {
                                 "item" : "Gastrointestinal stromal tumor, gastrointestinal",    //診斷[string]
@@ -331,22 +332,21 @@ HOST: http://www.wantoto.com
                         ]
                     },
                     {
-                        "title" : "過敏",
+                        "title" : "過敏",                       // [string, optional]
                         "content" : [
                             {
                                 "item" : "Penicillin group",    //過敏[string]
-                                "value" : "R"    //過敏類型[string]
+                                "value" : "R"                   //過敏類型[string]
                             },
                             ...
                         ]
                     },
                     {
-                        "title" : "危急值",
                         "content" : [
                             {
-                                "date" : 1406938026,    //報告時間[nubmer(timestamp)]
-                                "item" : "RBC",    //危及項目[string]
-                                "value" : "1.0" //危急值[string]
+                                "date" : 1406938026,    //報告時間[nubmer(timestamp), optional]
+                                "item" : "RBC",         //危及項目[string]
+                                "value" : "1.0"         //危急值[string]
                             },
                             ...
                         ]
@@ -456,8 +456,8 @@ HOST: http://www.wantoto.com
                 "consult" : [    //會診資訊
                     {
                         "date" : 1406938026,                    //會診時間 [number(timestamp)]
-                        "item" : "xxx 會診資訊",                //會診資訊 [number(timestamp)]
-                        "type" : "葉XX醫師",                    //會診醫師[string]
+                        "item" : "xxx 會診資訊",                //會診資訊 [string]
+                        "type" : "葉XX醫師",                    //會診醫師 [string]
                         "report" : {    //會診單
                             "reportType" : "HTML",                      //報告型態，HTML或PDF
                             "reportPath" : "/report/{reportID}",        //報告路徑
@@ -471,7 +471,7 @@ HOST: http://www.wantoto.com
             "endDate" : 1406938026    // [number(timestamp)] Query 結束日期，以時間序號表示 (包含此日期)
         }
 
-## 10/8-病歷資料 Web Service 通則 [/patients/{chartNo}/{dataPath}{?startDate,endDate}]
+## 10/8-病歷資料 Web Service 通則 {example} [/patients/{chartNo}/{dataPath}{?startDate,endDate}]
 ### 取得病歷資料 [GET]
 + Parameters
     + chartNo (string) ... 病歷號
@@ -595,9 +595,9 @@ HOST: http://www.wantoto.com
             "content" : {
                 "data" : [
                     {   
-                        "item" : "CBC+PLT BLOOD", //檢驗項目[string]
-                        "lab" : "血液檢驗組血液室HE",    //檢驗單位[string]
-                        "filterCode" : [    //篩選代碼
+                        "item" : "CBC+PLT BLOOD",           //檢驗項目[string]
+                        "lab" : "血液檢驗組血液室HE",       //檢驗單位[string]
+                        "filterCode" : [                    //篩選代碼
                             "HE"
                         ],
                         "table" : {
@@ -605,13 +605,13 @@ HOST: http://www.wantoto.com
                                 {
                                     "fieldCode" : "inspectionDate",         //欄位代碼[string]
                                     "displayName" : "採檢時間",             //欄位顯示名稱[string]
-                                    "dateFormat" : "yyyy-MM-dd HH:mm"       //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
+                                    "dateFormat" : "yyyy-MM-dd HH:mm"       //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳 [string, optional]
                                 },
                                 {
                                     "fieldCode" : "WBC",  
                                     "displayName" : "WBC(k/uL)",
-                                    "labInfo" : {   //檢驗項目相關資訊
-                                        "reference" : "3.54 ~ 9.06" //參考值[string]
+                                    "labInfo" : {                           //檢驗項目相關資訊 [optional]
+                                        "reference" : "3.54 ~ 9.06"         //參考值[string]
                                     }
                                     
                                 },
@@ -619,14 +619,14 @@ HOST: http://www.wantoto.com
                             ],
                             "data" : [
                                 {
-                                    "content" : {   //依據欄位填入資料，無資料則不回傳
-                                        "inspectionDate" : 1406938026,   //採檢時間[number(timestamp)]    
-                                        "date" : 1406938026,    //報告時間(不顯示，但須保留作為篩選用)[number(timestamp)]
-                                        "WBC" : {   //若為檢驗數值則回傳object
-                                            "value" :"4.05",    //檢驗值[string]
-                                            "status" : "normal",    //檢驗值狀態。ex:"normal"(正常)、"abnormal"(異常)、"low"(過低)、"high"(過高)、"unknow"(無法判斷)[string]
-                                            "note" : "123", //檢醫部註記，無資料則不回傳[sitrng]
-                                            "reportDate" : 1406938026  //報告時間[number(timestamp)]
+                                    "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                                        "inspectionDate" : 1406938026,          //採檢時間[number(timestamp)]    
+                                        "date" : 1406938026,                    //報告時間(不顯示，但須保留作為篩選用)[number(timestamp)]
+                                        "WBC" : {   //若為檢驗數值則回傳object [optional]
+                                            "value" :"4.05",                    //檢驗值[string]
+                                            "status" : "normal",                //檢驗值狀態。ex:"normal"(正常)、"abnormal"(異常)、"low"(過低)、"high"(過高)、"unknow"(無法判斷)[string]
+                                            "note" : "123",                     //檢醫部註記，無資料則不回傳[sitrng, optional]
+                                            "reportDate" : 1406938026           //報告時間[number(timestamp)]
                                         }
                                     }
                                 },
@@ -1303,12 +1303,12 @@ HOST: http://www.wantoto.com
                         "content" : {  //依據欄位填入資料，無資料則不回傳 [optional]
                             "item" : "住院"    // [string]
                         },
-                        "children" : [
+                        "children" : [  // [optional, duplicate]
                             {
                                 "content" : {                       //依據欄位填入資料，無資料則不回傳 [optional]
                                     "item" : "2014/06/25 外科部"    // [string]
                                 },
-                                "children" : [
+                                "children" : [  // [optional, duplicate]
                                     {
                                         "content" : {               //依據欄位填入資料，無資料則不回傳 [optional]
                                             "item" : "出院病摘"     // [string]
@@ -1316,7 +1316,7 @@ HOST: http://www.wantoto.com
                                         "report" : {    //如有報告則回傳 [optional]
                                             "reportType" : "HTML",                      //報告型態，HTML或PDF
                                             "reportPath" : "/EMRReport/{EMRReportID}",  //報告路徑 [string]
-                                            "encoding" : "utf-16",                      //編碼 (utf-8 or utf-16，為utf-8時可不回傳) [string]
+                                            "encoding" : "utf-16",                      //編碼 (utf-8 or utf-16，為utf-8時可不回傳) [string, optional]
                                             "baseURL" : "http://baseUrl.ntuh.gov.tw"    //報告基礎連結(報告中如有相對連結時回傳)[string(url)]
                                         },
                                         "children" : [ // [optional, duplicate]
@@ -1327,7 +1327,7 @@ HOST: http://www.wantoto.com
                                                 "report" : { //如有報告則回傳 [optional]
                                                     "reportType" : "PDF",                       //報告型態，HTML或PDF [string]
                                                     "reportPath" : "/EMRReport/{EMRReportID}",  //報告路徑 [string]
-                                                    "encoding" : "utf-16",                      //編碼 (utf-8 or utf-16，為utf-8時可不回傳) [string]
+                                                    "encoding" : "utf-16",                      //編碼 (utf-8 or utf-16，為utf-8時可不回傳) [string, optional]
                                                     "baseURL" : "http://baseUrl.ntuh.gov.tw"    //報告基礎連結(報告中如有相對連結時回傳)[string(url)]
                                                 }
                                             },
@@ -1361,6 +1361,7 @@ HOST: http://www.wantoto.com
     
 + Response 200 (application/json)
 
+
         {
             "content" : [
                 {
@@ -1386,8 +1387,9 @@ HOST: http://www.wantoto.com
         }
 
 
-# 1/29 - 取得 iPad 容量管理規則 [/device/storage_limit]
-## 取得iPad 容量警示參數[GET]
+# Group iPad 容量管理規則 
+## 1/29 - iPad 容量警示參數 [/device/storage_limit]
+### 取得iPad 容量警示參數[GET]
 
 + Response 200 (application/json)
 
@@ -1397,8 +1399,8 @@ HOST: http://www.wantoto.com
             }
         }
 
-# 1/29 - 取得系統閒置自動登出管理規則 [/device/logout_limit]
-## 取得系統閒置自動登出時間[GET]
+##  1/29 - 系統閒置自動登出時間 [/device/logout_limit]
+### 取得系統閒置自動登出時間[GET]
 
 + Response 200 (application/json)
 
@@ -1408,8 +1410,9 @@ HOST: http://www.wantoto.com
             }
         }
 
-# 3/15 - 院內訊息通知系統 [/notifications/doctor/{empNo}/{?startDate,endDate,offset,limit}]
-## 取得醫師所屬之通知訊息內容 [GET]
+# Group 院內訊息通知系統 
+## 3/15 - 醫師所屬之通知訊息 [/notifications/doctor/{empNo}/{?startDate,endDate,offset,limit}]
+### 取得醫師所屬之通知訊息內容 [GET]
 + Parameters
     + offset (number, optional) ... 資料偏移數，需與 limit 一起傳入
     + limit  (number, optional) ... 最大回傳筆數，需與 offset 一起傳入
@@ -1436,8 +1439,8 @@ HOST: http://www.wantoto.com
             "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期) [number(timestamp)]
         }
 
-# 4/24 - 院內訊息通知系統 [/notification/{id}{?confirmed}]
-## 取得通知訊息內容 [GET]
+## 4/24 - 院內訊息通知系統 [/notification/{id}{?confirmed,sessionKey}]
+### 取得通知訊息內容 [GET]
 + Response 200 (application/json)
 
 
@@ -1453,9 +1456,10 @@ HOST: http://www.wantoto.com
             }
         }
 
-## 確認通知訊息 [PUT]
+### 確認通知訊息 [PUT]
 + Parameters
-    + confirmed (boolean) ... 設定指定之通知訊息為確認(true)/未確認(false)
+    + confirmed  (boolean)  ... 設定指定之通知訊息為確認(true)/未確認(false)
+    + sessionKey (string)   ... Session Key
 
 + Response 200 (application/json)
         
@@ -1463,8 +1467,39 @@ HOST: http://www.wantoto.com
             "success": true
         }
 
-# 4/13 - 病患留言板系統 [/bulletin/{chartNo}/topicTitles{?startDate,endDate,offset,limit}]
-## 取得病患對應之布告欄主題標題[GET]
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1001,
+                "message": "Missing parameter error with parameter: ..."
+            }
+        }
+        
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1002,
+                "message": "Input parameter type error with parameter: ..."
+            }
+        }
+
++ Response 401 (application/json)
+
+
+        {
+            "error": {
+                "code": 401,
+                "message": "Unauthorized access"
+            }
+        }
+
+# Group 病患留言板系統 
+## 4/13 - 病患對應之布告欄主題標題 [/bulletin/{chartNo}/topicTitles{?startDate,endDate,offset,limit}]
+### 取得病患對應之布告欄主題標題[GET]
 + Parameters
     + offset (number, optional) ... 資料偏移數，需與limit一起傳入 
     + limit  (number, optional) ... 最大回傳筆數，需與 offset 一起傳入
@@ -1492,15 +1527,16 @@ HOST: http://www.wantoto.com
             "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期) [number(timestamp)]
             "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期) [number(timestamp)]
         }
-    
+ 
 
-# 3/15 - 病患留言板系統 [/bulletin/{chartNo}/topics{?startDate,endDate,offset,limit,empNo,title,content}]
-## 取得病患所對應之布告欄內容[GET]
+## 3/15 - 病患留言板系統 [/bulletin/{chartNo}/topics{?startDate,endDate,offset,limit,empNo,title,content,sessionKey}]
+### 取得病患所對應之布告欄內容[GET]
 + Parameters
     + offset (number, optional) ... 資料偏移數，需與 limit 一起傳入
     + limit  (number, optional) ... 最大回傳筆數，需與 offset 一起傳入
     + startDate (string, optional, `20150103`) ... Query 起始日期，以 YYYYMMDD 格式表示 (包含此日期)
     + endDate   (string, optional, `20150113`) ... Query 結束日期，以 YYYYMMDD 格式表示 (包含此日期)
+    + sessionKey (string) ... Session Key
 
 + Response 200 (application/json)
 
@@ -1512,8 +1548,8 @@ HOST: http://www.wantoto.com
                         "empNo" : "111111",      // the id for the one created the topic [string]
                         "name" : "謝小穎"        // the name of the one created the topic [string]
                     },
-                    "created":    1406938026,    // the timestamp for the created time. [number(datetime)]
-                    "updated":    1406940112,    // the timestamp for the last updated time [number(datetime)]
+                    "created":    1406938026,    // the timestamp for the created time. [number(timestamp)]
+                    "updated":    1406940112,    // the timestamp for the last updated time [number(timestamp)]
                     "title":      "HELLO",       // the title [string]
                     "message":    "hello world", // the message content [string]
                     "id":         "A12-40321",   // the identifier for the topic [string]
@@ -1547,9 +1583,10 @@ HOST: http://www.wantoto.com
         
 ## 新增主題至病患所對應之留言板[POST]
 + Parameters
-    + empNo (string)    ... 使用者帳號
-    + title (string)    ... 主題標題
-    + content (string)  ... 主題訊息內容
+    + empNo (string)        ... 使用者帳號
+    + title (string)        ... 主題標題
+    + content (string)      ... 主題訊息內容
+    + sessionKey (string)   ... Session Key
 
 + Response 200 (application/json)
 
@@ -1560,12 +1597,43 @@ HOST: http://www.wantoto.com
                 "id": "A12-40322"      // The identifier for the newly created topic [string].
             }
         }
+
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1001,
+                "message": "Missing parameter error with parameter: ..."
+            }
+        }
+        
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1002,
+                "message": "Input parameter type error with parameter: ..."
+            }
+        }
+
++ Response 401 (application/json)
+
+
+        {
+            "error": {
+                "code": 401,
+                "message": "Unauthorized access"
+            }
+        }
         
 
-# 3/15 - 留言板系統之主題 [/bulletin/topic/{id}{?empNo,title,content}]
-## 取得留言板某個主題[GET]
+## 3/15 - 留言板系統之主題 [/bulletin/topic/{id}{?empNo,title,content,sessionKey}]
+### 取得留言板某個主題[GET]
 + Parameters
-    + id (string) ... The identifier for the specified topic.
+    + id (string)           ... The identifier for the specified topic.
+    + sessionKey (string)   ... Session Key
 
 + Response 200 (application/json)
 
@@ -1603,12 +1671,13 @@ HOST: http://www.wantoto.com
             }
         }
 
-## 編輯留言板某個主題[PUT]
+### 編輯留言板某個主題[PUT]
 + Parameters
-    + id (string)       ... The identifier for the specified topic.
-    + empNo (string)    ... 請求更新之使用者帳號
-    + title (string)    ... 請求更新之標題
-    + content (string)  ... 更新之訊息內容
+    + id (string)           ... The identifier for the specified topic.
+    + empNo (string)        ... 請求更新之使用者帳號
+    + title (string)        ... 請求更新之標題
+    + content (string)      ... 更新之訊息內容
+    + sessionKey (string)   ... Session Key
     
 + Response 200 (application/json)
 
@@ -1617,9 +1686,41 @@ HOST: http://www.wantoto.com
             "success": true
         }
 
-## 刪除留言板某個主題[DELETE]
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1001,
+                "message": "Missing parameter error with parameter: ..."
+            }
+        }
+        
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1002,
+                "message": "Input parameter type error with parameter: ..."
+            }
+        }
+
++ Response 401 (application/json)
+
+
+        {
+            "error": {
+                "code": 401,
+                "message": "Unauthorized access"
+            }
+        }
+        
+        
+### 刪除留言板某個主題[DELETE]
 + Parameters
-    + id (string) ... The identifier for the specified reply.
+    + id (string)           ... The identifier for the specified reply.
+    + sessionKey (string)   ... Session Key
 
 + Response 200 (application/json)
 
@@ -1627,14 +1728,44 @@ HOST: http://www.wantoto.com
         {
             "success": true
         }
-        
-# 4/10 - 留言板系統指定主題之回應 [/bulletin/topic/{id}/replies{?empNo,content,offset,limit}]
 
-## 取得指定主題之所有回應 [GET]
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1001,
+                "message": "Missing parameter error with parameter: ..."
+            }
+        }
+        
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1002,
+                "message": "Input parameter type error with parameter: ..."
+            }
+        }
+
++ Response 401 (application/json)
+
+
+        {
+            "error": {
+                "code": 401,
+                "message": "Unauthorized access"
+            }
+        }
+
+## 4/10 - 留言板系統指定主題之回應 [/bulletin/topic/{id}/replies{?empNo,content,offset,limit,sessionKey}]
+### 取得指定主題之所有回應 [GET]
 + Parameters
     + id (string)               ... the identifier for the specified topic.
     + limit (number, optional)  ... the max number of replies in response data.
     + offset (number, optional) ... the offset index for the reponse reply list
+    + sessionKey (string)       ... Session Key
 
 + Response 200 (application/json)
     
@@ -1657,12 +1788,14 @@ HOST: http://www.wantoto.com
             "total": 6                                      // the total number of the replies [number]
         }
         
-## 新增回應至留言板至指定主題[POST]
-+ Parameters
-    + id (string)       ... The identifier for the specified topic.
-    + empNo (string)    ... The employment id for the one requesting for posting the reply.
-    + content (string)  ... The message content for the replay.
 
+### 新增回應至留言板至指定主題[POST]
++ Parameters
+    + id (string)           ... The identifier for the specified topic.
+    + empNo (string)        ... The employment id for the one requesting for posting the reply.
+    + content (string)      ... The message content for the replay.
+    + sessionKey (string)   ... Session Key
+    
 + Response 200 (application/json)
         
         {
@@ -1672,11 +1805,42 @@ HOST: http://www.wantoto.com
             }
         }
 
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1001,
+                "message": "Missing parameter error with parameter: ..."
+            }
+        }
         
-# 3/15 - 留言板系統之回應 [/bulletin/reply/{id}{?empNo,content}]
-## 取得留言板某個回應[GET]
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1002,
+                "message": "Input parameter type error with parameter: ..."
+            }
+        }
+
++ Response 401 (application/json)
+
+
+        {
+            "error": {
+                "code": 401,
+                "message": "Unauthorized access"
+            }
+        }
+
+        
+## 3/15 - 留言板系統之回應 [/bulletin/reply/{id}{?empNo,content,sessionKey}]
+### 取得留言板某個回應[GET]
 + Parameters
-    + id (string) ... The identifier for the specified reply.
+    + id (string)           ... The identifier for the specified reply.
+    + sessionKey (string)   ... Session Key
 
 + Response 200 (application/json)
 
@@ -1696,27 +1860,90 @@ HOST: http://www.wantoto.com
         }
 
 ## 編輯留言板某個回復[PUT]
-+ Parameters
-    + id (string)       ... The identifier for the specified reply.
-    + empNo (string)    ... 請求更新之使用者帳號
-    + content (string)  ... 更新之訊息內容
++ Parameter
+    + id (string)           ... The identifier for the specified reply.
+    + empNo (string)        ... 請求更新之使用者帳號
+    + content (string)      ... 更新之訊息內容
+    + sessionKey (string)   ... Session Key
     
 + Response 200 (application/json)
 
+
         {
             "success": true
         }
+        
++ Response 400 (application/json)
 
-## 刪除留言板某個主題[DELETE]
+
+        {
+            "error": {
+                "code": 1001,
+                "message": "Missing parameter error with parameter: ..."
+            }
+        }
+        
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1002,
+                "message": "Input parameter type error with parameter: ..."
+            }
+        }
+
++ Response 401 (application/json)
+
+
+        {
+            "error": {
+                "code": 401,
+                "message": "Unauthorized access"
+            }
+        }
+
+### 刪除留言板某個主題[DELETE]
 + Parameters
-    + id (string) ... The identifier for the specified reply.
+    + id (string)           ... The identifier for the specified reply.
+    + sessionKey (string)   ... Session Key
 
 + Response 200 (application/json)
 
+
         {
             "success": true
         }
 
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1001,
+                "message": "Missing parameter error with parameter: ..."
+            }
+        }
+        
++ Response 400 (application/json)
+
+
+        {
+            "error": {
+                "code": 1002,
+                "message": "Input parameter type error with parameter: ..."
+            }
+        }
+
++ Response 401 (application/json)
+
+
+        {
+            "error": {
+                "code": 401,
+                "message": "Unauthorized access"
+            }
+        }
 
 # Group 新增/修改醫令 Order
 
@@ -2006,7 +2233,7 @@ HOST: http://www.wantoto.com
                     {   
                         "content" : {
                             "packageName" : "科部",    // [string]
-                            "default" : true       // 預設選項，使用者選擇上一層選項之後，要預設選取的項目 [boolean, optional]
+                            "default" : true           // 預設選項，使用者選擇上一層選項之後，要預設選取的項目 [boolean, optional]
                         },
                         "children" : [
                             { 
@@ -2018,32 +2245,32 @@ HOST: http://www.wantoto.com
                                     {
                                         "content" : {
                                             "packageName" : "骨髓移植 BMT",
-                                            "default" : true
+                                            "default" : true                            // [boolean, optional]
                                         },
-                                        "children" : [  // [optional]
+                                        "children" : [  // [duplicate, optional]
                                             {
                                                 "content" : {
                                                     "packageName" : "Admission Orders", // [string]
-                                                    "packageCode" : "admissionorder",    // 透過此碼查詢醫令 [string, optional]
-                                                    "default" : true
-                                                }
+                                                    "packageCode" : "admissionorder",   // 透過此碼查詢醫令 [string, optional]
+                                                    "default" : true                    // [boolean, optional]
+                                                }  
                                             },
                                             {
                                                 "content" : { 
                                                     "packageName" : "Admission Lab",
-                                                    "packageCode" : "admissionlab"
+                                                    "packageCode" : "admissionlab"      // [string, optional]
                                                 }
                                             },
                                             {
                                                 "content" : {
                                                     "packageName" : "Routine Lab",
-                                                    "packageCode" : "routinelab"
+                                                    "packageCode" : "routinelab"        // [string, optional]
                                                 }
                                             },
                                             {
                                                 "content" : {
                                                     "packageName" : "CPCR",
-                                                    "packageCode" : "cpcr"
+                                                    "packageCode" : "cpcr"              // [string, optional]
                                                 }
                                             },
                                             ...
@@ -2207,7 +2434,7 @@ HOST: http://www.wantoto.com
                         "packageName" : "科部",
                         "default" : true    // 預設選項，使用者選擇上一層選項之後，要預設選取的項目 [boolean, optional]
                     },
-                    "children" : [
+                    "children" : [  // 如果有sublist的話, 則顯示此key  [optional, duplicate]
                         { 
                             "content" : {
                                 "packageName" : "內科部",   // 顯示的title名  [string]
@@ -2216,33 +2443,33 @@ HOST: http://www.wantoto.com
                             "children" : [  // 如果有sublist的話, 則顯示此key  [optional, duplicate]
                                 {
                                     "content" : {
-                                        "packageName" : "骨髓移植 BMT",
-                                        "default" : true
+                                        "packageName" : "骨髓移植 BMT",     // [string]
+                                        "default" : true                    // [boolean, optional]
                                     },
-                                    "children" : [
+                                    "children" : [  // 如果有sublist的話, 則顯示此key [optional, duplicate]
                                         {
                                             "content" : {
                                                 "packageName" : "Admission Orders",
-                                                "packageCode" : "admissionorder",    // 透過此碼查詢醫令 [string, optional]
-                                                "default" : true
+                                                "packageCode" : "admissionorder",       // 透過此碼查詢醫令 [string, optional]
+                                                "default" : true                        // [boolean, optional]
                                             }
                                         },
                                         {
                                             "content" : {
                                                 "packageName" : "Admission Lab",
-                                                "packageCode" : "admissionlab"
+                                                "packageCode" : "admissionlab"          // [string, optional]
                                             }
                                         },
                                         {
                                             "content" : {
-                                                "packageName" : "Routine Lab",
-                                                "packageCode" : "routinelab"
+                                                "packageName" : "Routine Lab",          
+                                                "packageCode" : "routinelab"            // [string, optional]
                                             }
                                         },
                                         {
                                             "content" : {
                                                 "packageName" : "CPCR",
-                                                "packageCode" : "cpcr"
+                                                "packageCode" : "cpcr"                  // [string, optional]
                                             }
                                         },
                                         ...
@@ -2608,7 +2835,7 @@ HOST: http://www.wantoto.com
         {
             "content": {
                 "success":  true,
-            }, 
+            }
         }
         
 # Group 多媒體相關 Media Relative Service
@@ -2627,3 +2854,249 @@ HOST: http://www.wantoto.com
                 "success" : true
             }
         }
+        
+# Group 急診
+## 5/05 - 急診 [/em]
+### 急診 [GET]
+
++ Response 200 (application/json)
+
+
+        {
+            "content":
+            [
+                {
+                    "actions" : [
+                        {
+                            "displayName" : "評估意識", // 按鈕上要顯示的名字 [string]
+                            "optionName" : "意識評估",  // 記錄的時候要顯示的字 [string]
+                            "recordKey" : "A01",
+                            "relation" : [              // 做了此動作之後，會影響到其他按鈕狀態的話，則顯示 [optional]
+                                {
+                                    "button" : "評估呼吸",  // 會影響的按鈕的displayName [string]
+                                    "action" : "highlight"  // 按鈕的動作 [string]  ex: highlight, unhighlight, disable, enable
+                                }   
+                            ],
+                            "defaultNote" : "E1M1V1",   // 預設的備註值  [string, optional]
+                        },
+                        {
+                            "displayName" : "評估呼吸",
+                            "popup" : {                       // [optional]
+                                "type": "option",
+                                "content": [
+                                    {
+                                        "displayName" : "無呼吸",
+                                        "optionName"  : "無呼吸",
+                                        "relation" : [
+                                            {
+                                                "button" : "打開呼吸道",
+                                                "action" : "highlight"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "displayName" : "頻死呼吸",
+                                        "optionName" : "頻死呼吸",
+                                        "recordKey" : "B01"
+                                    },
+                                    {
+                                        "displayName" : "自發性呼吸",
+                                        "optionName" : "自發性呼吸",
+                                        "recordKey" : "B02"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "category" : "Airway+Breathing",    // 分類的名字  [string, optional]
+                    "actions" : [
+                        {
+                            "displayName" : "打開呼吸道",
+                            "type" : "option",
+                            "popup" : [
+                                {
+                                    "displayName" : "壓額抬下巴",
+                                    "optionName" : "壓額抬下巴",
+                                    "recordKey" : "C01",
+                                    "relation" : [
+                                        {
+                                            "button" : "評估呼吸",
+                                            "action" : "unhighlight"
+                                        },
+                                        {
+                                            "button" : "使用Ambu",
+                                            "action" : "highlight"
+                                        },
+                                        {
+                                            "button" : "打開呼吸道",
+                                            "action" : "disable"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "displayName" : "下顎推前",
+                                    "optionName" : "下顎推前",
+                                    "recordKey" : "C02"
+                                }
+                            ]
+                        },
+                        {
+                            "displayName" : "輔助呼吸道",
+                            "type" : "checkbox",
+                            "popup" : [
+                                {
+                                    "displayName" : "置入口咽呼吸道",
+                                    "optionName" : "置入口咽呼吸道",
+                                    "recordKey" : "D01"
+                                },
+                                {
+                                    "displayName" : "置入鼻咽呼吸道",
+                                    "optionName" : "置入鼻咽呼吸道",
+                                    "recordKey" : "D02"
+                                },
+                                {
+                                    "displayName" : "置入咬口器",
+                                    "optionName" : "置入咬口器",
+                                    "recordKey" : "D03"
+                                }
+                            ]
+                        },
+                        {
+                            "displayName" : "使用Ambu",
+                            "optionName" : "進行Ambu-Bagging",
+                            "recordKey" : "E01"
+                        },
+                        {
+                            "displayName" : "確認插管",
+                            "type" : "checkbox",
+                            "popup" : [
+                                {
+                                    "displayName" : "聽診確認插管正確",
+                                    "optionName" : "聽診確認插管正確",
+                                    "recordKey" : "F01"
+                                },
+                                {
+                                    "displayName" : "使用EtCO2",
+                                    "optionName" : "使用EtCO2",
+                                    "recordKey" : "F02"
+                                }
+                            ],
+                            "defaultNote" : "EtCO2: mmHg"
+                        },
+                    ]
+                },
+                {
+                    "category" : "Circulation+Medication",
+                    "actions" : [
+                        {
+                            "displayName" : "檢查脈博",
+                            "type" : "checkbox",
+                            "popup" : [
+                                {
+                                    "displayName" : "無脈博",
+                                    "optionName" : "無脈博",
+                                    "recordKey" : "G01",
+                                    "relation" : [
+                                        {
+                                            "button" : "壓胸",
+                                            "action" : "highlight"
+                                        },
+                                        {
+                                            "button" : "接上心電圖機",
+                                            "action" : "highlight"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "displayName" : "頸動脈",
+                                    "optionName" : "頸動脈",
+                                    "recordKey" : "G02"
+                                },
+                                {
+                                    "displayName" : "股動脈",
+                                    "optionName" : "股動脈",
+                                    "recordKey" : "G03"
+                                },
+                                {
+                                    "displayName" : "肱動脈",
+                                    "optionName" : "肱動脈",
+                                    "recordKey" : "G04"
+                                },
+                                {
+                                    "displayName" : "橈動脈",
+                                    "optionName" : "橈動脈",
+                                    "recordKey" : "G05"
+                                }
+                            ]
+                        },
+                        {
+                            "displayName" : "壓胸",
+                            "type" : "option",
+                            "popup" : [
+                                {
+                                    "displayName" : "人工壓胸",
+                                    "optionName" : "人工壓胸",
+                                    "recordKey" : "H01"
+                                },
+                                {
+                                    "displayName" : "機械壓胸",
+                                    "optionName" : "機械壓胸",
+                                    "recordKey" : "H02"
+                                }
+                            ]
+                        },
+                        {
+                            "displayName" : "Adrenaline 1mg/amp",
+                            "optionName" : "Adrenaline 1mg/amp iv",
+                            "recordKey" : "H03",
+                            "count" : true
+                        }
+                    ]
+                },
+                {
+                    "category" : "Defibrillation",
+                    "actions" : [
+                        {
+                            "displayName" : "接上心電圖機",
+                            "optionName" : "接上心電圖監視器",
+                            "recordKey" : "I01"
+                        },
+                        {
+                            "displayName" : "檢查心律",
+                            "type" : "option",
+                            "popup" : [
+                                {
+                                    "displayName" : "心室頻脈(VT)",
+                                    "optionName" : "心室頻脈(VT)",
+                                    "recordKey" : "J01"
+                                },
+                                {
+                                    "displayName" : "心室顫動(VF)",
+                                    "optionName" : "心室顫動(VF)",
+                                    "recordKey" : "J02"
+                                },
+                                {
+                                    "displayName" : "無脈博電器活動(PEA)",
+                                    "optionName" : "無脈博電器活動(PEA)",
+                                    "recordKey" : "J03"
+                                },
+                                {
+                                    "displayName" : "無心率(Asystole)",
+                                    "optionName" : "無心率(Asystole)",
+                                    "recordKey" : "J04"
+                                },
+                                {
+                                    "displayName" : "有脈博心律",
+                                    "optionName" : "有脈博心律",
+                                    "recordKey" : "J05"
+                                }
+                            ],
+                            "defaultNote" : "EtCO2:  mmHg"
+                        }
+                    ]
+                }
+            ],
+        }
+
