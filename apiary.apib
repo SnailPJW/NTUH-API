@@ -1,10 +1,10 @@
 FORMAT: 1A
 HOST: http://www.wantoto.com
 
-# 台大醫院行動醫療資訊系統 Web Service v1.2.3
+# DEV台大醫院行動醫療資訊系統 Web Service v1.4.1
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
-# 9/22-登入與取得或驗證 SessionKey
+# Group 登入與取得或驗證 SessionKey
 ## sessionKey [/sessionKey{?empNo,password}]
 ### 取得 session key[GET]
 + Parameters
@@ -19,7 +19,7 @@ HOST: http://www.wantoto.com
                 "sessionKey" : "51ADFDA9C02D4E1E9930D88A26963612" //Session key [string]
             }
         }
-    
+
 + Response 401 (application/json)
 
         {
@@ -38,7 +38,7 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "authorized": ture  // [boolean] 驗證結果
+                "authorized": true  // [boolean] 驗證結果
             }
         }
 
@@ -64,14 +64,14 @@ HOST: http://www.wantoto.com
     + sessionKey (string) ... 使用者登入 Session Key
     + offset = `0` (number, optional) ... 資料偏移數，需與 limit 一起傳入，當content為陣列或collection時使用
     + limit (number, optional) ... 最大回傳筆數，需與 offset 一起傳入，當content為陣列或collection時使用
-    
+
 + Response 200 (application/json)
-        
+
         {
             "content" : [], // 回傳內容(可以是單一物件，也可以是陣列)
-            "limit" : 50,   // 最大回傳筆數，當client傳入時需回傳[number] 
+            "limit" : 50,   // 最大回傳筆數，當client傳入時需回傳[number]
             "offset" : 0,   // 回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100   // 此次Query總筆數，當content為陣列或collection時需回傳[number] 
+            "total" : 100   // 此次Query總筆數，當content為陣列或collection時需回傳[number]
         }
 
 + Response 401 (application/json)
@@ -80,7 +80,7 @@ HOST: http://www.wantoto.com
             "message" : "Session Key 過期", //錯誤訊息 [string]
             "error" :  102                  //錯誤代碼 [number]
         }
-        
+
 + Response 403 (application/json)
 
         {
@@ -90,11 +90,12 @@ HOST: http://www.wantoto.com
 
 # Group 病患清單 Patient List
 病患清單相關 Web Service
-## 6/4 -病患清單 [/patients{?chartNo,personID,wardCode,empNo,empNoConsult,empNoStarred,ORCode,ERCode,OPDCode,examRoomCode}]
+## 7/2 -病患清單 [/patients{?chartNo,ptName,personID,wardCode,empNo,empNoConsult,empNoStarred,ORCode,ERCode,OPDCode,examRoomCode,queryDate}]
 ### 查詢病患清單 [GET]
-可傳入病歷號、身分證號、病房、醫師員編、開刀房號、急診科別、門診科別、檢查科室等參數，回傳符合參數條件之病患
+可傳入病歷號、姓名、身分證號、病房、醫師員編、開刀房號、急診科別、門診科別、檢查科室等參數，回傳符合參數條件之病患
 + Parameters
     + chartNo (string, optional) ... 病歷號
+    + ptName (string, optional) ... 病患姓名
     + personID (string, optional) ... 身分證號
     + wardCode (string, optional, `5W3`) ... 病房號
     + empNo (string, optional) ... 醫師員編 (依照醫師員編顯示個人病患)
@@ -104,7 +105,8 @@ HOST: http://www.wantoto.com
     + ERCode (string, optional) ... 急診科別
     + OPDCode (string, optional) ... 門診科別
     + examRoomCode (string, optional) ... 檢查科室
-    
+    + queryDate (string, optional) ... 搜尋日期(格式為YYYYMMDD，無回傳則為當日)
+
 + Response 200 (application/json)
 
         {
@@ -117,18 +119,19 @@ HOST: http://www.wantoto.com
                     "personID" : "A123456789",      //身分證號[string]
                     "bedInfo" : "5W3 01-01",        //病房病床號(住院與急診)，非住院或急診中則不回傳Key[string]
                     "inDate" : 1406938026,          //入院日期(住院或急診檢傷時間)，非住院或在急診則不回傳Key [number(timestamp)]
+                    "bedTransferDate" : 1406938026,          //轉床日期，非住院或在急診則不回傳Key [number(timestamp)]
                     "triageLevels" : "1",           //檢傷分級，非急診則不回傳 Key [string, optional]
                     "_emp_VS" : {                   //主治醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)[string, optional]
                         "empNo" : "111281",         //醫師員編[string]
-                        "name" : "葉小菜" 
+                        "name" : "葉小菜"
                     },
                     "_emp_RS" : {           //住院醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)[string, optional]
                         "empNo" : "000123", //醫師員編[string]
-                        "name" : "蘇小宇" 
+                        "name" : "蘇小宇"
                     },
                     "_emp_NP" : {           //護理師 [string, optional]
                         "empNo" : "111111", //員編 [string]
-                        "name" : "謝小穎" 
+                        "name" : "謝小穎"
                     },
                     "status" : "住院中",    //狀態[string]
                     "specialTag" : [        //特殊標記[string array] (ex:DNR,...)
@@ -139,16 +142,23 @@ HOST: http://www.wantoto.com
                         ...
                     ],
                     "latestPacsReportDateTime" : 1406938026, //最新影像時間 [number(timestamp)]
-                    "latestLISReportDateTime" : 1406938026,  //最新報告時間 [number(timestamp)]
+                    "latestLISReportDateTime" : 1406938026,  //最新檢驗時間 [number(timestamp)]
+                    "latestExamReportDateTime" : 1406938026,  //最新檢查時間 [number(timestamp)]
+                    "latestConsultDateTime" : 1406938026,  //最新會診更新時間 [number(timestamp)]
+                    "latestBulletinDateTime" : 1406938026,  //最新留言時間 [number(timestamp)]
+                    "orderNotComfirmed" : true,    //醫囑是否有未確認項目[boolean, optional]
+                    "orderNotReceived" : true,    //醫囑是否有未簽收項目[boolean, optional]
                     "accountIDSE" : "14T05267794",           //帳號 [string, optional]
                     "patClassCode" : "I",                    //門住急別 [string, optional]
-                    "visible": true                          //是否可以瀏覽 [boolean]
+                    "visible": true,                         //是否可以瀏覽 [boolean]
+                    "waitBed": true,     //是否可被候床 [boolean, optional]
+                    "assignBed": true     //是否可被配床 [boolean, optional]
                 },
                 ...
             ],
-            "limit" : 50,   //最大回傳筆數 [number] 
+            "limit" : 50,   //最大回傳筆數 [number]
             "offset" : 0,   //回傳資料偏移數 [number]
-            "total" : 50    //此次Query總筆數 [number] 
+            "total" : 50    //此次Query總筆數 [number]
         }
 
 + Response 404 (application/json)
@@ -156,15 +166,15 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
- 
+        }
+
 ## 病房號 [/wards]
 ### 查詢所有病房 [GET]
 + Response 200 (application/json)
@@ -178,11 +188,11 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "limit" : 50, //最大回傳筆數[number] 
+            "limit" : 50, //最大回傳筆數[number]
             "offset" : 0, //回傳資料偏移數[number]
-            "total" : 50  //此次Query總筆數[number] 
+            "total" : 50  //此次Query總筆數[number]
         }
-        
+
 ## 開刀房號 [/ORs]
 ### 查詢開刀房 [GET]
 + Response 200 (application/json)
@@ -196,11 +206,11 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "limit" : 50,   //最大回傳筆數[number] 
+            "limit" : 50,   //最大回傳筆數[number]
             "offset" : 0,   //回傳資料偏移數[number]
-            "total" : 50    //此次Query總筆數[number] 
+            "total" : 50    //此次Query總筆數[number]
         }
-        
+
 ## 急診科別 [/ERs]
 ### 查詢急診科別 [GET]
 + Response 200 (application/json)
@@ -219,11 +229,11 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "limit" : 50, //最大回傳筆數[number] 
+            "limit" : 50, //最大回傳筆數[number]
             "offset" : 0, //回傳資料偏移數[number]
-            "total" : 50 //此次Query總筆數[number] 
+            "total" : 50 //此次Query總筆數[number]
         }
-    
+
 ## 門診科別 [/OPDs]
 ### 查詢今日門診科別 [GET]
 + Response 200 (application/json)
@@ -238,18 +248,18 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "limit" : 50,   //最大回傳筆數[number] 
+            "limit" : 50,   //最大回傳筆數[number]
             "offset" : 0,   //回傳資料偏移數[number]
-            "total" : 50    //此次Query總筆數[number] 
+            "total" : 50    //此次Query總筆數[number]
         }
 
 ## 門診科別層級 [/OPDs/{OPDCode}]
 ### 查詢今日門診科別 [GET]
-+ Parameters 
++ Parameters
     + OPDCode (string) ... 門診代碼
 
 + Response 200 (application/json)
-        
+
         {
             "content" : [   //門診科別資訊陣列
                 {
@@ -266,9 +276,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "limit" : 50, //最大回傳筆數[number] 
+            "limit" : 50, //最大回傳筆數[number]
             "offset" : 0, //回傳資料偏移數[number]
-            "total" : 50 //此次Query總筆數[number] 
+            "total" : 50 //此次Query總筆數[number]
         }
 
 ## 檢查科室 [/examRooms]
@@ -285,9 +295,9 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "limit" : 50, //最大回傳筆數[number] 
+            "limit" : 50, //最大回傳筆數[number]
             "offset" : 0, //回傳資料偏移數[number]
-            "total" : 50 //此次Query總筆數[number] 
+            "total" : 50 //此次Query總筆數[number]
         }
 
 ## 檢查科室層級 [/examRooms/{examRoomCode}]
@@ -315,20 +325,20 @@ HOST: http://www.wantoto.com
                     "displayName" : "[檢查照會] 肺功能室 晚上"    //顯示名稱[string]
                 }
             ],
-            "limit" : 3, //最大回傳筆數[number] 
+            "limit" : 3, //最大回傳筆數[number]
             "offset" : 0, //回傳資料偏移數[number]
-            "total" : 3 //此次Query總筆數[number] 
+            "total" : 3 //此次Query總筆數[number]
         }
 
 # Group 病歷資料 Medical Record
-## 6/4 病患醫療基本資料 [/patients/{chartNo}{?startDate,endDate}]
+## 7/2 病患醫療基本資料 [/patients/{chartNo}{?startDate,endDate}]
 ### 取得病患醫療基本資料 [GET]
-+ Parameters 
++ Parameters
     + chartNo (string) ... 病歷號
     + startDate = `三日前` (string, optional, `20141108`) ... Query 起始日期，以yyyyMMdd表示 (包含此日期)
     + endDate = `今日` (string, optional, `20141108`) ... Query 結束日期，以yyyyMMdd表示 (包含此日期)
 + Response 200 (application/json)
-        
+
         {
             "content" : {
                 "basic" : [
@@ -362,6 +372,20 @@ HOST: http://www.wantoto.com
                             ...
                         ]
                     },
+                    {
+                        "title" : "血品醫令",                                        // [string, optional]
+                        "content" : [
+                          {
+                            "item" : "開立血量",    //[string]
+                            "value" : "238"    //[string]
+                          },
+                          {
+                            "item" : "輸入血量",    //[string]
+                            "value" : "238"    //[string]
+                          },
+                          ...
+                        ]
+                    },
                     ...
                 ],
                 "history" :[    //兩年內就診診斷記錄
@@ -380,14 +404,14 @@ HOST: http://www.wantoto.com
                         "bloodPressure" : { //血壓
                             "systolic" : 116,   //收縮壓[number,optional]
                             "diastolic" : 69    //舒張壓[number,optional]
-                        }    
+                        }
                     },
                     ...
                 ],
                 "labReport" : [
                     {   //檢驗報告
                         "reportDate" : 1406938026,          //最後報告時間[nubmer(timestamp)]
-                        "content" : [ 
+                        "content" : [
                             {   //依據欄位填入資料，無資料則不回傳 [optional]
                                 "item" : "RBC",
                                 "labValue" : {              //若為檢驗數值則回傳object
@@ -401,10 +425,11 @@ HOST: http://www.wantoto.com
                     ...
                 ],
                 "otherReport" : [
-                    {   
-                        "date" : 1406938026,                            //報告時間[nubmer(timestamp)]
+                    {
+                        "date" : 1406938026,                            //報告時間(顯示於畫面)[nubmer(timestamp)]
+                        "modifiedDate": 1406938026,                     //報告更新時間(用於判斷提示) [number(timestamp)]
                         "item" : "Chest PA View (Standing)",            //報告項目[string]
-                        "type" : "影核醫",                              //報告種類[string]
+                        "type" : "影核醫",                               //報告種類[string]
                         "report" : {    //如有報告則回傳 [optional]
                             "reportType" : "HTML",                      //報告型態，HTML或PDF
                             "reportPath" : "/report/{reportID}",        //報告路徑
@@ -415,7 +440,7 @@ HOST: http://www.wantoto.com
                     ...
                 ],
                 "progressNote" : [
-                    {   
+                    {
                         "date" : 1406938026,                            //時間[nubmer(timestamp)]
                         "item" : "Admission Note",                      //項目[string]
                         "report" : {    //如有報告則回傳 [optional]
@@ -428,7 +453,7 @@ HOST: http://www.wantoto.com
                     ...
                 ],
                 "OPNote" : [
-                    {   
+                    {
                         "date" : 1406938026,                            //時間[nubmer(timestamp)]
                         "item" : "Subxiphoid drainage with sternal",    //項目[string]
                         "report" : {    //如有報告則回傳 [optional]
@@ -441,12 +466,12 @@ HOST: http://www.wantoto.com
                     ...
                 ],
                 "order" : [    //抓本日 active 就好
-                    {   
+                    {
                         "startDate" : 1406938026,                       // [number(timestamp)]
                         "endDate" : 1406938026,                         // [number(timestamp)]
                         "type" : "執行中",                              //醫囑進度
                         "item" : "Chest PA View (Standing)",            //醫令內容[string]
-                        "bgColor" : "FFFFFF",                           //如需調整背景顏色則回傳16進位色碼[string,optional] 
+                        "bgColor" : "FFFFFF",                           //如需調整背景顏色則回傳16進位色碼[string,optional]
                         "report" : {    //如有報告則回傳 [optional]
                             "reportType" : "HTML",                      //報告型態，HTML或PDF
                             "reportPath" : "/report/{reportID}",        //報告路徑
@@ -457,7 +482,7 @@ HOST: http://www.wantoto.com
                     ...
                 ],
                 "medication" : [    //抓本日 active 就好
-                    {   
+                    {
                         "startDate" : 1406938026,       // [number(timestamp)]
                         "endDate" : 1406938026,         // [number(timestamp)]
                         "item" : "Magnesium Oxide"      //組合名[string]
@@ -466,9 +491,10 @@ HOST: http://www.wantoto.com
                 ],
                 "consult" : [    //會診資訊
                     {
-                        "date" : 1406938026,                    //會診時間 [number(timestamp)]
-                        "item" : "xxx 會診資訊",                //會診資訊 [string]
-                        "type" : "葉XX醫師",                    //會診醫師 [string]
+                        "date" : 1406938026,                        //會診時間(顯示於畫面) [number(timestamp)]
+                        "modifiedDate": 1406938026,                 //會診訪視更新時間(用於判斷提示) [number(timestamp)]
+                        "item" : "xxx 會診資訊",                      //會診資訊 [string]
+                        "type" : "葉XX醫師",                          //會診醫師 [string]
                         "report" : {    //會診單
                             "reportType" : "HTML",                      //報告型態，HTML或PDF
                             "reportPath" : "/report/{reportID}",        //報告路徑
@@ -488,14 +514,14 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 ## 6/4 -病歷資料 Web Service 通則 {example} [/patients/{chartNo}/{dataPath}{?startDate,endDate}]
 ### 取得病歷資料 [GET]
@@ -505,14 +531,14 @@ HOST: http://www.wantoto.com
     + startDate = `入院日` (string, optional, `1406938026`) ... Query 起始日期，以時間序號表示 (包含此日期)
     + endDate = `今日` (string, optional, `1406938026`) ... Query 結束日期，以時間序號表示 (包含此日期)
 + Response 200 (application/json)
-        
+
         {
             "content" : [], //回傳內容(可以是單一物件，也可以是陣列)
             "startDate" : 1406938026, // [number(timestamp)] Query 起始日期，以時間序號表示 (包含此日期)
             "endDate" : 1406938026, // [number(timestamp)] Query 結束日期，以時間序號表示 (包含此日期)
-            "limit" : 50, //最大回傳筆數，當client傳入與content為陣列或collection時需回傳[number] 
+            "limit" : 50, //最大回傳筆數，當client傳入與content為陣列或collection時需回傳[number]
             "offset" : 0, //回傳資料偏移數，當client傳入與content為陣列或collection時需回傳[number]
-            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number] 
+            "total" : 100 //此次Query總筆數，當content為陣列或collection時需回傳[number]
         }
 
 ## 6/4 -檢驗報告-清單報告 [/patients/{chartNo}/labReport/report]
@@ -520,7 +546,7 @@ HOST: http://www.wantoto.com
 
 + Response 200 (application/json)
 
-        
+
         {
             "content" : {
                 "data" : [
@@ -530,7 +556,7 @@ HOST: http://www.wantoto.com
                         "requestNo" : "4025928",    //檢驗單號[string]
                         "inspectionDate" : 1406938026,   //採檢時間[number(timestamp)]
                         "recordDate" : 1406938026,    //登入時間[number(timestamp)]
-                        "reportDate" : 1406938026,   //最後報告時間[number(timestamp)]                        
+                        "reportDate" : 1406938026,   //最後報告時間[number(timestamp)]
                         "filterCode" : [    //篩選代碼
                             "HE"
                         ],
@@ -547,27 +573,27 @@ HOST: http://www.wantoto.com
                                     "displayName" : "檢驗項目"  //欄位顯示名稱[string]
                                 },
                                 {
-                                    "fieldCode" : "labValue",  
+                                    "fieldCode" : "labValue",
                                     "displayName" : "檢驗值"
                                 },
                                 {
-                                    "fieldCode" : "unit",  
+                                    "fieldCode" : "unit",
                                     "displayName" : "單位"
                                 },
                                 {
-                                    "fieldCode" : "reference",  
+                                    "fieldCode" : "reference",
                                     "displayName" : "參考值"
                                 },
                                 {
-                                    "fieldCode" : "critical",  
+                                    "fieldCode" : "critical",
                                     "displayName" : "危急值"
                                 },
                                 {
-                                    "fieldCode" : "note",  
+                                    "fieldCode" : "note",
                                     "displayName" : "說明"
                                 },
                                 {
-                                    "fieldCode" : "specialOrder",  
+                                    "fieldCode" : "specialOrder",
                                     "displayName" : "特別醫囑"
                                 }
                             ],
@@ -581,9 +607,9 @@ HOST: http://www.wantoto.com
                                         },
                                         "unit" : "M/ul",
                                         "reference" : "4 ~ 5.52",
-                                        "critical" : "< 2.0 & > 7.0", 
-                                        "note" : "",                // [optional] 
-                                        "specialOrder" : ""                         
+                                        "critical" : "< 2.0 & > 7.0",
+                                        "note" : "",                // [optional]
+                                        "specialOrder" : ""
                                     }
                                 },
                                 ...
@@ -603,10 +629,10 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ],
-                "limit" : 50,                   //最大回傳筆數，當client傳入與content為陣列或collection時需回傳[number] 
+                "limit" : 50,                   //最大回傳筆數，當client傳入與content為陣列或collection時需回傳[number]
                 "offset" : 0,                   //回傳資料偏移數，當client傳入與content為陣列或collection時需回傳傳[number]
-                "total" : 100                   //此次Query總筆數，當content為陣列或collection時需回傳[number] 
-            }, 
+                "total" : 100                   //此次Query總筆數，當content為陣列或collection時需回傳[number]
+            },
             "startDate" : 1406938026,           // Query 起始日期，以時間序號表示 (包含此日期)
             "endDate" : 1406938026              // Query 結束日期，以時間序號表示 (包含此日期)
         }
@@ -617,26 +643,26 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 
 ## 6/4 -檢驗報告-累積報告 [/patients/{chartNo}/labReport/accmulatedReport]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
-        
+
 
         {
             "content" : {
                 "data" : [
-                    {   
+                    {
                         "item" : "CBC+PLT BLOOD",           //檢驗項目[string]
                         "lab" : "血液檢驗組血液室HE",       //檢驗單位[string]
                         "filterCode" : [                    //篩選代碼
@@ -650,19 +676,19 @@ HOST: http://www.wantoto.com
                                     "dateFormat" : "yyyy-MM-dd HH:mm"       //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳 [string, optional]
                                 },
                                 {
-                                    "fieldCode" : "WBC",  
+                                    "fieldCode" : "WBC",
                                     "displayName" : "WBC(k/uL)",
                                     "labInfo" : {                           //檢驗項目相關資訊 [optional]
                                         "reference" : "3.54 ~ 9.06"         //參考值[string]
                                     }
-                                    
+
                                 },
                                 ...
                             ],
                             "data" : [
                                 {
                                     "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
-                                        "inspectionDate" : 1406938026,          //採檢時間[number(timestamp)]    
+                                        "inspectionDate" : 1406938026,          //採檢時間[number(timestamp)]
                                         "date" : 1406938026,                    //報告時間(不顯示，但須保留作為篩選用)[number(timestamp)]
                                         "WBC" : {   //若為檢驗數值則回傳object [optional]
                                             "value" :"4.05",                    //檢驗值[string]
@@ -689,7 +715,7 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ]
-            }, 
+            },
             "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
             "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
         }
@@ -700,25 +726,25 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 ## 6/4 -檢驗報告-綠單報告 [/patients/{chartNo}/labReport/greenReport]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
 
-        
+
         {
             "content" : {
                 "data" : [
-                    {   
+                    {
                         "item" : "Complete Blood Cell Count BLOOD", //綠單項目[string]
                         "filterCode" : [    //篩選代碼
                             "CBC"
@@ -731,19 +757,19 @@ HOST: http://www.wantoto.com
                                     "dateFormat" : "yyyy-MM-dd HH:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string, optional]
                                 },
                                 {
-                                    "fieldCode" : "WBC",  
+                                    "fieldCode" : "WBC",
                                     "displayName" : "WBC(k/uL)",
                                     "labInfo" : {   //檢驗項目相關資訊  // [optional]
                                         "reference" : "3.54 ~ 9.06"     //參考值[string]
                                     }
-                                    
+
                                 },
                                 ...
                             ],
                             "data" : [
                                 {
                                     "content" : {   //依據欄位填入資料，無資料則不回傳
-                                        "inspectionDate" : 1406938026,   //採檢時間[number(timestamp)]    
+                                        "inspectionDate" : 1406938026,   //採檢時間[number(timestamp)]
                                         "date" : 1406938026,    //報告時間(不顯示，但須保留作為篩選用)[number(timestamp)]
                                         "WBC" : {   //若為檢驗數值則回傳[optional]
                                             "value" :"4.05",    //檢驗值[string]
@@ -770,7 +796,7 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ]
-            }, 
+            },
             "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
             "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
         }
@@ -781,26 +807,26 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 ## 6/4 -報告系統 [/patients/{chartNo}/otherReport]
 檢驗報告之外的其他報告
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "content" : {
                 "field" : [    //欄位資訊
                     {
-                        "fieldCode" : "item",  
+                        "fieldCode" : "item",
                         "displayName" : "檢查項目"
                     },
                     {
@@ -814,7 +840,7 @@ HOST: http://www.wantoto.com
                         "dateFormat" : "yyyy-MM-dd HH:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string, optional]
                     },
                     {
-                        "fieldCode" : "type",  
+                        "fieldCode" : "type",
                         "displayName" : "報告種類"
                     }
                 ],
@@ -849,7 +875,7 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ],
-                "limit" : 50, //最大回傳筆數傳[number] 
+                "limit" : 50, //最大回傳筆數傳[number]
                 "offset" : 0, //回傳資料偏移數[number]
                 "total" : 100 //此次Query總筆數[number]
             },
@@ -863,21 +889,21 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 
 ## 6/4 -影像報告 [/patients/{chartNo}/ImageReport]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "content" : [
                 {
@@ -891,7 +917,7 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ],
-            "limit" : 50,               //最大回傳筆數傳[number] 
+            "limit" : 50,               //最大回傳筆數傳[number]
             "offset" : 0,               //回傳資料偏移數[number]
             "total" : 100,              //此次Query總筆數[number]
             "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
@@ -904,21 +930,21 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 
 ## 6/4 -生命徵象 [/patients/{chartNo}/TPR]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "content" : {
                 "TPR" : [   //TPR 圖表資料
@@ -930,7 +956,7 @@ HOST: http://www.wantoto.com
                         "bloodPressure" : { //血壓
                             "systolic" : 116,       //收縮壓[number,optional]
                             "diastolic" : 69        //舒張壓[number,optional]
-                        }    
+                        }
                     },
                     ...
                 ],
@@ -949,7 +975,7 @@ HOST: http://www.wantoto.com
                         "fieldName" : "身高",   //欄位名稱[string]
                         "unit" : "cm",          //單位，有單位時回傳[string,optional]
                         "range" : { //繪圖範圍，可以圖形表示時回傳 [optional]
-                            "max" : "210", 
+                            "max" : "210",
                             "min" : "100"
                         },
                         "data" : [
@@ -968,7 +994,7 @@ HOST: http://www.wantoto.com
                         "fieldName" : "血糖",   //欄位名稱[string]
                         "unit" : "ug/ml",       //單位，有單位時回傳[string,optional]
                         "range" : { //繪圖範圍，可以圖形表示時回傳 [optional]
-                            "max" : "210", 
+                            "max" : "210",
                             "min" : "100"
                         },
                         "data" : [
@@ -1026,7 +1052,7 @@ HOST: http://www.wantoto.com
                     {
                         "filterCode" : "Corticosteroids",
                         "displayName" : "類固醇"
-            
+
                     },
                 ...
                 ]}
@@ -1041,20 +1067,20 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 ## 6/4 -非處方醫囑 [/patients/{chartNo}/order]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "content" : {
                 "field" : [    //欄位資訊
@@ -1069,12 +1095,12 @@ HOST: http://www.wantoto.com
                         "dateFormat" : "yyyy-MM-dd"     // 若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string, optional]
                     },
                     {
-                        "fieldCode" : "order",  
+                        "fieldCode" : "order",
                         "displayName" : "醫令內容",
                         "textAlignment" : "left"        // 欄位內容對齊方式  ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
                     },
                     {
-                        "fieldCode" : "status",  
+                        "fieldCode" : "status",
                         "displayName" : "狀態"
                     }
                 ],
@@ -1084,7 +1110,7 @@ HOST: http://www.wantoto.com
                             "order" : "Chest PA View (Standing)",
                             "startDate" : 1406938026,
                             "endDate" : 1406938026,
-                            "_emp_doctor" : { 
+                            "_emp_doctor" : {
                                 "empNo" : "23454353",
                                 "name" : "葉小菜"
                             },
@@ -1100,7 +1126,7 @@ HOST: http://www.wantoto.com
                             "encoding" : "utf-16",                              // 編碼 (utf-8 or utf-16，為utf-8時可不回傳) [string, optional]
                             "baseURL" : "http://baseUrl.ntuh.gov.tw"            // 報告基礎連結(報告中如有相對連結時回傳)[string, optional]
                         },
-                        "bgColor" : "FFFFFF" //如需調整此列背景顏色則回傳16進位色碼[string,optional] 
+                        "bgColor" : "FFFFFF" //如需調整此列背景顏色則回傳16進位色碼[string,optional]
                     },
                     ...
                 ],
@@ -1123,7 +1149,7 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ],
-                "limit" : 50, //最大回傳筆數傳[number] 
+                "limit" : 50, //最大回傳筆數傳[number]
                 "offset" : 0, //回傳資料偏移數[number]
                 "total" : 100 //此次Query總筆數[number]
             },
@@ -1137,21 +1163,21 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 
 ## 6/4 -處方醫囑 [/patients/{chartNo}/medication]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "content" : [
                 {
@@ -1196,15 +1222,15 @@ HOST: http://www.wantoto.com
                 {
                     "filterCode" : "acesodyne",
                     "displayName" : "止痛藥"
-           
+
                 },
                 ...
             ],
             "startDate" : 1406938026,           // Query 起始日期，以時間序號表示 (包含此日期)
             "endDate" : 1406938026,             // Query 結束日期，以時間序號表示 (包含此日期)
-            "limit" : 50,                       //最大回傳筆數，當client傳入時需回傳[number] 
+            "limit" : 50,                       //最大回傳筆數，當client傳入時需回傳[number]
             "offset" : 0,                       //回傳資料偏移數，當client傳入時需回傳[number]
-            "total" : 100                       //此次Query總筆數，當content為陣列或collection時需回傳[number] 
+            "total" : 100                       //此次Query總筆數，當content為陣列或collection時需回傳[number]
         }
 
 
@@ -1213,21 +1239,21 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 
 ## 9/15-藥物資訊 [/medication/{medicationID}]
 ### 取得藥物資訊 [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "content" : {
                 "drugName" : "Mecobalamin",                         //學名[string]
@@ -1260,16 +1286,16 @@ HOST: http://www.wantoto.com
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "content" : {
                 "field" : [    //欄位資訊
                     {
-                        "fieldCode" : "OPType",  
+                        "fieldCode" : "OPType",
                         "displayName" : "術式"
                     },
                     {
-                        "fieldCode" : "dept",  
+                        "fieldCode" : "dept",
                         "displayName" : "科部"
                     },
                     {
@@ -1278,11 +1304,11 @@ HOST: http://www.wantoto.com
                         "dateFormat" : "yyyy-MM-dd HH:mm"   //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string, optional]
                     },
                     {
-                        "fieldCode" : "_emp_doctor",  
+                        "fieldCode" : "_emp_doctor",
                         "displayName" : "醫師"
                     },
                     {
-                        "fieldCode" : "status",  
+                        "fieldCode" : "status",
                         "displayName" : "狀態"
                     }
                 ],
@@ -1307,7 +1333,7 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ],
-                "limit" : 50, //最大回傳筆數傳[number] 
+                "limit" : 50, //最大回傳筆數傳[number]
                 "offset" : 0, //回傳資料偏移數[number]
                 "total" : 100 //此次Query總筆數[number]
             },
@@ -1321,21 +1347,21 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 
 ## 6/4 -病程紀錄 [/patients/{chartNo}/progressNote]
 ### 取得病歷資料 [GET]
 
 + Response 200 (application/json)
-        
+
         {
             "content" : {
                 "field" : [ //欄位資訊
@@ -1407,7 +1433,7 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ],
-                "limit" : 50, //最大回傳筆數傳  [number] 
+                "limit" : 50, //最大回傳筆數傳  [number]
                 "offset" : 0, //回傳資料偏移數  [number]
                 "total" : 100 //此次Query總筆數 [number]
             },
@@ -1420,14 +1446,14 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
 
 
 ## 6/4 -電子病歷 [/patients/{chartNo}/EMR]
@@ -1440,7 +1466,7 @@ HOST: http://www.wantoto.com
             "content" : {
                 "field" : [    //欄位資訊
                     {
-                        "fieldCode" : "item",  
+                        "fieldCode" : "item",
                         "displayName" : "項目"
                     }
                 ],
@@ -1521,7 +1547,7 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ],
-                "limit" : 50, //最大回傳筆數傳[number] 
+                "limit" : 50, //最大回傳筆數傳[number]
                 "offset" : 0, //回傳資料偏移數[number]
                 "total" : 100 //此次Query總筆數[number]
             },
@@ -1535,14 +1561,15 @@ HOST: http://www.wantoto.com
         {
             "error": 301,
             "message": "不存在指定之病患"
-        }   
+        }
 
 + Response 403 (application/json)
 
         {
             "error": 302,
             "message": "不可瀏覽指定之病患"
-        } 
+        }
+
 
 # Group 其他 Other Web Service
 ## 9/24-通訊錄 [/contacts{?offset,limit}]
@@ -1551,7 +1578,7 @@ HOST: http://www.wantoto.com
 + Parameters
     + offset = `0` (number, optional) ... 資料偏移數，需與 limit 一起傳入
     + limit (number, optional) ... 最大回傳筆數，需與 offset 一起傳入
-    
+
 + Response 200 (application/json)
 
 
@@ -1573,14 +1600,14 @@ HOST: http://www.wantoto.com
                     "remark" : ""                   //備註[string, optional]
                 },
                 ...
-            ], 
-            "limit" : 50, //最大回傳筆數[number] 
+            ],
+            "limit" : 50, //最大回傳筆數[number]
             "offset" : 0, //回傳資料偏移數[number]
-            "total" : 100 //此次Query總筆數[number] 
+            "total" : 100 //此次Query總筆數[number]
         }
 
 
-# Group iPad 容量管理規則 
+# Group iPad 容量管理規則
 ## 1/29 - iPad 容量警示參數 [/device/storage_limit]
 ### 取得iPad 容量警示參數[GET]
 
@@ -1603,7 +1630,7 @@ HOST: http://www.wantoto.com
             }
         }
 
-# Group 院內訊息通知系統 
+# Group 院內訊息通知系統
 ## 3/15 - 醫師所屬之通知訊息 [/notifications/doctor/{empNo}{?startDate,endDate,offset,limit}]
 ### 取得醫師所屬之通知訊息內容 [GET]
 + Parameters
@@ -1611,9 +1638,9 @@ HOST: http://www.wantoto.com
     + limit  (number, optional) ... 最大回傳筆數，需與 offset 一起傳入
     + startDate (string, optional, `20150103`) ... Query 起始日期，以時間序號表示 (包含此日期)
     + endDate   (string, optional, `20150103`) ... Query 結束日期，以時間序號表示 (包含此日期)
-    
+
 + Response 200 (application/json)
-        
+
         {
             "content": [
                 {
@@ -1623,11 +1650,11 @@ HOST: http://www.wantoto.com
                     "datetime":   1406938026,                           // The time when the notification was issues [number(timestamp)]
                     "type":       "TEST_TYPE",                          // The type of the notification [string]
                     "confirmed":  false                                 // The flag indicated that the notification had been confirmed [boolean]
-                }, ... 
+                }, ...
             ],
-            "limit": 50,                // 最大回傳筆數 [number] 
+            "limit": 50,                // 最大回傳筆數 [number]
             "offset": 0,                // 回傳資料偏移數 [number]
-            "total" : 100,              // 此次Query總筆數 [number] 
+            "total" : 100,              // 此次Query總筆數 [number]
             "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期) [number(timestamp)]
             "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期) [number(timestamp)]
         }
@@ -1655,7 +1682,7 @@ HOST: http://www.wantoto.com
     + sessionKey (string)   ... Session Key
 
 + Response 200 (application/json)
-        
+
         {
             "success": true
         }
@@ -1666,7 +1693,7 @@ HOST: http://www.wantoto.com
             "error": 701,
             "message": "缺少參數 xxx"
         }
-        
+
 + Response 400 (application/json)
 
 
@@ -1682,37 +1709,37 @@ HOST: http://www.wantoto.com
             "message": "無存取權限"
         }
 
-# Group 病患留言板系統 
+# Group 病患留言板系統
 ## 4/5 - 病患對應之布告欄主題標題 [/bulletin/{chartNo}/topicTitles{?startDate,endDate,offset,limit}]
 ### 取得病患對應之布告欄主題標題[GET]
 + Parameters
-    + offset (number, optional) ... 資料偏移數，需與limit一起傳入 
+    + offset (number, optional) ... 資料偏移數，需與limit一起傳入
     + limit  (number, optional) ... 最大回傳筆數，需與 offset 一起傳入
     + startDate (string, optional) ... Query 起始日期，以 YYYYMMDD 格式表示 (包含此日期)
     + endDate   (string, optional) ... Query 結束日期，以 YYYYMMDD 格式表示 (包含此日期)
 
 + Response 200 (application/json)
-        
+
         {
             "content": [
                 {
                     "created": 1406938026,          // the created time. [number(timestamp)]
                     "updated": 1406940112,          // the last updated time. [number(timestamp)]
-                    "_emp_author": {            
+                    "_emp_author": {
                         "empNo": "111111",          // [string]
                         "name":  "謝小穎"            // [string]
-                    },  
+                    },
                     "title":    "HELLO",            // [string]
                     "id":       "A12-40321"         // the identifier for the topic [string]
                 }, ...
             ],
-            "limit": 50,                // 最大回傳筆數 [number] 
+            "limit": 50,                // 最大回傳筆數 [number]
             "offset": 0,                // 回傳資料偏移數 [number]
-            "total" : 100,              // 此次Query總筆數 [number] 
+            "total" : 100,              // 此次Query總筆數 [number]
             "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期) [number(timestamp)]
             "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期) [number(timestamp)]
         }
- 
+
 
 ## 6/4 - 病患留言板系統 [/bulletin/{chartNo}/topics{?startDate,endDate,offset,limit,empNo,title,content,sessionKey,authGroup}]
 ### 取得病患所對應之布告欄內容[GET]
@@ -1729,7 +1756,7 @@ HOST: http://www.wantoto.com
         {
             "content": [
                 {
-                    "_emp_author" : {  
+                    "_emp_author" : {
                         "empNo" : "111111",      // the id for the one created the topic [string]
                         "name" : "謝小穎"        // the name of the one created the topic [string]
                     },
@@ -1742,7 +1769,7 @@ HOST: http://www.wantoto.com
                     "replies": {
                         "list": [
                             {
-                                "_emp_author": {            
+                                "_emp_author": {
                                     "empNo": "111381",                  // the id for the one created the reply  [string]
                                     "name":  "震大事"                   // the name of the one created the reply [string]
                                 },
@@ -1759,13 +1786,13 @@ HOST: http://www.wantoto.com
                     }
                 }, ...
             ],
-            "limit": 50,                // 最大回傳筆數. [number] 
+            "limit": 50,                // 最大回傳筆數. [number]
             "offset": 0,                // 回傳資料偏移數. [number]
-            "total" : 100,              // 此次Query總筆數. [number] 
-            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期). [number(timestamp)] 
-            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期). [number(timestamp)] 
+            "total" : 100,              // 此次Query總筆數. [number]
+            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期). [number(timestamp)]
+            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期). [number(timestamp)]
         }
-        
+
 ### 新增主題至病患所對應之留言板[POST]
 + Parameters
     + empNo (string)        ... 使用者帳號
@@ -1790,7 +1817,7 @@ HOST: http://www.wantoto.com
             "error": 701,
             "message": "缺少參數xxx"
         }
-        
+
 + Response 400 (application/json)
 
 
@@ -1806,7 +1833,7 @@ HOST: http://www.wantoto.com
             "error": 103,
             "message": "無存取權限"
         }
-        
+
 
 ## 6/4 - 留言板系統之主題 [/bulletin/topic/{topicId}{?empNo,title,content,sessionKey,chartNo,authGroup}]
 ### 取得留言板某個主題[GET]
@@ -1819,7 +1846,7 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "_emp_author" : {  
+                "_emp_author" : {
                     "empNo" : "111111",         // the id for the one created the topic [string]
                     "name" : "謝小穎"           // the name of the one created the topic [string]
                 },
@@ -1832,7 +1859,7 @@ HOST: http://www.wantoto.com
                 "replies": {
                     "list": [
                         {
-                            "_emp_author": {            
+                            "_emp_author": {
                                 "empNo": "111381",                  // the id for the one created the reply  [string]
                                 "name":  "震大事"                   // the name of the one created the reply [string]
                             },
@@ -1857,9 +1884,9 @@ HOST: http://www.wantoto.com
     + title (string)        ... 請求更新之標題
     + content (string)      ... 更新之訊息內容
     + sessionKey (string)   ... Session Key
-    + chartNo (string)      ... 病例號碼 
+    + chartNo (string)      ... 病例號碼
     + authGroup (string)    ... 設定開放權限, 'A'=私人, 'B'=開放所有人瀏覽, 'C'=開放所有人編輯
-    
+
 + Response 200 (application/json)
 
         {
@@ -1872,7 +1899,7 @@ HOST: http://www.wantoto.com
             "error": 701,
             "message": "缺少參數xxx"
         }
-        
+
 + Response 400 (application/json)
 
         {
@@ -1886,7 +1913,7 @@ HOST: http://www.wantoto.com
             "error": 103,
             "message": "無存取權限"
         }
-        
+
 ### 刪除留言板某個主題[DELETE]
 + Parameters
     + topicId (string)      ... The identifier for the specified reply.
@@ -1915,11 +1942,11 @@ HOST: http://www.wantoto.com
     + sessionKey (string)       ... Session Key
 
 + Response 200 (application/json)
-    
+
         {
             "content": [
                 {
-                    "_emp_author": {            
+                    "_emp_author": {
                         "empNo": "111381",                  // the id for the one created the reply  [string]
                         "name":  "震大事"                   // the name of the one created the reply [string]
                     },
@@ -1934,7 +1961,7 @@ HOST: http://www.wantoto.com
             "limit": 5,                                     // the max number of replies in the response [number]
             "total": 6                                      // the total number of the replies [number]
         }
-        
+
 
 ### 新增回應至留言板至指定主題[POST]
 + Parameters
@@ -1942,9 +1969,9 @@ HOST: http://www.wantoto.com
     + empNo (string)        ... The employment id for the one requesting for posting the reply.
     + content (string)      ... The message content for the replay.
     + sessionKey (string)   ... Session Key
-    
+
 + Response 200 (application/json)
-        
+
         {
             "success": true,
             "content": {
@@ -1958,7 +1985,7 @@ HOST: http://www.wantoto.com
             "error": 701,
             "message": "缺少參數 xxx"
         }
-        
+
 + Response 400 (application/json)
 
         {
@@ -1972,7 +1999,7 @@ HOST: http://www.wantoto.com
             "error": 103,
             "message": "無存取權限"
         }
-        
+
 
 ## 6/4 - 留言板系統之回應 [/bulletin/reply/{replyId}{?empNo,content,sessionKey,chartNo}]
 ### 取得留言板某個回應[GET]
@@ -1985,12 +2012,12 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "_emp_author" : {  
+                "_emp_author" : {
                     "empNo" : "111111",         // the id for the one created the reply [string]
                     "name" : "謝小穎"           // the name of the one created the reply [string]
                 },
                 "created":     1406938026,      // created time. [number(timestamp)]
-                "updated":     1407000123,      // the last updated time. [number(timestamp)] 
+                "updated":     1407000123,      // the last updated time. [number(timestamp)]
                 "message":     "hello world",   // [string]
                 "id":          "A13-3321",      // [string]
                 "editable":    false
@@ -2003,21 +2030,21 @@ HOST: http://www.wantoto.com
     + empNo (string)        ... 請求更新之使用者帳號
     + content (string)      ... 更新之訊息內容
     + sessionKey (string)   ... Session Key
-    
+
 + Response 200 (application/json)
 
 
         {
             "success": true
         }
-        
+
 + Response 400 (application/json)
 
         {
             "error": 701,
             "message": "缺少參數xxx"
         }
-        
+
 + Response 400 (application/json)
 
         {
@@ -2059,10 +2086,10 @@ HOST: http://www.wantoto.com
 
 + Parameters
     + empNo (string)    ....員工編號
-    
+
 + Response 200 (application/json)
-    
-        {   
+
+        {
             "content" : {
                 "field" : [ //欄位資訊
                     {
@@ -2083,7 +2110,7 @@ HOST: http://www.wantoto.com
                         "dateFormat" : "yyyy-MM-dd HH:mm"   // 若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳 [string, optional]
                     },
                     {
-                        "fieldCode" : "drugName",           //欄位代碼 [string]  
+                        "fieldCode" : "drugName",           //欄位代碼 [string]
                         "displayName" : "藥名",             //欄位顯示名稱[string]
                         "textAlignment" : "left"            // 欄位內容對齊方式 ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊) [string,optional]
                     },
@@ -2092,15 +2119,15 @@ HOST: http://www.wantoto.com
                         "displayName" : "劑量"              //欄位顯示名稱 [string]
                     },
                     {
-                        "fieldCode" : "unit",               //欄位代碼 [string] 
+                        "fieldCode" : "unit",               //欄位代碼 [string]
                         "displayName" : "單位"              //欄位顯示名稱[string]
                     },
                     {
-                        "fieldCode" : "frequency",          //欄位代碼 [string]  
+                        "fieldCode" : "frequency",          //欄位代碼 [string]
                         "displayName" : "頻率"              //欄位顯示名稱[string]
                     },
                     {
-                        "fieldCode" : "approach",           //欄位代碼 [string]  
+                        "fieldCode" : "approach",           //欄位代碼 [string]
                         "displayName" : "途徑"              //欄位顯示名稱[string]
                     },
                     {
@@ -2112,7 +2139,7 @@ HOST: http://www.wantoto.com
                         "displayName" : "特殊事項"          //欄位顯示名稱[string]
                     },
                     {
-                        "fieldCode" : "account",            //欄位代碼 [string]  
+                        "fieldCode" : "account",            //欄位代碼 [string]
                         "displayName" : "帳"                //欄位顯示名稱[string]
                     }
                 ],
@@ -2131,8 +2158,8 @@ HOST: http://www.wantoto.com
                             "approach" : "D",                                                                       // [string]
                             "days" : "0",                                                                           // [string]
                             "specialOrder" : "",                                                                    // [string]
-                            "account" : "健"                        
-                        } 
+                            "account" : "健"
+                        }
                     },
                     {
                         "id" : "B45654",                                                                            // [string]
@@ -2149,10 +2176,10 @@ HOST: http://www.wantoto.com
                             "days" : "0",                                                                           // [string]
                             "specialOrder" : "",                                                                    // [string]
                             "account" : "健"                                                                        // [string]
-                        } 
+                        }
                     },
                     ...
-                ] 
+                ]
             }
         }
 
@@ -2162,7 +2189,7 @@ HOST: http://www.wantoto.com
 
 + Parameters
     + empNo (string)    ... 員工編號
-    
+
 + Response 200 (applicaiton/json)
 
 
@@ -2183,16 +2210,16 @@ HOST: http://www.wantoto.com
                                         {
                                             "displayName" : "一般",
                                             "optionCode" : "general",
-                                        }, 
+                                        },
                                         {
                                             "displayName" : "PAT",
                                             "optionCode" : "pat",
                                         },
-                                        {    
+                                        {
                                             "displayName" : "術前",
                                             "optionCode" : "preopr",
                                         }, ...
-                                    ], 
+                                    ],
                                     "default": "general",   // 預設值(如果是傳醫囑ID，則回傳醫囑裡設定的值)   [string, optional]
                                 }, ...
                             ],
@@ -2200,7 +2227,7 @@ HOST: http://www.wantoto.com
                                 "general": [
                                     {
                                         "title":"預計時間",
-                                        "key":  "estimatedTime", 
+                                        "key":  "estimatedTime",
                                         "required" : true,
                                         "elements" : [
                                             {
@@ -2212,13 +2239,13 @@ HOST: http://www.wantoto.com
                                     }, ...
                                 ],
                             }
-                        }, 
+                        },
                         {
                             "title" : "稀釋體積",
                             "key":  "dilutionVolume",   // [optional]
                             "required" : true,          // [optional]
                             "elements": [
-                                {   
+                                {
                                     "title" : "稀釋液", // [string, optional]
                                     "type": "option",   // [string]
                                     "options":  [ //[optional]
@@ -2226,9 +2253,9 @@ HOST: http://www.wantoto.com
                                             "displayName" : "NS",   // [string]
                                             "optionCode" : "NS",    // [string]
                                         }, ...
-                                    ], 
+                                    ],
                                     "default": "NS" // [optional]
-                                }, 
+                                },
                                 {
                                     "title" : "體積",   // 此元件的title [string, optional]
                                     "type": "number",   // [string]
@@ -2236,7 +2263,7 @@ HOST: http://www.wantoto.com
                                     "unit" : "ml",      // 單位(或是後面的字) [string, optional]
                                 }, ...
                             ],
-                        }, 
+                        },
                         {
                             "title" : "藥品名稱",
                             "elements": [
@@ -2246,7 +2273,7 @@ HOST: http://www.wantoto.com
                                 },
                                 ...
                             ],
-                        }, 
+                        },
                         {
                             "title" : "自費",
                             "key" : "expense",          // [optional]
@@ -2257,7 +2284,7 @@ HOST: http://www.wantoto.com
                                 },
                                 ...
                             ],
-                        }, 
+                        },
                         {
                             "title" : "特殊醫囑",
                             "key" : "specialOrder",     // [optional]
@@ -2284,7 +2311,7 @@ HOST: http://www.wantoto.com
                         }
                     ]
                 }
-                , 
+                ,
                 ...
             ]
         }
@@ -2313,7 +2340,11 @@ HOST: http://www.wantoto.com
                     {
                         "accountNo" : "O1120Y1X2W3",
                         "displayName" : "X月XX日 XX:XX 門診"
- 
+                    }, ...
+                ]
+            }
+        }
+
 
 ## 6/3 - 醫令套餐 [/orderPackage{?empNo,chartNo,accountNo}]
 ### 取得醫令套餐清單 [GET]
@@ -2328,18 +2359,18 @@ HOST: http://www.wantoto.com
 
         {
             "content" : {
-                "general" : [   // Portal的上半部份 (科部, 病房, 員工, 病人, 路徑) 
-                    {   
+                "general" : [   // Portal的上半部份 (科部, 病房, 員工, 病人, 路徑)
+                    {
                         "content" : {
                             "packageName" : "科部",    // [string]
                             "default" : true           // 預設選項，使用者選擇上一層選項之後，要預設選取的項目 [boolean, optional]
                         },
                         "children" : [ // [optional]
-                            { 
+                            {
                                 "content" : {
                                     "packageName" : "內科部",                       // 顯示的title名  [string]
                                     "default": true
-                                }, 
+                                },
                                 "children" : [  // 如果有sublist的話, 則顯示此key  [optional]
                                     {
                                         "content" : {
@@ -2352,10 +2383,10 @@ HOST: http://www.wantoto.com
                                                     "packageName" : "Admission Orders", // [string]
                                                     "packageCode" : "admissionorder",   // 透過此碼查詢醫令 [string, optional]
                                                     "default" : true                    // [boolean, optional]
-                                                }  
+                                                }
                                             },
                                             {
-                                                "content" : { 
+                                                "content" : {
                                                     "packageName" : "Admission Lab",
                                                     "packageCode" : "admissionlab"      // [string, optional]
                                                 }
@@ -2406,7 +2437,7 @@ HOST: http://www.wantoto.com
                         ]
                     },
                     ...
-                ], 
+                ],
                 "category" : [  // 醫令開立部份 (檢驗, 檢查, 影醫, 核醫, 病理, 治療, 醫囑)
                     {
                         "content" : {
@@ -2423,7 +2454,7 @@ HOST: http://www.wantoto.com
                                             "packageName" : "CBC+BCS_Glu",
                                             "packageCode" : "cbcbcsglu"
                                         },
-                                    }, 
+                                    },
                                     ...
                                 ]
                             }
@@ -2444,7 +2475,7 @@ HOST: http://www.wantoto.com
                                             "packageName" : "血管檢查",
                                             "packageCode" : "blood"
                                         },
-                                    }, 
+                                    },
                                     ...
                                 ]
                             }
@@ -2454,16 +2485,16 @@ HOST: http://www.wantoto.com
                 ]
             }
         }
-        
-        
-## 6/3 - 醫令搜尋 [/orderSearch{?name,packageCode,accountNo}]
+
+
+## 7/8 - 醫令搜尋 [/orderSearch{?name,packageCode,accountNo}]
 ### 取得藥物清單 [GET]
 
 + Parameters
     + name (string, optional)           ...搜尋字串
     + packageCode (string, optional)    ...套餐
-    + accountNo (string)                ...帳號編號
-    
+    + accountNo (string)                ...帳號編號 第一各字元為病患的門住急別
+
 + Response 200 (application/json)
 
         {
@@ -2474,7 +2505,7 @@ HOST: http://www.wantoto.com
                         "displayName" : "醫令類別"
                     }
                     {
-                        "fieldCode" : "orderCode", 
+                        "fieldCode" : "DisplayCode",
                         "displayName" : "醫令碼",
                     },
                     {
@@ -2482,32 +2513,32 @@ HOST: http://www.wantoto.com
                         "displayName" : "醫令內容"
                     },
                     ...
-                ], 
+                ],
                 "data" : [
                     {
-                        "id" : "000L0114",  // 醫令碼 [string, required]
-                        "content" : {   
-                            "orderCode" : "000L0114",
+                        "orderCode" : "T000L0114",  // 醫令碼 [string, required]
+                        "content" : {
+                            "DisplayCode" : "000L0114",
                             "orderType" : "治療",
                             "order"     : "複印全口顎Ｘ光照相"
                         }
                     },
                     {
-                        "id" : "000L0113",
+                        "orderCode" : "T000L0113",
                         "content" : {
-                            "orderCode" : "000L0113",
+                            "DisplayCode" : "000L0113",
                             "orderType" : "治療",
                             "order"     : "複印咬合片Ｘ光照相"
                         }
                     },
                     {
-                        "id" : "000L0112", 
+                        "orderCode" : "T000L0112",
                         "content" : {
-                            "orderCode" : "000L0112",
+                            "DisplayCode" : "000L0112",
                             "orderType" : "治療",
                             "order"     : "複印根尖周Ｘ光照相"
                         }
-                    } ,
+                    },
                     ...
                 ]
             }
@@ -2535,11 +2566,11 @@ HOST: http://www.wantoto.com
                         "default" : true    // 預設選項，使用者選擇上一層選項之後，要預設選取的項目 [boolean, optional]
                     },
                     "children" : [  // 如果有sublist的話, 則顯示此key  [optional, duplicate]
-                        { 
+                        {
                             "content" : {
                                 "packageName" : "內科部",   // 顯示的title名  [string]
                                 "default" : true            // [boolean, optional]
-                            }, 
+                            },
                             "children" : [  // 如果有sublist的話, 則顯示此key  [optional, duplicate]
                                 {
                                     "content" : {
@@ -2562,7 +2593,7 @@ HOST: http://www.wantoto.com
                                         },
                                         {
                                             "content" : {
-                                                "packageName" : "Routine Lab",          
+                                                "packageName" : "Routine Lab",
                                                 "packageCode" : "routinelab"            // [string, optional]
                                             }
                                         },
@@ -2600,7 +2631,7 @@ HOST: http://www.wantoto.com
                                         "packageName" : "醫囑",
                                         "packageCode" : "A1235"
                                     }
-                                }, 
+                                },
                                 ...
                             ]
                         }, ...
@@ -2617,7 +2648,7 @@ HOST: http://www.wantoto.com
 + Parameters
     + name (string, optional)           ... 搜尋字串(搜尋全部藥名)
     + packageCode (string, optional)    ... 套餐
-    + accountNo                         ... 帳號編號   
+    + accountNo                         ... 帳號編號 第一個字元代表病患門住急別
 
 + Response 200 (application/json)
 
@@ -2635,33 +2666,33 @@ HOST: http://www.wantoto.com
                         "displayName" : "商品名", //欄位顯示名稱[string]
                     },
                     {
-                        "fieldCode" : "dose",  
+                        "fieldCode" : "dose",
                         "displayName" : "常用劑量",
                     },
                     {
-                        "fieldCode" : "frequency",  
+                        "fieldCode" : "frequency",
                         "displayName" : "常用頻率",
                     },
                     {
-                        "fieldCode" : "unit",  
+                        "fieldCode" : "unit",
                         "displayName" : "單位"
                     }
                 ],
                 "data" : [
                     {
-                        "id" : "v1234567",    // 藥品代碼 [string]
-                        "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                        "id" : "v1234567",      // 藥品代碼 [string]
+                        "content" : {           //依據欄位填入資料，無資料則不回傳 [optional]
                             "drugName" : "Dextrose and Electrolyte Solution",
                             "itemName" : "Taita No. 1 500 ml/btl",
                             "dose" : "1",
                             "unit" : "tab",
                             "frequency" : "TID",
                         },
-                        
+
                     },
                     ...
                 ],
-            }, 
+            },
         }
 
 ## 4/20 - 取得開立/修改醫囑需要資料 [/order{?drugCode%5B%5D,orderCode%5B%5D,orderID%5B%5D}]
@@ -2692,16 +2723,16 @@ HOST: http://www.wantoto.com
                                         {
                                             "displayName" : "一般",
                                             "optionCode" : "general",
-                                        }, 
+                                        },
                                         {
                                             "displayName" : "PAT",
                                             "optionCode" : "pat",
                                         },
-                                        {    
+                                        {
                                             "displayName" : "術前",
                                             "optionCode" : "preopr",
                                         }, ...
-                                    ], 
+                                    ],
                                     "default": "general",   // 預設值(如果是傳醫囑ID，則回傳醫囑裡設定的值)   [string, optional]
                                 }, ...
                             ],
@@ -2711,12 +2742,12 @@ HOST: http://www.wantoto.com
                                     "postContent": [
                                         {
                                             "title":"預計時間",
-                                            "key":  "estimatedTime", 
+                                            "key":  "estimatedTime",
                                             "required" : true,
                                             "elements" : [
                                                 {
                                                     "type" : "date",
-                                                    "default" : 1406938026, 
+                                                    "default" : 1406938026,
                                                     "dateformat" : "yyyy-MM-dd HH"  //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
                                                 }
                                             ]
@@ -2724,13 +2755,13 @@ HOST: http://www.wantoto.com
                                     ],
                                 }, ...
                             ]
-                        }, 
+                        },
                         {
                             "title" : "稀釋體積",
                             "key":  "dilutionVolume",    // [optional]
-                            "required" : true,           // [optional] 
+                            "required" : true,           // [optional]
                             "elements": [
-                                {   
+                                {
                                     "title" : "稀釋液", // [string, optional]
                                     "type": "option",   // [string]
                                     "options":  [ // [optional]
@@ -2738,9 +2769,9 @@ HOST: http://www.wantoto.com
                                             "displayName" : "NS",   // [string]
                                             "optionCode" : "NS",    // [string]
                                         }, ...
-                                    ], 
+                                    ],
                                     "default": "NS"         // [string, optional]
-                                }, 
+                                },
                                 {
                                     "title" : "體積",       // 此元件的title [string, optional]
                                     "type": "number",       // [string]
@@ -2748,7 +2779,7 @@ HOST: http://www.wantoto.com
                                     "unit" : "ml",          // 單位(或是後面的字) [string, optional]
                                 }, ...
                             ],
-                        }, 
+                        },
                         {
                             "title" : "藥品名稱",
                             "elements": [
@@ -2758,7 +2789,7 @@ HOST: http://www.wantoto.com
                                 },
                                 ...
                             ],
-                        }, 
+                        },
                         {
                             "title" : "自費",
                             "key" : "expense",    // [optional]
@@ -2769,7 +2800,7 @@ HOST: http://www.wantoto.com
                                 },
                                 ...
                             ],
-                        }, 
+                        },
                         {
                             "title" : "特殊醫囑",
                             "key" : "specialOrder",     // [optional]
@@ -2825,21 +2856,21 @@ HOST: http://www.wantoto.com
                             "displayName" : "期間", //欄位顯示名稱[string]
                         },
                         {
-                            "fieldCode" : "category",  
+                            "fieldCode" : "category",
                             "displayName" : "類別",
                         },
                         {
-                            "fieldCode" : "drugName",  
+                            "fieldCode" : "drugName",
                             "displayName" : "學名",
                             "textAlignment" : "left", //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
                         },
                         {
-                            "fieldCode" : "itemName",  
+                            "fieldCode" : "itemName",
                             "displayName" : "商品名",
                             "textAlignment" : "left", //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
                         },
                         {
-                            "fieldCode" : "status",  
+                            "fieldCode" : "status",
                             "displayName" : "狀態"
                         },
                         {
@@ -2855,7 +2886,7 @@ HOST: http://www.wantoto.com
                                 "category" : "處方",
                                 "startDate" : 1406938026, // [number(timestamp)]
                                 "period" : "長",
-                                "_emp_doctor" : { 
+                                "_emp_doctor" : {
                                     "empNo" : "23454353",
                                     "name" : "葉小菜"
                                 },
@@ -2864,7 +2895,7 @@ HOST: http://www.wantoto.com
                         },
                         ...
                     ],
-                }, 
+                },
                 {   // 診療醫令部份
                     "field" : [    //欄位資訊
                         {
@@ -2877,18 +2908,18 @@ HOST: http://www.wantoto.com
                             "displayName" : "期間", //欄位顯示名稱[string]
                         },
                         {
-                            "fieldCode" : "category",  
+                            "fieldCode" : "category",
                             "displayName" : "類別",
                         },
                         {
-                            "fieldCode" : "order",  
+                            "fieldCode" : "order",
                             "displayName" : "醫令名稱",
                             "textAlignment" : "left", //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
                         },
                         {
-                            "fieldCode" : "status",  
+                            "fieldCode" : "status",
                             "displayName" : "狀態"
-                        }, 
+                        },
                         {
                             "fieldCode" : "_emp_doctor",
                             "displayName" : "輸入人員"
@@ -2902,7 +2933,7 @@ HOST: http://www.wantoto.com
                                 "category" : "檢查",
                                 "startDate" : 1406938026,
                                 "period" : "",
-                                "_emp_doctor" : { 
+                                "_emp_doctor" : {
                                     "empNo" : "23454353",
                                     "name" : "葉小菜"
                                 },
@@ -2912,10 +2943,10 @@ HOST: http://www.wantoto.com
                         ...
                     ],
                 },
-            ] 
+            ]
         }
-        
-        
+
+
 ## 4/08 - 確認醫令 [/patients/{charNo}/orderConfirm{?orderID%5B%5D,empNo}]
 ### 取得未確認醫令清單 [POST]
 
@@ -2931,35 +2962,55 @@ HOST: http://www.wantoto.com
                 "success":  true,
             }
         }
-        
-# Group 開發中 Phase2 APIs
 
-## 6/18 - 影像醫學介面內容 [/order/MI/interface/{imageType}{?sessionKey}]
+# Group 開發中 Phase2 Order APIs
+
+## 6/29 - 病患 cre 值 [/patients/{chartNo}/cre{?sessionKey}]
+### 取得病患 cre 值報告 [GET]
++ Parameters
+    + sessionKey        (string) ... SessionKey
+
++ Response 200 (application/json)
+
+        {
+            "content": {
+                "cre": 31.2
+            }
+        }
+
++ Response 404 (application/json)
+
+
+        {
+            "error": 104,                                   // [number] error code
+            "message": "找不到病患最近三個月的 cre 數值"       // [string] error message
+        }
+
+## 7/07 - 影像醫學介面內容 [/interface/order/MI{imageType}{?sessionKey}]
 ### 取得介面內容 [GET]
 + Parameters
     + sessionKey        (string) ... SessionKey
     + imageType         (string) ... 影像種類，例如: CT, MRI, Plain
 
 + Response 200 (application/json)
-        
+
         {
             "content": {
-                "note": "檢查範圍與內容影像...",                                // [string, optional] 注意事項
-                "cre": 31.1,                                                // [number, optional] 病患 CRE 值，若無則不用回傳
-                "indicationOptions": [                                      // [optional] indication 所對應的選項，若無則不用回傳
+                "note": "檢查範圍與內容影像...",                            // [string, optional] 注意事項
+                "indicationOptions": [                                    // [optional] indication 所對應的選項，若無則不用回傳
                     {
-                        "returnValue": "ind_option_1",                      // [string] 項目所對應之回傳值 
-                        "displayName": "Follow Up"                          // [string] 項目顯示名稱          
+                        "returnValue": "ind_option_1",                    // [string] 項目所對應之回傳值
+                        "displayName": "Follow Up"                        // [string] 項目顯示名稱
                     },
                     ...
                 ],
                 "groups": [
                     {
                         "title": "Upper Body",                                      // [string, optional] Group 標題 若無則不用回傳
-                        "sections": [   
+                        "sections": [
                             {
                                 "title": "Brain",                                   // [string] Section 標題
-                                "sections": [                                       
+                                "sections": [
                                     {
                                         "title": "Routine",                         // [string] 子 Section 標題
                                         "elements": [                               // 子 Section 內可以勾選的項目
@@ -3015,7 +3066,7 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "hospitalCode":     "HQ",               // [string] 院區碼     
+                "hospitalCode":     "HQ",               // [string] 院區碼
                 "orderCode":        "T123123",          // [string] 醫令碼
                 "orderType":        "T",                // [string] 醫令主類別，如治療為 T
                 "orderName":        "Testing Order",    // [string] 醫令名稱
@@ -3025,12 +3076,25 @@ HOST: http://www.wantoto.com
                 "isAvailable":      true,               // [boolean] 是否可以使用
                 "isOpen":           "OI",               // [string] 註明可用之類別 E 為急診 I 為住院 O 為門診
                 "isOpenSelect":     true,               // [boolean] 是否開放選取
-                "isEmergency":      true,               // [boolean] 是否支援急做               
-                "subType":          "N",                // [string, optional] 如手術為 N, 當不需要時不用回傳
+                "isEmergency":      true,               // [boolean] 是否支援急做
+                "subType":          "N",                // [string, optional] orderType = T 時使用 一般為 N, 手術為 O, 麻醉為 A, 齒位為 D, 技工所為 E, 復健為 P
                 "selectable":       true,               // [boolean] 是否可以選取
+                "specimenList":     [                   // [optional] orderType = L 時使用
+                    {
+                        "code": "ts1",                  // [string] 檢體代號
+                        "title": "TEST_SPECIMEN_1",     // [string] 檢體名稱
+                        "selected": false               // [boolean] 預設選取的時候回傳 True 否則回傳 False
+                    },
+                    {
+                        "code": "ts2",                  // [string] 檢體代號
+                        "title": "TEST_SPECIMEN_2",     // [string] 檢體名稱
+                        "selected": true                // [boolean] 預設選取的時候回傳 True 否則回傳 False
+                    },
+                    ...
+                ],
                 "appendOrders":     [                   // [optional] 附帶醫令，若無則不用回傳
                     {
-                        "orderType":    "T",                    // [string] 醫令主類別，如治療為 T 
+                        "orderType":    "T",                    // [string] 醫令主類別，如治療為 T
                         "orderCode":    "TSA123zzz",            // [string] 醫令碼
                         "orderName":    "Testing Order2",       // [string] 醫令名稱
                         "quantity":     1,                      // [number] 數量
@@ -3064,7 +3128,7 @@ HOST: http://www.wantoto.com
                                 "title": "OPTIONAL: B",         // [string] 項目顯示內容
                                 "returnValue": "optiona_b",     // [string] 回傳時該選項所對應的值
                                 "priority": 1                   // [number] 項目顯示順序
-                            }, 
+                            },
                             ...
                         ],
                         "freeSelectionEnable": false            // [optional, boolean] 是否允許增添選項，當類型為 S, M 時使用
@@ -3109,13 +3173,13 @@ HOST: http://www.wantoto.com
     + limit         (number) ... 設定最大回傳筆數
     + sessionKey    (string) ... SessionKey
 
-+ Response 200 (application/json) 
++ Response 200 (application/json)
 
         {
             "content": [
                 "台灣大學醫學院",         // [string] 字彙選項
                 "台灣大學醫學院竹東分院",
-                "榮民總醫院",             
+                "榮民總醫院",
                 ...
             ],
             "total": 10,                // [number] 此次Query總筆數
@@ -3127,16 +3191,16 @@ HOST: http://www.wantoto.com
 ## 6/16 病患醫令記錄 [/account/{accountNo}/orderRecords{?orderCode,orderName,quantity,billType,expectedExTime,hospitalCode,sessionKey}]
 
 ### 開立醫令 [POST]
-+ Parameters 
++ Parameters
     + orderCode    (string) ... the unique id for the specific order
     + orderName    (string) ... the order name
-    + sessionKey 
+    + sessionKey
 
 + Request IssueOrders (application/json)
 
         {
             "content": { // 開立醫令清單，每個醫令對應的鍵值為該醫令在本次請求中辨識之所用
-                "1": {                                  
+                "1": {
                     "orderCode": "T00001234",           // [string] 醫令碼
                     "orderName": "TEST_ORDER_001",      // [string] 醫令名稱
                     "hospitalCode": "HQ",               // [string] 院區碼
@@ -3149,7 +3213,7 @@ HOST: http://www.wantoto.com
                         {
                             "returnKey": "d_selection_example",     // [string] 問答題對應鍵值
                             "type": "S",                            // [string] 問答題類型
-                            "value": [
+                            "value": [                              // [optional]
                                 0,
                                 1,
                                 ...
@@ -3158,7 +3222,7 @@ HOST: http://www.wantoto.com
                         {
                             "returnKey": "input_box_example",       // [string] 問答題對應鍵值
                             "type": "T",                            // [string] 問答題類型
-                            "value": "this is the input content"
+                            "value": "this is the input content"    // [optional]
                         }
                     ],
                     "appendOrders": [ // [optional] 附帶醫令，若無則不會傳入
@@ -3180,7 +3244,7 @@ HOST: http://www.wantoto.com
                         {
                             "returnKey": "d_selection_example",     // [string] 問答題對應鍵值
                             "type": "S",                            // [string] 問答題類型
-                            "value": [
+                            "value": [                              // [optional]
                                 0,
                                 1,
                                 ...
@@ -3189,7 +3253,7 @@ HOST: http://www.wantoto.com
                         {
                             "returnKey": "input_box_example",       // [string] 問答題對應鍵值
                             "type": "T",                            // [string] 問答題類型
-                            "value": "this is the input content"
+                            "value": "this is the input content"    // [optional]
                         }
                     ],
                     "appendOrders": [ // [optional] 附帶醫令，若無則不會傳入
@@ -3208,7 +3272,7 @@ HOST: http://www.wantoto.com
                     "expectedExTime": 1405238026,       // [number(timestamp)] 預計執行時間
                     "specialInstruction": "Test 3"      // [string] 特殊醫囑
                 },
-                ...   
+                ...
             },
             "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"
         }
@@ -3232,8 +3296,8 @@ HOST: http://www.wantoto.com
             "error": 802,
             "content": {
                 "succeeded": {  // [optional] 回傳成功開立的醫令之清單，若無則不用回傳
-                    "orderRecordIds" {
-                        "2": "K23111222222", 
+                    "orderRecordIds": {
+                        "2": "K23111222222",
                         ...
                     }
                 }
@@ -3254,7 +3318,7 @@ HOST: http://www.wantoto.com
     + sessionKey    (string) ... SessionKey
 
 + Response 200 (application/json)
-        
+
 
         {
             "content": {
@@ -3267,7 +3331,7 @@ HOST: http://www.wantoto.com
                 "patientClass": "E",                // [string] 病患門住急別
                 "quantity": 10,                     // [number] 數量
                 "billType": "Z",                    // [string] 記帳類別，自費為 Z 健保為 E 內含為 U
-                "expectedExTime": 1406938026,       // [number(timestamp)] 預計執行時間 
+                "expectedExTime": 1406938026,       // [number(timestamp)] 預計執行時間
                 "confirmedTime": 1407038026,        // [number(timestamp)] 確認時間
                 "creator": "111281",                // [string] 開立醫囑者員工編號
                 "verifier": "111281",               // [string] 確認醫師員工編號
@@ -3276,7 +3340,12 @@ HOST: http://www.wantoto.com
                 "status": "開立",                    // [string] 狀態
                 "scheduled": false,                 // [boolean] 是否已經排程
                 "specialInstruction": "特殊醫囑內容",  // [string] 特殊醫囑
-                "questionary": [                    // [optional] 問題清單答案
+                "startActivateDatetime": 1435744800, // [number(timestamp), optional] 醫令有效起日 K類醫囑使用
+                "endActivateDatetime": 1438423200,   // [number(timestamp), optional] 醫令有效迄日 K類醫囑使用
+                "frequency": "QD",                   // [string] 頻率碼 K類醫囑使用
+                "isBedside": false,                  // [boolean, optional] 是否為床邊攝影 R類醫囑使用
+                "specimenCode": "sp1",               // [string] 檢體代碼 L類醫囑使用
+                "questionary": [                     // [optional] 問題清單答案
                     {
                         "displayTitle": "SINGLE_SELECTION",     // [string] 問題顯示題目
                         "returnKey": "s_selection_example",     // [string] 回傳結果時該問題所對應的鍵值
@@ -3286,7 +3355,7 @@ HOST: http://www.wantoto.com
                             0,                                  // [number] 預設或已選取項目對應之順序代號
                             2,
                             ...
-                        ],                   
+                        ],
                         "options": [                            // [optional] 選擇項目列表，當類型為 S, M 時使用
                             {
                                 "displayValue": "OPTIONA: A",   // [string] 選項顯示內容
@@ -3297,7 +3366,7 @@ HOST: http://www.wantoto.com
                                 "displayValue": "OPTIONAL: B",  // [string] 項目顯示內容
                                 "returnValue": "optiona_b",     // [string] 回傳時該選項所對應的值
                                 "priority": 1                   // [number] 項目顯示順序
-                            }, 
+                            },
                             ...
                         ],
                         "freeSelectionEnable": false,           // [optional, boolean] 是否允許增添選項，當類型為 S, M 時使用
@@ -3346,18 +3415,26 @@ HOST: http://www.wantoto.com
 + Request ModifyOrder (application/json)
 
         {
-            "content": {                                  
-                "hospitalCode": "HQ",               // [string] 院區碼
-                "quantity": 3,                      // [number] 數量
-                "billType": "E",                    // [string] 記帳類別
-                "isEmergency": false,               // [boolean] 是否急做
-                "expectedExTime": 1406938026,       // [number(timestamp)] 預計執行時間
-                "specialInstruction": "Test 1",     // [string] 特殊醫囑
-                "questionary": [                    // [optional] 問答題答案，若無則不會傳入
+            "content": {
+                "hospitalCode": "HQ",                // [string] 院區碼
+                "quantity": 3,                       // [number] 數量
+                "billType": "E",                     // [string] 記帳類別
+                "confirmedTime": 1438423200,         // [number(timestamp)] 確認時間
+                "verifier": "111283",                // [string]  確認醫師員工編號
+                "isEmergency": false,                // [boolean] 是否急做
+                "expectedExTime": 1406938026,        // [number(timestamp)] 預計執行時間
+                "specialInstruction": "Test 1",      // [string] 特殊醫囑
+                "bedId": "b3dID",                    // [string] 床號
+                "startActivateDatetime": 1435744800, // [number(timestamp), optional] 醫令有效起日 K類醫囑使用
+                "endActivateDatetime": 1438423200,   // [number(timestamp), optional] 醫令有效迄日 K類醫囑使用
+                "frequency": "QD",                   // [string] 頻率碼 K類醫囑使用
+                "isBedside": false,                  // [boolean, optional] 是否為床邊攝影 R類醫囑使用
+                "specimenCode": "sp1",               // [string] 檢體代碼 L類醫囑使用
+                "questionary": [                     // [optional] 問答題答案，若無則不會傳入
                     {
                         "returnKey": "d_selection_example",     // [string] 問答題對應鍵值
                         "type": "S",                            // [string] 問答題類型
-                        "value": [
+                        "value": [                              // [optional]
                             0,
                             1,
                             ...
@@ -3366,8 +3443,9 @@ HOST: http://www.wantoto.com
                     {
                         "returnKey": "input_box_example",       // [string] 問答題對應鍵值
                         "type": "T",                            // [string] 問答題類型
-                        "value": "this is the input content"
-                    }
+                        "value": "this is the input content"    // [optional]
+                    },
+                    ...
                 ],
                 "appendOrders": [ // [optional] 附帶醫令，若無則不會傳入
                     "TSA123001",  // [string] 醫令碼
@@ -3379,17 +3457,434 @@ HOST: http://www.wantoto.com
         }
 
 
-+ Response 200 (application/json) 
-        
++ Response 200 (application/json)
+
         {
             "success": true
         }
 
-+ Response 400 (application/json) 
-        
++ Response 400 (application/json)
+
         {
             "error": 802,                                   // [number] Error Code
             "message": "THE LOCAL ERROR DESCRIPTION"        // [string] 錯誤訊息
+        }
+
+# Group MedicationOrder
+
+## 處方醫令資訊 [/medication/{medicationCode}{?sessionKey,stateIndex}]
+### 取得處方醫令屬性資料 [GET]
++ Parameters
+    + sessionKey    (string) ... SessionKey
+    + stateIndex    (number) ... 請求階段 index 開始為 0
+
++ Response 200 (application/json)
+
+
+        {
+            "content": {
+                "medicationCode":           "P1110023",               // [string] 處方代碼
+                "medicationName":           "TEST_ORDER_NAME",        // [string] 處方名稱
+                "medicationType":           "N",                      // [string] 處方類別 如一般為 N 注射為 I
+                "doseUnit":                 "mg",                     // [string] 藥品劑量使用單位名稱
+                "packUnit":                 "mg",                     // [string] 藥品包裝劑量使用單位名稱
+                "packConvertRate":          1,                        // [number] 一個包裝內有幾個 dose unit
+                "defaultDose":              "0.13",                   // [string, optional] 藥品預設劑量 若無則不用回傳
+                "defaultRoute":             "IF",                     // [string, optional] 預設途徑代碼 若無則不用回傳
+                "defaultRepeatedPattern":   "QD",                     // [string, optional] 預設頻率代碼 若無則不用回傳
+                "defaultUseDays":           0,                        // [number] 預設使用天數 若無則不用回傳
+                "billType":                 "Z",                      // [string] 記帳類別，自費為 Z 健保為 E 內含為 U
+                "createdTime":              1435744800,               // [number(timestamp)] 此項處方醫令編輯起始時間 (UI 介面顯示用)
+                "specialDose":              "TEXT_CONTENT ...",       // [string, optional] 特殊劑量 若無則不用回傳
+                "repeatReason":             "TEXT_CONTENT ...",       // [string, optional] 用要原因 若無則不用回傳
+                "isAllergic":               false,                    // [boolean] 過敏 是否需要預設勾選
+                "isADR":                    false,                    // [boolean] ADR 是否預設勾選
+                "supportedRoutes":  [                                 // [optional] 注射處方使用 若沒有對應的途徑則不用回傳
+                    "IF",                                             // [string] 途徑代碼
+                    "IV",
+                    "cIF",
+                    ...
+                ],
+                "hiddenRoutes": [                                     // [optional] 注射處方使用 隱藏的途徑清單 若沒有不用回傳
+                    "LL",
+                    ...
+                ],
+                "diluentInstructions": {                              // [optional] 稀釋液指示 注射處方式使用
+                    "default": [                                      // [optional] 預設稀釋液選項 若無不用回傳
+                        "NS",
+                        "D5W",
+                        ...
+                    ],
+                    "IF": {                                           // [optional] 對應的鍵值為路徑代碼，陣列內容為該路徑所支援的稀釋液
+                        "options": [
+                            "NS",                                     // [string] 稀釋液
+                            "LR",
+                            ...
+                        ],
+                        "default": "NS",                              // [string] 預設選取稀釋液
+                        "othersEnable": false,                        // [boolean] 是否可以輸入其他稀釋液
+                        "displayOptions": "1122",                     // [string] 顯示輸注說明欄位代碼 1: 顯示但不可編輯 2: 可編輯 0: 不顯示
+                        "volumeSug": {                                // [optional] 容量輸注指示
+                            "max": 1000,
+                            "min": 10,
+                            "unit": "ml"
+                        },
+                        "concentrationSug": {                         // [optional] 濃度輸注指示
+                            "max": 100,
+                            "min": 20,
+                            "unit": "ml/minute"
+                        },
+                        "InfusionTimeSug": {                          // [optional] 輸注時間指示
+                            "max": 20,
+                            "min": 5,
+                            "unit": "min"
+                        },
+                        "VelocitySug": {                              // [optional] 流速指示
+                            "max": 300,
+                            "min": 30,
+                            "unit": "ml/Hr"
+                        }
+                    },
+                    ...
+                }
+            }
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": 804,                       // [number] error code
+            "content": {
+                "message": "TEST_MESSAGE",      // [string] error message
+            }
+        }
+
+
+## 處方醫令開令記錄 [/account/{accountNo}/medicationRecords{?sessionKey,stateIndex}]
+### 開立處方醫令 [POST]
+
++ Request IssueMedicationOrder (application/json)
+
+        {
+            "content": {
+                "medicationCode":   "P1110023",                     // [string] 欲開立之處方代碼
+                "hospitalCode":     "HQ",                           // [string] 院區代碼
+                "stage":            "regular",                      // [string] 階段
+                "dose":             "1",                            // [string] 劑量
+                "route":            "IF",                           // [string] 路徑代碼
+                "repeatedPattern":  "QD",                           // [string] 頻率代碼
+                "useDays":          0,                              // [number] 使用天數
+                "billType":         "Z",                            // [string] 記帳類別，自費為 Z 健保為 E 內含為 U
+                "state":            false,                          // [boolean] STATE 選項是否被勾選
+                "startDate":        "20150702",                     // [string] 起始日期，依照格式 yyyymmDD
+                "startTime":        9,                              // [number] 起始時間 (小時, 24 時制)
+                "endDate":          "20150709",                     // [string, optional] 結束日期，依照格式 yyyymmDD 若使用者沒輸入不會傳入
+                "endTime":          9,                              // [number, optional] 結束時間 (小時, 24 時制) 若使用者沒輸入不會傳入
+                "specialDose":      "TEXT CONTENT ...",             // [string, optional] 特殊劑量 若使用者沒輸入不會傳入
+                "repeatReason":     "TEXT CONTENT ...",             // [string, optional] 使用原因 若使用者沒輸入不會傳入
+                "isAllergic":       false,                          // [boolean] 過敏
+                "isADR":            false,                          // [boolean] ADR
+                "diluent":          {  // [optional] 稀釋液 注射處方使用
+                    "code":     "12332123",                         // [string] 稀釋液代碼
+                    "volume":   100                                 // [number] 稀釋液體積
+                },
+                "injection": {  // [optional] 注射處方指示
+                    "concentration":    100,                        // [number] 濃度 注射處方使用
+                    "flowVelocity":     100,                        // [number] 速度 注射處方使用
+                    "infusionTime":     10,                         // [number] 輸注時間 注射處方使用
+                    "mlPerHour":        0.01,                       // [number] 流速 注射處方使用
+                },
+                "dispenseWay":  1,                                  // [number, optional] 調劑方式
+                "dispenseDayList": [                                // [optional] 調劑指定日期
+                    "20150707",                                     // [string] 調劑日期 依照格式 yyyymmDD
+                    "20150714",
+                    "20150721",
+                    ...
+                ],
+                "dailyAmmount": 5                                   // [number, optional] 每日劑量, 若無則不會傳入
+            },
+            "stateIndex": 0,                                        // [number] 交易狀態的 state 從 0 開始
+            "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"        // [string] SessionKey
+        }
+
++ Response 201 (application/json)
+
+        {
+            "success": true,
+            "content": {
+                "medicationRecordId": "123123",     // [string] 交易記錄ID
+            }
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": 804,                           // [number] ErrorCode
+            "content": {                            // The content to help the client to handle the error response
+                "stateIndex":  1,                   // [number]
+                "message": "Validation XXX failed"  // [string] error description
+            }
+        }
+
+
+## 特殊劑量常用選項表 [/medication/specialDoseOptions{?sessionKey}]
+### 取得選項內容 [GET]
++ Parameters
+    + sessionKey        (string) ... SessionKey
+
++ Response 200 (application/json)
+
+        {
+            "content": [
+                "早 __{%f:dose1}__ 微克, 午 __{%f:dose2}__ 微克, 晚 __{%f:dose3}__ 微克, 睡前 __{%f:dose3}__ 微克, __{%p:selection}__ 飯前 __{%p:selection}__ 飯後",
+                "__{%t:time1}__ 微克, __{%t:time2}__ 微克, __{%t:time3}__ 微克, __{%t:time4}__ 微克.",
+                "指定用法: __{%s:content}__",
+                "一日 __{%f:dose1}__ 微克, 隔日 __{%f:dose2}__ 微克交替使用. __{%p:timeSelection}__ 早(9AM) __{%p:timeSelection}__ 午(1PM) __{%p:timeSelection}__ 晚(6PM) __{%p:timeSelection}__ 睡前(9PM)",
+                "周一 __{%f:mon}__ 微克, 周二 __{%f:tue}__ 微克, 周三 __{%f:wed}__ 微克, 周四 __{%f:thu}__ 微克, 周五 __{%f:fri}__ 微克, 周六 __{%f:sat}__ 微克, 周日 __{%f:sun}__ 微克. __{%p:timeSelection}__ 早(9AM) __{%p:timeSelection}__ 午(1PM) __{%p:timeSelection}__ 晚(6PM) __{%p:timeSelection}__ 睡前(9PM)",
+                ...
+            ]
+        }
+
+## 處方頻率表 [/medication/repeatedPatterns{?sessionKey}]
+### 取得處方頻率表 [GET]
++ Parameters
+    + sessionKey        (string) ... SessionKey
+
++ Response 200 (application/json)
+
+        {
+            "content": [
+                {
+                    "code":         "QD",           // [string] 頻率代碼
+                    "name":         "QD",           // [string] 頻率名稱
+                    "daysOfPeriod":  7,             // [number] 週期天數 一個週期幾天
+                    "daysPerPeriod": 1,             // [number] 週期內服用天數
+                    "timesPerDay":   1,             // [number] 每日次數
+                    "timeOptions": [                // [optional] 如果沒有就不回傳
+                        9,
+                        18,
+                        ...
+                    ],
+                },
+                ...
+            ]
+        }
+
+# Group Blood Order
+
+## 血品相關病患資訊 [/patients/{chartNo}/bloodInfo{?sessionKey}]
+### 取得病患血品相關資訊 [GET]
++ Parameters
+    + sessionKey        (string) ... SessionKey
+
++ Response 200 (application/json)
+
+
+        {
+            "content": {
+                "bloodType": "type_unknown",                                    // [string] 檢驗血型
+                "specimenInfo": "檢體: -- 採檢: -- 提血期限: 採檢後 3 日內",          // [string] 有效檢體
+                "inspectInfo": "HB 12.0 (20150520-RL)  PLT 472 (20150520-RL)",  // [string] 檢驗資訊
+                "dictateBloodType": {                                           // 口述血型
+                    "type": "type_unknown",                                     // [string] 血型代號
+                    "description": "自過敏史取得口述血型, 資料來源為舊病歷資料"         // [string] 口述血型敘述
+                },
+                "newbornInfoRequired": false                                    // [boolean] 是否需要額外輸入新生兒資料
+            }
+        }
+
+## 血品清單 [/bloodOrder/bloodTypes{?sessionKey,displayAll}]
+### 取得血品清單 [GET]
++ Parameters
+    + sessionKey        (string) ... SessionKey
+    + displayAll        (string) ... 是否顯示完整清單 true/false 若為 false 則回傳常用血品即可
+
++ Response 200 (application/json)
+
+
+        {
+            "content": {
+                "groups": [
+                    {
+                        "title": "紅血球血品",                          // [string] 血品群組名稱
+                        "items": [                                    // 血品清單
+                            {
+                                "code":     "000PP011",               // [string] 血品代碼
+                                "name":     "Packed RBC",             // [string] 血品名稱
+                                "unit":     "U",                      // [string] 血品單位
+                                "frqUsed":  true                      // [boolean] 是否常用
+                            },
+                            {
+                                "code":     "000PP141",               // [string] 血品代碼
+                                "name":     "Leukocyte-Poor RBC",     // [string] 血品名稱
+                                "unit":     "U",                      // [string] 血品單位
+                                "frqUsed":  true                      // [boolean] 是否常用
+                            },
+                            ...
+                        ],
+                        "adaptations": [    // 輸血適應症清單
+                            {
+                                "title": "開刀前或侵襲術式前備血",        // [string] 該選項所顯示的標題
+                                "return_value": "RBC_001"             // [string] 該選項選取時的回傳值
+                            },
+                            {
+                                "title": "大量輸血",                    // [string] 該選項所顯示的標題
+                                "return_value": "RBC_002"             // [string] 該選項選起時的回傳值
+                            },
+                            ...
+                        ],
+                        "notification": {  // [optional] 額外提示，當沒有時不用回傳
+                            "title": "指定血小板血品供應不足時",
+                            "content": "本血品庫存不足時, 相同血型血品不足時, 血庫將電話通知給與優先替代血型, 指定種類不足時, 將電話連繫醫師替代並重開醫令"
+                        }
+                    },
+                    ...
+                ]
+            }
+        }
+
+## 血品備血醫囑 [/account/{accountNo}/bloodOrderSheets{?sessionKey}]
+### 取得備血醫囑清單 [GET]
++ Parameters
+    + sessionKey        (string) ... SessionKey
+
++ Response 200 (application/json)
+
+
+        {
+            "content": [
+                {
+                    "sheetNo": "2004681",                               // [string] 備血單號
+                    "blood": {                                          // 血品相關資訊
+                        "name": "Packed RBC",                           // [string] 血品名稱
+                        "unit": "U"                                     // [string] 血品單位
+                    },
+                    "totalAmount": 6,                                   // [number] 總備血量
+                    "issuedAmount": 3,                                  // [number] 已開血量
+                    "issueOrders": [                                    // 輸血醫囑清單 [optional] 若無則不用回傳
+                        {
+                            "issueNo": "2004681-01",                    // [string] 提血單號
+                            "amount": 3,                                // [number] 提血血量
+                            "status": "(待血庫接單)(醫囑未確認)"           // [string] 提血單狀態描述
+                        },
+                        ...
+                    ],
+                    "creatorNo": "111291",                              // [string] 開立醫師員編
+                    "creatorName": "王大明",                             // [string] 開立醫師姓名
+                    "createdTime": 1436256491,                          // [number(timestamp)] 開立時間
+                    "expectedIssueDay": 1436260091,                     // [number(timestamp)] 預計輸血日期
+                    "verified": false,                                  // [boolean] 醫囑是否被確認
+                    "additionalInfo": [
+                        {
+                            "title": "用血時機",
+                            "content": "先行備血, 分批輸血, 由護理師啟動提血"
+                        },
+                        {
+                            "title": "備血血品狀態",
+                            "content": "待血庫接單(醫囑未確認)"
+                        }
+                    ]
+                }
+            ]
+        }
+
+### 開立備血醫囑 [POST]
+
++ Request IssueBloodOrderSheets (application/json)
+
+        {
+            "content": {
+                "dictateBloodType": "type_0",                           // [string] 口述血型代碼
+                "newBornInfo": {                                        // [optional] 新生兒資料，若不需要填寫不會傳入
+                    "motherBloodType": "type_A",                        // [string] 母親口述血型
+                    "fatherBloodType": "type_unknown",                  // [string] 父親口述血型
+                    "hadTransfused": "T",                               // [string] 使否曾經輸血 T:為是 F:為否 U:不清楚
+                    "hadExchanged": "U",                                // [string] 使否曾經換血 T:為是 F:為否 U:不清楚
+                    "needPedipack": false                               // [boolean] 是否需要分裝血品
+                },
+                "code": "000PP011",                                     // [string] 欲開立之血品代碼
+                "amount": 2,                                            // [number] 開立血品之數量
+                "adaptation": "RBC_001",                                // [string] 開立血品之適應症代碼
+                "destination": {                                        // 送達地點
+                    "code": "T01",                                      // [string] 送達地點代號
+                    "description": "11B-07-01"                          // [string] 送達地點資訊
+                },
+                "transfuseTime": {                                      // 輸血時機
+                    "code": "BeforSurgery",                             // [string] 輸血時機代碼
+                    "Operation": "OPERATION_TYPE",                      // [string, optional] 術式說明 手術/處置前備血用
+                    "date": 1435744800,                                 // [number(timestamp), optional] 日期 手術/處置前備血用
+                    "description": "DESCRIPTION_CONTENT"                // [string] 其他描述
+                },
+                "flowSpeed": {                                          // 輸血流速
+                    "code": "01",                                       // [string] 流速代碼
+                    "description": "DESCRIPTION_CONTENT"                // [string] 其他說明
+                },
+                "notification": "NOTIFICATION_CONTENT"                  // [string] 其他敘述
+            },
+            "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"            // [string] SessionKey
+        }
+
++ Response 201 (application/json)
+
+
+        {
+            "success": true,
+            "content": {
+                "sheetNo": "2004681"                                    // [string]  備血醫囑單號
+            }
+        }
+
+
+## 血品輸血醫囑清單 [/account/{accountNo}/bloodIssueOrders{?sessionKey,amount,expectedIssueDay,destCode,destDescription,sheetNo}]
+### 開立輸血醫囑 [POST]
++ Parameters
+    + sessionKey        (string) ... SessionKey
+    + sheetNo           (string) ... 對應的備血單單號
+    + amount            (number) ... 提血數量
+    + expectedIssueDay  (number) ... 預計輸血日期 unix timestamp 格式
+    + destCode          (string) ... 送達地點代碼
+    + destDescription   (string, optional) ... 送達地點敘述
+
++ Response 201 (application/json)
+
+        {
+            "success": true,
+            "content": {
+                "issueNo": "2004681-1"
+            }
+        }
+
+## 血品輸血醫囑 [/account/{accountNo}/bloodIssueOrder/{issueNo}{?sessionKey}]
+### 取得輸血醫囑內容 [GET]
+
++ Parameters
+    + sessionKey        (string) ... SessionKey
+
++ Response 200 (application/json)
+
+
+        {
+            "content": {
+                "issueNo": "2004681-1",                             // [string] 輸血醫囑單號
+                "blood": {                                          // 血品相關資訊
+                    "name": "Packed RBC",                           // [string] 血品名稱
+                    "unit": "U"                                     // [string] 血品單位
+                },
+                "status": "待血庫接單 (醫囑未確認)",                   // [string] 狀態描述
+                "amount": 2,                                        // [number] 數量
+                "verified": false,                                  // [boolean] 是否被確認
+                "additionalInfo": [
+                    {
+                        "title": "送達地",
+                        "content": "病房 0PII-06-03"
+                    },
+                    {
+                        "title": "表單申請",
+                        "content": "XXX (簡碼: 99999) 2015/07/07"
+                    }
+                    ...
+                ]
+            }
         }
 
 # Group 排程相關
@@ -3398,11 +3893,11 @@ HOST: http://www.wantoto.com
 
 ### 取得排程內容 [GET]
 + Parameters
-    + sessionKey    (string) ... SessionKey 
+    + sessionKey    (string) ... SessionKey
     + orderSeqNo    (string) ... 醫令序號
 
 + Response 200 (application/json)
-        
+
         {
             "content": {
                 "examRoomCode": "CTS",
@@ -3414,7 +3909,7 @@ HOST: http://www.wantoto.com
         }
 
 + Response 404 (application/json)
-        
+
         {
             "error": 802,                               // [number] Error Code
             "message": "PUT LOCAL DESCRIPTION HERE"     // [string] 錯誤訊息
@@ -3430,15 +3925,15 @@ HOST: http://www.wantoto.com
     + session       (string) ... 排程時段, 上午為 A 下午為 P 晚上為 N
     + selectedOrder (number) ... 使用者指定的排程順序
     + sessionKey    (string) ... SessionKey
-    
+
 + Response 200 (application/json)
-    
+
         {
             "success": true
         }
 
 + Response 400 (application/json)
-    
+
         {
             "message": "123123", // [string] error message #TODO: setup the proper error response
             "error": 400         // [number] error code
@@ -3457,7 +3952,7 @@ HOST: http://www.wantoto.com
     + offset        (number) ... 設定搜尋結果偏移量
 
 + Response 200 (application/json)
-    
+
         {
             "content": [
                 {
@@ -3466,7 +3961,7 @@ HOST: http://www.wantoto.com
                     "session":          "A",            // [string] 排程時段, 上午為 A 下午為 P 晚上為 N
                     "examRoomCode":     "CTAB",         // [string] 檢查室代碼
                     "examRoomName":     "CTAB_檢查室",   // [string] 檢查室名稱
-                    "ErOpdBookCount":   10,             // [number] 門診/急診 登記個數       
+                    "ErOpdBookCount":   10,             // [number] 門診/急診 登記個數
                     "PatientBookCount": 12,             // [number] 住院 登記個數
                     "ErOpdTotal":       20,             // [number] 門診/急診 開放總數
                     "PatientTotal":     20,             // [number] 住院 開放總數
@@ -3510,8 +4005,6 @@ HOST: http://www.wantoto.com
             //#TODO: add aditional content
         }
 
-
-
 # Group 多媒體相關 Media Relative Service
 ## 6/5 - ProgressNote 上傳 [/patients/{chartNo}/progressNote{?image%5B%5D,accountNo,uploader,description,reviewer}]
 ### 新增 ProgressNote [POST]
@@ -3528,10 +4021,10 @@ HOST: http://www.wantoto.com
         {
             "success": true,
             "content": {
-                
+
             }
         }
-    
+
 # 6/5 - 暫存空間照片上傳 [/patients/{chartNo}/tempStorage{?image%5B%5D,uploader}]
 ### 新增照片至暫存空間 [POST]
 + Parameters
@@ -3547,14 +4040,13 @@ HOST: http://www.wantoto.com
             }
         }
 
-
 ## 4/08 - 多媒體上傳 [/patients/{chartNo}/media/upload{?image%5B%5D,accountNo}]
 ### 上傳 [POST]
 
 + Parameters
     + image%5B%5D (array[binary])    ... 上傳之影像byte array(可多張image)
     + accountNo (string, optional)   ... 帳號編號
-    
+
 + Response 200 (application/json)
 
 
@@ -3584,7 +4076,7 @@ HOST: http://www.wantoto.com
                             ...
                         ]
                     },
-                    ...        
+                    ...
                 ],
                 "piority" : {
                     "default" : "piorityA", //預設選項
@@ -3609,11 +4101,11 @@ HOST: http://www.wantoto.com
                         ...
                     ]
                 }
-                
+
             }
         }
-        
-        
+
+
 ### 回傳候床資訊[POST]
 
 + Parameters
@@ -3623,7 +4115,7 @@ HOST: http://www.wantoto.com
     + wardClass (array[string], optional) ... 床等
 
 + Response 200 (application/json)
-    
+
         {
             "success" : true,
             "content" : {
@@ -3631,4 +4123,120 @@ HOST: http://www.wantoto.com
             }
         }
 
+## 7/6 - 可配床細分科 [/assignBed/department]
+### 取得此醫師可配床細分科清單[GET]
 
+
++ Response 200 (application/json)
+
+        {
+            "content" : [   //病房資訊陣列
+                {   //病房資訊
+                    "hospCode" : "T0",      //醫院代碼[string]
+                    "deptCode" : "14C",    //科別代碼[string]
+                    "displayName" : "胸腔內科 14C"  //顯示名稱[string]
+                },
+                ...
+            ],
+            "limit" : 50, //最大回傳筆數[number]
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50  //此次Query總筆數[number]
+        }
+
+
+
+## 7/6 - 待配床清單 [/assignBed/department/{deptCode}]
+### 取得待配床病患清單[GET]
+
++ Parameters
+
+    + deptCode (string)    ... 科別代碼
+
++ Response 200 (application/json)
+
+        {
+            "content" : [   //病患資訊陣列
+                {   //病患資訊
+                    "patName" : "王小明",                    //病患姓名[string]
+                    "patSexCode" : "M",                     //性別[string]（男性："M";女性："F"）
+                    "patBirthday" : 1406938026,             //出生日期[number(timestamp)]
+                    "chartNo" : "12345678",                 //病歷號[string]
+                    "piority" : "Ａ",                        //優先順序[string]
+                    "waitStartDate": 1416938026,              //候床起始時間 [number(timestamp)]
+                    "waitEndDate": 1416938326,                //候床結束時間 [number(timestamp), optional] 若無則不用回傳
+                    "source" : "轉",                         //來源[string]
+                    "hospital" : "總院",                      //原院[string]
+                    "department" : "腫瘤",                    //原科[string]
+                    "note" : "註記"                           //註[string]
+                },
+                ...
+            ],
+            "limit" : 50, //最大回傳筆數[number]
+            "offset" : 0, //回傳資料偏移數[number]
+            "total" : 50  //此次Query總筆數[number]
+        }
+
+## 7/6 - 病患配床資訊 [/assignBed/patients/{chartNo}{?bedCode,date}]
+### 取得病患配床資訊[GET]
+
++ Parameters
+
+   + chartNo (string)    ... 病歷號
+
++ Response 200 (application/json)
+
+        {
+           "content" : {   //病患資訊陣列
+               "patInfo" : {   //病患資訊
+                   "patName" : "王小明",                    //病患姓名[string]
+                   "patSexCode" : "M",                     //性別[string]（男性："M";女性："F"）
+                   "patBirthday" : 1406938026,             //出生日期[number(timestamp)]
+                   "personID" : "A123456789",      //身分證號[string]
+                   "chartNo" : "12345678",                 //病歷號[string]
+                   "TEL" : "02-123456",                //聯絡電話[string]
+                   "mobile" : "0972111222"        //手機[string]
+               },
+               "waitBedInfo" : [ //候床資訊(除診療行為)
+                  {
+                     "title" : "候床單號",
+                     "content" : "1080922"
+                  },
+                  ...
+               ],
+               "treatment" : {   //診療行為
+                  "category" : "一般住院",  //類別[string]
+                  "item" : "一般住院",   //項目[string]
+                  "treatmentCode" : "L000001" //診療代碼[string]
+                  "insurance" : "健保"   //保險別[string]
+               },
+               "wards" : [ //床位
+                  {
+                     wardTitle : "內科部 03A2",
+                     beds:[
+                           "bedNo" : "01-01",
+                           "bedClass" : "雙人",
+                           "outDate" : 1406938026,
+                           "bedCode" : "03A2-01-01",
+                           "bedStatus" : "empty"  //床狀態[string](空床：“empty”;住院中，無人預定:"occupied";住院中，後有預定:"nonAvailable";預定出院:"available")                     ]
+                  },
+                  ...
+               ]
+           },
+           "limit" : 50, //最大回傳筆數[number]
+           "offset" : 0, //回傳資料偏移數[number]
+           "total" : 50  //此次Query總筆數[number]
+        }
+
+### 回傳病患配床資訊[POST]
+
++ Parameters
+
+   + chartNo (string)   ... 病歷號
+   + bedCode (string)   ... 床位代碼
+   + date (string)      ... 預定日期(格式為YYYYMMDD）
+
++ Response 200 (application/json)
+
+        {
+          "success": true
+        }
