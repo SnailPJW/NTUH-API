@@ -1,7 +1,7 @@
 FORMAT: 1A
 HOST: http://www.wantoto.com
 
-# 台大醫院行動醫療資訊系統 Web Service v1.4.1
+# DEV台大醫院行動醫療資訊系統 Web Service v1.4.2
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
 # Group 登入與取得或驗證 SessionKey
@@ -303,7 +303,7 @@ HOST: http://www.wantoto.com
 ## 檢查科室層級 [/examRooms/{examRoomCode}]
 ### 查詢檢查科室 [GET]
 + Parameters
-    + examRoomCode (string, `000CPFT0`) ... 檢查科室代碼
+    + examRoomCode (string) ... 檢查科室代碼
 
 + Response 200 (application/json)
 
@@ -2025,7 +2025,7 @@ HOST: http://www.wantoto.com
         }
 
 ### 編輯留言板某個回復[PUT]
-+ Parameter
++ Parameters
     + replyId (string)      ... The identifier for the specified reply.
     + empNo (string)        ... 請求更新之使用者帳號
     + content (string)      ... 更新之訊息內容
@@ -2209,18 +2209,18 @@ HOST: http://www.wantoto.com
                                     "options": [    // 選項或是預設文字，如果沒有則不回傳 [optional]
                                         {
                                             "displayName" : "一般",
-                                            "optionCode" : "general",
+                                            "optionCode" : "general"
                                         },
                                         {
                                             "displayName" : "PAT",
-                                            "optionCode" : "pat",
+                                            "optionCode" : "pat"
                                         },
                                         {
                                             "displayName" : "術前",
-                                            "optionCode" : "preopr",
+                                            "optionCode" : "preopr"
                                         }, ...
                                     ],
-                                    "default": "general",   // 預設值(如果是傳醫囑ID，則回傳醫囑裡設定的值)   [string, optional]
+                                    "default": "general"    // 預設值(如果是傳醫囑ID，則回傳醫囑裡設定的值)   [string, optional]
                                 }, ...
                             ],
                             "relativeContent": {    // [optional]
@@ -2237,7 +2237,7 @@ HOST: http://www.wantoto.com
                                             }, ...
                                         ]
                                     }, ...
-                                ],
+                                ]
                             }
                         },
                         {
@@ -2251,7 +2251,7 @@ HOST: http://www.wantoto.com
                                     "options":  [ //[optional]
                                         {
                                             "displayName" : "NS",   // [string]
-                                            "optionCode" : "NS",    // [string]
+                                            "optionCode" : "NS"     // [string]
                                         }, ...
                                     ],
                                     "default": "NS" // [optional]
@@ -2260,9 +2260,9 @@ HOST: http://www.wantoto.com
                                     "title" : "體積",   // 此元件的title [string, optional]
                                     "type": "number",   // [string]
                                     "default": 100,     // [optional]
-                                    "unit" : "ml",      // 單位(或是後面的字) [string, optional]
+                                    "unit" : "ml"       // 單位(或是後面的字) [string, optional]
                                 }, ...
-                            ],
+                            ]
                         },
                         {
                             "title" : "藥品名稱",
@@ -2272,7 +2272,7 @@ HOST: http://www.wantoto.com
                                     "default": "NS"     // [optional]
                                 },
                                 ...
-                            ],
+                            ]
                         },
                         {
                             "title" : "自費",
@@ -2280,10 +2280,10 @@ HOST: http://www.wantoto.com
                             "required" : true,          // [optional]
                             "elements": [
                                 {
-                                    "type": "switch",
+                                    "type": "switch"
                                 },
                                 ...
-                            ],
+                            ]
                         },
                         {
                             "title" : "特殊醫囑",
@@ -2295,16 +2295,16 @@ HOST: http://www.wantoto.com
                                     "options" : [      // [optional]
                                         {
                                             "displayName" : "Syncope",   // [string]
-                                            "optionCode" : "Syncope",    // [string]
+                                            "optionCode" : "Syncope"     // [string]
                                         },
                                         {
                                             "displayName" : "Evaluation of pacemaker function",   // [string]
-                                            "optionCode" : "Evaluation of pacemaker function",    // [string]
+                                            "optionCode" : "Evaluation of pacemaker function"     // [string]
                                         },
                                         {
                                             "displayName" : "Assessment of total ischemic burden",   // [string]
-                                            "optionCode" : "Assessment of total ischemic burden",    // [string]
-                                        },
+                                            "optionCode" : "Assessment of total ischemic burden"     // [string]
+                                        }
                                     ]
                                 }
                             ]
@@ -2327,7 +2327,7 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "default" : "I000B1C2D3",     // 預設 [string]
+                "defaultAccount" : "I000B1C2D3",     // 預設 [string]
                 "list" : [
                     {
                         "accountNo" : "I000B1C2D3",                 // [string] 第一個字元為帳號的門住急別
@@ -2345,214 +2345,11 @@ HOST: http://www.wantoto.com
             }
         }
 
-
-## 6/3 - 醫令套餐 [/orderPackage{?empNo,chartNo,accountNo}]
-### 取得醫令套餐清單 [GET]
-
-+ Parameters
-    + empNo (string)       ...員工編號
-    + chartNo (string)     ...病人編號
-    + accountNo (string)   ...帳號編號
-
-+ Response 200 (application/json)
-
-
-        {
-            "content" : {
-                "general" : [   // Portal的上半部份 (科部, 病房, 員工, 病人, 路徑)
-                    {
-                        "content" : {
-                            "packageName" : "科部",    // [string]
-                            "default" : true           // 預設選項，使用者選擇上一層選項之後，要預設選取的項目 [boolean, optional]
-                        },
-                        "children" : [ // [optional]
-                            {
-                                "content" : {
-                                    "packageName" : "內科部",                       // 顯示的title名  [string]
-                                    "default": true
-                                },
-                                "children" : [  // 如果有sublist的話, 則顯示此key  [optional]
-                                    {
-                                        "content" : {
-                                            "packageName" : "骨髓移植 BMT",
-                                            "default" : true                            // [boolean, optional]
-                                        },
-                                        "children" : [  // [duplicate, optional]
-                                            {
-                                                "content" : {
-                                                    "packageName" : "Admission Orders", // [string]
-                                                    "packageCode" : "admissionorder",   // 透過此碼查詢醫令 [string, optional]
-                                                    "default" : true                    // [boolean, optional]
-                                                }
-                                            },
-                                            {
-                                                "content" : {
-                                                    "packageName" : "Admission Lab",
-                                                    "packageCode" : "admissionlab"      // [string, optional]
-                                                }
-                                            },
-                                            {
-                                                "content" : {
-                                                    "packageName" : "Routine Lab",
-                                                    "packageCode" : "routinelab"        // [string, optional]
-                                                }
-                                            },
-                                            {
-                                                "content" : {
-                                                    "packageName" : "CPCR",
-                                                    "packageCode" : "cpcr"              // [string, optional]
-                                                }
-                                            },
-                                            ...
-                                        ],
-                                    }, ...
-                                ],
-                            }, ...
-                        ]
-                    },
-                    {
-                        "content" : {
-                            "packageName" : "病房"
-                        },
-                        "children" : [ // [optional]
-                            {
-                                "content" : {
-                                    "packageName" : "Major Burn"
-                                },
-                                "children" : [ // [optional]
-                                    {
-                                        "content" : {
-                                            "packageName" : "照會",
-                                            "packageCode" : "A1234"
-                                        }
-                                    },
-                                    {
-                                        "content" : {
-                                            "packageName" : "醫囑",
-                                            "packageCode" : "A1235"
-                                        }
-                                    }, ...
-                                ]
-                            }, ...
-                        ]
-                    },
-                    ...
-                ],
-                "category" : [  // 醫令開立部份 (檢驗, 檢查, 影醫, 核醫, 病理, 治療, 醫囑)
-                    {
-                        "content" : {
-                            "packageName" : "檢驗"
-                        },
-                        "children" : [
-                            {
-                                "content" : {
-                                    "packageName" : "常用檢驗項目"
-                                },
-                                "children" : [
-                                    {
-                                        "content" : {
-                                            "packageName" : "CBC+BCS_Glu",
-                                            "packageCode" : "cbcbcsglu"
-                                        },
-                                    },
-                                    ...
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        "content" : {
-                            "packageName" : "檢查"
-                        },
-                        "children" : [
-                            {
-                                "content" : {
-                                    "packageName" : "外科檢查"
-                                },
-                                "children" : [
-                                    {
-                                        "content" : {
-                                            "packageName" : "血管檢查",
-                                            "packageCode" : "blood"
-                                        },
-                                    },
-                                    ...
-                                ]
-                            }
-                        ]
-                    },
-                    ...
-                ]
-            }
-        }
-
-
-## 7/8 - 醫令搜尋 [/orderSearch{?name,packageCode,accountNo}]
-### 取得藥物清單 [GET]
-
-+ Parameters
-    + name (string, optional)           ...搜尋字串
-    + packageCode (string, optional)    ...套餐
-    + accountNo (string)                ...帳號編號 第一各字元為病患的門住急別
-
-+ Response 200 (application/json)
-
-        {
-            "content" : {
-                "field" : [
-                    {
-                        "fieldCode" : "orderType",
-                        "displayName" : "醫令類別"
-                    }
-                    {
-                        "fieldCode" : "DisplayCode",
-                        "displayName" : "醫令碼",
-                    },
-                    {
-                        "fieldCode" : "order",
-                        "displayName" : "醫令內容"
-                    },
-                    ...
-                ],
-                "data" : [
-                    {
-                        "orderCode" : "T000L0114",  // 醫令碼 [string, required]
-                        "content" : {
-                            "DisplayCode" : "000L0114",
-                            "orderType" : "治療",
-                            "order"     : "複印全口顎Ｘ光照相"
-                        }
-                    },
-                    {
-                        "orderCode" : "T000L0113",
-                        "content" : {
-                            "DisplayCode" : "000L0113",
-                            "orderType" : "治療",
-                            "order"     : "複印咬合片Ｘ光照相"
-                        }
-                    },
-                    {
-                        "orderCode" : "T000L0112",
-                        "content" : {
-                            "DisplayCode" : "000L0112",
-                            "orderType" : "治療",
-                            "order"     : "複印根尖周Ｘ光照相"
-                        }
-                    },
-                    ...
-                ]
-            }
-        }
-
-
-
-
-## 6/3 - 藥物套餐 [/drugPackage{?empNo,chartNo,accountNo}]
+## 6/3 - 藥物套餐 [/medicationOrderPackages{?empNo,chartNo,accountNo}]
 ### 取得藥物套餐清單 [GET]
 
 + Parameters
     + empNo (string)       ...員工編號
-    + chartNo (string)     ...病人編號
     + accountNo (string)   ...帳號編號
 
 + Response 200 (application/json)
@@ -2608,7 +2405,7 @@ HOST: http://www.wantoto.com
                                 }
                             ]
                         }, ...
-                    ],
+                    ]
                 },
                 {
                     "content" : {
@@ -2642,7 +2439,7 @@ HOST: http://www.wantoto.com
         }
 
 
-## 6/3 - 藥物搜尋 [/drugSearch{?name,packageCode,accountNo}]
+## 6/3 - 藥物搜尋 [/medicationOrders{?name,packageCode,accountNo}]
 ### 取得藥物清單 [GET]
 
 + Parameters
@@ -2659,19 +2456,19 @@ HOST: http://www.wantoto.com
                     {
                         "fieldCode" : "drugName",       //欄位代碼[string]
                         "displayName" : "學名",         //欄位顯示名稱[string]
-                        "textAlignment" : "left",       //欄位內容對齊方式ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
+                        "textAlignment" : "left"        //欄位內容對齊方式ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
                     },
                     {
                         "fieldCode" : "itemName",  //欄位代碼[string]
-                        "displayName" : "商品名", //欄位顯示名稱[string]
+                        "displayName" : "商品名"  //欄位顯示名稱[string]
                     },
                     {
                         "fieldCode" : "dose",
-                        "displayName" : "常用劑量",
+                        "displayName" : "常用劑量"
                     },
                     {
                         "fieldCode" : "frequency",
-                        "displayName" : "常用頻率",
+                        "displayName" : "常用頻率"
                     },
                     {
                         "fieldCode" : "unit",
@@ -2686,152 +2483,13 @@ HOST: http://www.wantoto.com
                             "itemName" : "Taita No. 1 500 ml/btl",
                             "dose" : "1",
                             "unit" : "tab",
-                            "frequency" : "TID",
-                        },
-
+                            "frequency" : "TID"
+                        }
                     },
                     ...
-                ],
-            },
+                ]
+            }
         }
-
-## 4/20 - 取得開立/修改醫囑需要資料 [/order{?drugCode%5B%5D,orderCode%5B%5D,orderID%5B%5D}]
-### 醫囑通用格式 [GET]
-
-+ Parameters
-    + drugCode%5B%5D (array[string], optional)    ... 藥碼
-    + orderCode%5B%5D (array[string], optional)   ... 醫令碼
-    + orderID%5B%5D (array[string], optional)     ... 醫囑ID
-
-+ Response 200 (application/json)
-
-
-        {
-            "content": [
-                {
-                    "id": "000L0114",               // [string]
-                    "postURL" :  "url/to/server",   // [string(url)]
-                    "postContent":[
-                        {
-                            "title":"階段", // 欄位名稱 [string]
-                            "key":"stage",  // 開立時需要post至server的key, 如果單純顯示用則不需回傳 [string, optional]
-                            "required": true,   // 此欄位是否必要, 如果單純顯示用則不需回傳  [boolean, optional]
-                            "elements": [
-                                {
-                                    "type":"option",    // element的格式  ex: label, textField, checkbox, switch, option, date, number [string]
-                                    "options": [    // 選項或是預設文字，如果沒有則不回傳 [optional]
-                                        {
-                                            "displayName" : "一般",
-                                            "optionCode" : "general",
-                                        },
-                                        {
-                                            "displayName" : "PAT",
-                                            "optionCode" : "pat",
-                                        },
-                                        {
-                                            "displayName" : "術前",
-                                            "optionCode" : "preopr",
-                                        }, ...
-                                    ],
-                                    "default": "general",   // 預設值(如果是傳醫囑ID，則回傳醫囑裡設定的值)   [string, optional]
-                                }, ...
-                            ],
-                            "relativeContent": [       // [optional]
-                                {
-                                    "optionCode" : "general",
-                                    "postContent": [
-                                        {
-                                            "title":"預計時間",
-                                            "key":  "estimatedTime",
-                                            "required" : true,
-                                            "elements" : [
-                                                {
-                                                    "type" : "date",
-                                                    "default" : 1406938026,
-                                                    "dateformat" : "yyyy-MM-dd HH"  //若此欄位資訊為時間，則回傳顯示格式，非時間則不回傳[string]
-                                                }
-                                            ]
-                                        }, ...
-                                    ],
-                                }, ...
-                            ]
-                        },
-                        {
-                            "title" : "稀釋體積",
-                            "key":  "dilutionVolume",    // [optional]
-                            "required" : true,           // [optional]
-                            "elements": [
-                                {
-                                    "title" : "稀釋液", // [string, optional]
-                                    "type": "option",   // [string]
-                                    "options":  [ // [optional]
-                                        {
-                                            "displayName" : "NS",   // [string]
-                                            "optionCode" : "NS",    // [string]
-                                        }, ...
-                                    ],
-                                    "default": "NS"         // [string, optional]
-                                },
-                                {
-                                    "title" : "體積",       // 此元件的title [string, optional]
-                                    "type": "number",       // [string]
-                                    "default": 100,         // [number, optional]
-                                    "unit" : "ml",          // 單位(或是後面的字) [string, optional]
-                                }, ...
-                            ],
-                        },
-                        {
-                            "title" : "藥品名稱",
-                            "elements": [
-                                {
-                                    "type": "label",
-                                    "default": "Acetaminophen" // [optional]
-                                },
-                                ...
-                            ],
-                        },
-                        {
-                            "title" : "自費",
-                            "key" : "expense",    // [optional]
-                            "required" : true,   // [optional]
-                            "elements": [
-                                {
-                                    "type": "switch",
-                                },
-                                ...
-                            ],
-                        },
-                        {
-                            "title" : "特殊醫囑",
-                            "key" : "specialOrder",     // [optional]
-                            "required" : false,         // [optional]
-                            "elements" : [
-                                {
-                                    "type" : "textField",
-                                    "options" : [ // [optional]
-                                        {
-                                            "displayName" : "Syncope",   // [string]
-                                            "optionCode" : "Syncope",    // [string]
-                                        },
-                                        {
-                                            "displayName" : "Evaluation of pacemaker function",   // [string]
-                                            "optionCode" : "Evaluation of pacemaker function",    // [string]
-                                        },
-                                        {
-                                            "displayName" : "Assessment of total ischemic burden",   // [string]
-                                            "optionCode" : "Assessment of total ischemic burden",    // [string]
-                                        },
-                                    ]
-                                }
-                            ]
-                        }
-                    ],
-                    "notice" : "本藥品可能增加跌倒風險"     // 注意事項 [string, optional]
-                },
-                ...
-            ]
-        }
-
 
 ## 3/20 - 未確認醫令 [/patients/{charNo}/unconfirmOrder{?empNo}]
 ### 取得未確認醫令清單 [GET]
@@ -2853,21 +2511,21 @@ HOST: http://www.wantoto.com
                         },
                         {
                             "fieldCode" : "period",  //欄位代碼[string]
-                            "displayName" : "期間", //欄位顯示名稱[string]
+                            "displayName" : "期間"  //欄位顯示名稱[string]
                         },
                         {
                             "fieldCode" : "category",
-                            "displayName" : "類別",
+                            "displayName" : "類別"
                         },
                         {
                             "fieldCode" : "drugName",
                             "displayName" : "學名",
-                            "textAlignment" : "left", //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
+                            "textAlignment" : "left"  //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
                         },
                         {
                             "fieldCode" : "itemName",
                             "displayName" : "商品名",
-                            "textAlignment" : "left", //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
+                            "textAlignment" : "left"  //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
                         },
                         {
                             "fieldCode" : "status",
@@ -2890,11 +2548,11 @@ HOST: http://www.wantoto.com
                                     "empNo" : "23454353",
                                     "name" : "葉小菜"
                                 },
-                                "status" : "開立",
-                            },
+                                "status" : "開立"
+                            }
                         },
                         ...
-                    ],
+                    ]
                 },
                 {   // 診療醫令部份
                     "field" : [    //欄位資訊
@@ -2905,16 +2563,16 @@ HOST: http://www.wantoto.com
                         },
                         {
                             "fieldCode" : "period",  //欄位代碼[string]
-                            "displayName" : "期間", //欄位顯示名稱[string]
+                            "displayName" : "期間"    //欄位顯示名稱[string]
                         },
                         {
                             "fieldCode" : "category",
-                            "displayName" : "類別",
+                            "displayName" : "類別"
                         },
                         {
                             "fieldCode" : "order",
                             "displayName" : "醫令名稱",
-                            "textAlignment" : "left", //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
+                            "textAlignment" : "left"   //欄位內容對齊方式  //ex:"left"(向左對齊)、"center"(置中對齊)、"right"(向右對齊)[string,optional]
                         },
                         {
                             "fieldCode" : "status",
@@ -2937,12 +2595,12 @@ HOST: http://www.wantoto.com
                                     "empNo" : "23454353",
                                     "name" : "葉小菜"
                                 },
-                                "status" : "新增",
-                            },
+                                "status" : "新增"
+                            }
                         },
                         ...
-                    ],
-                },
+                    ]
+                }
             ]
         }
 
@@ -2959,11 +2617,167 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "success":  true,
+                "success":  true
             }
         }
 
 # Group 開發中 Phase2 Order APIs
+
+## 7/21 - 科部清單 [/departments{?sessionKey}]
+### 取得科部清單 [GET]
+
++ Parameters
+    + sessionKey    (string) ... SessionKey
+
++ Response 200 (application/json)
+
+        {
+            "content": [
+                {
+                    "title": "內科",                  // [string] 顯示的 title 名稱
+                    "code": "DEPT_001"               // [string] 科部對應的代碼
+                },
+                {
+                    "title": "外科",
+                    "code": "DEPT_002"
+                },
+                ...
+            ]
+        }
+
+
+## 7/21 - 醫令套餐 [/orderPackages{?empNo,accountNo,type,department,sessionKey}]
+### 取得醫令套餐清單 [GET]
+
++ Parameters
+    + empNo         (string, optional) ... 員工編號
+    + accountNo     (string, optional) ... 帳號編號 (第一碼為門住級別)
+    + department    (string, optional) ... 欲搜尋套餐之科部
+    + type          (string) ... 請求套餐種類 'general' 為 科部, 病房, 員工, 病人, 路徑 'catagory' 為 category 為 全部, 檢驗, 檢查, 影醫, 核醫, 病理, 治療, 醫囑
+    + sessionKey    (string) ... SessionKey
+
++ Response 200 (application/json)
+
+        {
+            "content" : [
+                {
+                    "packageName": "科部",                                       // [string] 顯示的title名
+                    "packageCode": "the_package_code",                          // [string, optional] 透過此碼查詢醫令
+                    "preset" : true,                                            // [boolean, optional] 預設選項，使用者選擇上一層選項之後，要預設選取的項目 [
+                    "children" : [ // [duplicate, optional]
+                        {
+                            "packageName": "內科部",                             // 顯示的title名  [string]
+                            "preset": true,                                     // [boolean, optional]
+                            "children" : [  // 如果有sublist的話, 則顯示此key  [duplicate, optional]
+                                {
+                                    "packageName": "骨髓移植 BMT",
+                                    "preset": true,                             // [boolean, optional]
+                                    "children": [  // [duplicate, optional]
+                                        {
+                                            "packageName" : "Admission Orders", // [string]
+                                            "packageCode" : "admissionorder",   // 透過此碼查詢醫令 [string, optional]
+                                            "preset" : true                     // [boolean, optional]
+                                        },
+                                        {
+                                            "packageName" : "Admission Lab",    // [string]
+                                            "packageCode" : "admissionlab"      // [string, optional]
+                                        },
+                                        {
+                                            "packageName" : "Routine Lab",      // [string]
+                                            "packageCode" : "routinelab"        // [string, optional]
+                                        },
+                                        {
+                                            "packageName" : "CPCR",             // [string]
+                                            "packageCode" : "cpcr"              // [string, optional]
+                                        },
+                                        ...
+                                    ]
+                                }, ...
+                            ]
+                        }, ...
+                    ]
+                },
+                {
+                    "packageName" : "病房",
+                    "children" : [ // [optional]
+                        {
+                            "packageName" : "Major Burn",
+                            "children" : [ // [optional]
+                                {
+                                    "packageName" : "照會",
+                                    "packageCode" : "A1234"
+                                },
+                                {
+                                    "packageName" : "醫囑",
+                                    "packageCode" : "A1235"
+                                },
+                                ...
+                            ]
+                        },
+                        ...
+                    ]
+                },
+                ...
+            ]
+        }
+
+
+## 7/8 - 醫令搜尋 [/orders{?name,packageCode,accountNo}]
+### 取得藥物清單 [GET]
+
++ Parameters
+    + name (string, optional)           ...搜尋字串
+    + packageCode (string, optional)    ...套餐
+    + accountNo (string)                ...帳號編號 第一各字元為病患的門住急別
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "field" : [
+                    {
+                        "fieldCode" : "orderType",
+                        "displayName" : "醫令類別"
+                    },
+                    {
+                        "fieldCode" : "DisplayCode",
+                        "displayName" : "醫令碼"
+                    },
+                    {
+                        "fieldCode" : "order",
+                        "displayName" : "醫令內容"
+                    },
+                    ...
+                ],
+                "data" : [
+                    {
+                        "orderCode" : "T000L0114",  // 醫令碼 [string, required]
+                        "content" : {
+                            "DisplayCode" : "000L0114",
+                            "orderType" : "治療",
+                            "order"     : "複印全口顎Ｘ光照相"
+                        }
+                    },
+                    {
+                        "orderCode" : "T000L0113",
+                        "content" : {
+                            "DisplayCode" : "000L0113",
+                            "orderType" : "治療",
+                            "order"     : "複印咬合片Ｘ光照相"
+                        }
+                    },
+                    {
+                        "orderCode" : "T000L0112",
+                        "content" : {
+                            "DisplayCode" : "000L0112",
+                            "orderType" : "治療",
+                            "order"     : "複印根尖周Ｘ光照相"
+                        }
+                    },
+                    ...
+                ]
+            }
+        }
 
 ## 6/29 - 病患 cre 值 [/patients/{chartNo}/cre{?sessionKey}]
 ### 取得病患 cre 值報告 [GET]
@@ -2983,10 +2797,10 @@ HOST: http://www.wantoto.com
 
         {
             "error": 104,                                   // [number] error code
-            "message": "找不到病患最近三個月的 cre 數值"       // [string] error message
+            "message": "找不到病患最近三個月的 cre 數值"         // [string] error message
         }
 
-## 7/07 - 影像醫學介面內容 [/interface/order/MI{imageType}{?sessionKey}]
+## 7/07 - 影像醫學介面內容 [/interface/order/MI/{imageType}{?sessionKey}]
 ### 取得介面內容 [GET]
 + Parameters
     + sessionKey        (string) ... SessionKey
@@ -3058,10 +2872,11 @@ HOST: http://www.wantoto.com
 
 
 ## 6/25 - 醫令碼所對應的醫令 [/order/{orderCode}{?sessionKey}]
+### 取得醫令資訊 [GET]
+
 + Parameters
     + sessionKey        (string) ... SessionKey
 
-### 取得醫令資訊 [GET]
 + Response 200 (application/json)
 
         {
@@ -3188,15 +3003,11 @@ HOST: http://www.wantoto.com
         }
 
 
-## 6/16 病患醫令記錄 [/account/{accountNo}/orderRecords{?orderCode,orderName,quantity,billType,expectedExTime,hospitalCode,sessionKey}]
+## 7/20 病患醫令記錄 [/account/{accountNo}/orderRecords{?orderCode,orderName,sessionKey,orderRecordId}]
 
 ### 開立醫令 [POST]
-+ Parameters
-    + orderCode    (string) ... the unique id for the specific order
-    + orderName    (string) ... the order name
-    + sessionKey
 
-+ Request IssueOrders (application/json)
++ Request IssueRegularOrders (application/json)
 
         {
             "content": { // 開立醫令清單，每個醫令對應的鍵值為該醫令在本次請求中辨識之所用
@@ -3274,7 +3085,8 @@ HOST: http://www.wantoto.com
                 },
                 ...
             },
-            "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"
+            "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009",           // [string] SessionKey
+            "forMIOrders": false                                        // [boolean] 是否為請求影像醫學的 order
         }
 
 + Response 200 (application/json)
@@ -3300,8 +3112,7 @@ HOST: http://www.wantoto.com
                         "2": "K23111222222",
                         ...
                     }
-                }
-
+                },
                 "failed": [     // 未能成功開立的醫令之清單，內容為該醫令所對應之鍵值
                     "1",
                     "3",
@@ -3310,6 +3121,69 @@ HOST: http://www.wantoto.com
                 "message": "ERROR DESCRIPTION"  // [string] 有關請求錯誤之描述
             }
         }
+
+### 刪除醫令 [DELETE]
++ Parameters
+    + sessionKey    (string) ... SessionKey
+    + orderRecordId (string) ... 欲刪除之醫令交易檔 ID
+
++ Response 200 (application/json)
+
+        {
+            "success": true
+        }
+
+## 7/20 開立影像醫學醫令 [/account/{accountNo}/orderRecords{?orderCode,sessionKey,orderRecordId}]
+### 開立醫令 [POST]
+
++ Request IssueMedicalImageOrders (application/json)
+
+
+        {
+            "cointent": {
+                "payment": "PAYMENT_SELECTION_SELF",            // [optional] 以下為表格填寫的資料
+                "indication": "",                               // [optional]
+                "whole_brain_flag": true                        // [optional]
+            },
+            "imageType": "Plain",                               // [string] 影像類別 MRI, CT 或 Plain
+            "forMIOrders": true,                                // [boolean] 是否為請求影像醫學的 order
+            "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"    // [string] SessionKey
+        }
+
+
++ Response 200 (application/json)
+
+        {
+            "success": True,
+            "content": {
+                "orderRecordIds": {
+                    "1": "T12312311111",     // [string] 醫令交易檔 ID
+                    "2": "K23111222222",     // [string] 醫令交易檔 ID
+                    ...
+                }
+            }
+        }
+
++ Response 400 (application/json)
+
+        {
+            "error": 802,
+            "content": {
+                "succeeded": {  // [optional] 回傳成功開立的醫令之清單，若無則不用回傳
+                    "orderRecordIds": {
+                        "2": "K23111222222",
+                        ...
+                    }
+                },
+                "failed": [     // 未能成功開立的醫令之清單，內容為該醫令所對應之鍵值
+                    "1",
+                    "3",
+                    ...
+                ],
+                "message": "ERROR DESCRIPTION"  // [string] 有關請求錯誤之描述
+            }
+        }
+
 
 ## 6/16 醫令交易檔 ID 所對應之病患醫令記錄 [/account/{accountNo}/orderRecord/{orderRecordId}{?quantity,billType,expectedExTime,confirmedTime,stage,status,sessionKey,orderRecordIds,verifier,isEmergency,specialInstruction,bedId}]
 
@@ -3369,7 +3243,7 @@ HOST: http://www.wantoto.com
                             },
                             ...
                         ],
-                        "freeSelectionEnable": false,           // [optional, boolean] 是否允許增添選項，當類型為 S, M 時使用
+                        "freeSelectionEnable": false            // [optional, boolean] 是否允許增添選項，當類型為 S, M 時使用
                     },
                     {
                         "displayTitle": "DATE_SELECTION",       // [string] 問題顯示題目
@@ -3472,7 +3346,7 @@ HOST: http://www.wantoto.com
 
 # Group MedicationOrder
 
-## 處方醫令資訊 [/medication/{medicationCode}{?sessionKey,stateIndex}]
+## 處方醫令資訊 [/medicationOrder/{medicationCode}{?sessionKey,stateIndex}]
 ### 取得處方醫令屬性資料 [GET]
 + Parameters
     + sessionKey    (string) ... SessionKey
@@ -3555,12 +3429,12 @@ HOST: http://www.wantoto.com
         {
             "error": 804,                       // [number] error code
             "content": {
-                "message": "TEST_MESSAGE",      // [string] error message
+                "message": "TEST_MESSAGE"       // [string] error message
             }
         }
 
 
-## 處方醫令開令記錄 [/account/{accountNo}/medicationRecords{?sessionKey,stateIndex}]
+## 處方醫令開令記錄 [/account/{accountNo}/medicationRecords{?sessionKey,stateIndex,medicationRecordId}]
 ### 開立處方醫令 [POST]
 
 + Request IssueMedicationOrder (application/json)
@@ -3592,7 +3466,7 @@ HOST: http://www.wantoto.com
                     "concentration":    100,                        // [number] 濃度 注射處方使用
                     "flowVelocity":     100,                        // [number] 速度 注射處方使用
                     "infusionTime":     10,                         // [number] 輸注時間 注射處方使用
-                    "mlPerHour":        0.01,                       // [number] 流速 注射處方使用
+                    "mlPerHour":        1                           // [number] 流速 注射處方使用
                 },
                 "dispenseWay":  1,                                  // [number, optional] 調劑方式
                 "dispenseDayList": [                                // [optional] 調劑指定日期
@@ -3612,7 +3486,7 @@ HOST: http://www.wantoto.com
         {
             "success": true,
             "content": {
-                "medicationRecordId": "123123",     // [string] 交易記錄ID
+                "medicationRecordId": "123123"      // [string] 交易記錄ID
             }
         }
 
@@ -3626,8 +3500,19 @@ HOST: http://www.wantoto.com
             }
         }
 
+### 刪除醫令處方 [DELETE]
++ Parameters
+    + sessionKey            (string) ... SessionKey
+    + medicationRecordId    (string) ... 欲刪除之醫令交易記錄 ID
 
-## 特殊劑量常用選項表 [/medication/specialDoseOptions{?sessionKey}]
++ Response 200 (application/json)
+
+        {
+            "success": true
+        }
+
+
+## 特殊劑量常用選項表 [/medicationOrder/specialDoseOptions{?sessionKey}]
 ### 取得選項內容 [GET]
 + Parameters
     + sessionKey        (string) ... SessionKey
@@ -3645,7 +3530,7 @@ HOST: http://www.wantoto.com
             ]
         }
 
-## 處方頻率表 [/medication/repeatedPatterns{?sessionKey}]
+## 處方頻率表 [/medicationOrder/repeatedPatterns{?sessionKey}]
 ### 取得處方頻率表 [GET]
 + Parameters
     + sessionKey        (string) ... SessionKey
@@ -3664,7 +3549,7 @@ HOST: http://www.wantoto.com
                         9,
                         18,
                         ...
-                    ],
+                    ]
                 },
                 ...
             ]
@@ -3682,22 +3567,56 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "bloodType": "type_unknown",                                    // [string] 檢驗血型
-                "specimenInfo": "檢體: -- 採檢: -- 提血期限: 採檢後 3 日內",          // [string] 有效檢體
-                "inspectInfo": "HB 12.0 (20150520-RL)  PLT 472 (20150520-RL)",  // [string] 檢驗資訊
+                "bloodTypeInfo": {                                              // 檢驗血型資料
+                    "description": "此病人無檢驗血型資料",                          // [string] 血型資料內容
+                    "hilight": true                                             // [boolean] 是否要 highlight資訊內容
+                },
+                "specimenInfo": "檢體: -- 採檢: -- 提血期限: 採檢後 3 日內",         // 有效檢體資訊
+                "inspectInfo": {                                                // 檢驗資訊
+                    "HB": {                                                     // [optional] HB相關 若無資料可以不用回傳
+                        "value": 12.0,                                          // [number] 檢驗數值
+                        "description": "(20150520-RL)"                          // [string] 檢驗描述
+                    },
+                    "PLT": {                                                    // [optional] PLT相關 若無資料可以不用回傳
+                        "value": 472,                                           // [number] 檢驗數值
+                        "description": "(20150520-RL)"                          // [string] 檢驗描述
+                    },
+                    "PT": {                                                     // [optional] PT相關 若無資料可以不用回傳
+                        "value": 12.0,                                          // [number] 檢驗數值
+                        "description": "(20150520-CT)"                          // [string] 檢驗描述
+                    },
+                    "PTT": {                                                    // [optional] PTT相關 若無資料可以不用回傳
+                        "value": 36.4,                                          // [number] 檢驗數值
+                        "description": "(20150521-RL)"                          // [string] 檢驗描述
+                    }
+                },
                 "dictateBloodType": {                                           // 口述血型
                     "type": "type_unknown",                                     // [string] 血型代號
                     "description": "自過敏史取得口述血型, 資料來源為舊病歷資料"         // [string] 口述血型敘述
                 },
-                "newbornInfoRequired": false                                    // [boolean] 是否需要額外輸入新生兒資料
+                "newbornInfo": {                                                // [optional] 若無則不用回傳
+                    "motherBloodType": "type_A",                                // [string] 母親口述血型
+                    "fatherBloodType": "type_unknown",                          // [string] 父親口述血型
+                    "hadTransfused": "T",                                       // [string] 使否曾經輸血 T:為是 F:為否 U:不清楚
+                    "transfuseInfo": {                                          // [optional] 只有曾經輸血有記錄才回傳
+                        "blood": "Packed RBC",                                  // [string] 血品
+                        "bloodType": "type_A"                                   // [string] 血型
+                    },
+                    "hadExchanged": "T",                                        // [string] 使否曾經換血 T:為是 F:為否 U:不清楚
+                    "exchangeInfo": {                                           // [optional] 只有曾經換血有記錄才回傳
+                        "blood": "Packed RBC",                                  // [string] 血品
+                        "bloodType": "type_A"                                   // [string] 血型
+                    },
+                    "needPedipack": false                                       // [boolean] 是否需要分裝血品
+                }
             }
         }
 
-## 血品清單 [/bloodOrder/bloodTypes{?sessionKey,displayAll}]
+## 血品清單 [/bloodOrder/bloods{?sessionKey,displayAll}]
 ### 取得血品清單 [GET]
 + Parameters
     + sessionKey        (string) ... SessionKey
-    + displayAll        (string) ... 是否顯示完整清單 true/false 若為 false 則回傳常用血品即可
+    + displayAll        (string) ... 是否顯示完整清單 true/false 若為 false 則回傳常用血品 即 freqUsed=True 之血品即可
 
 + Response 200 (application/json)
 
@@ -3706,30 +3625,39 @@ HOST: http://www.wantoto.com
             "content": {
                 "groups": [
                     {
-                        "title": "紅血球血品",                          // [string] 血品群組名稱
-                        "items": [                                    // 血品清單
+                        "title": "紅血球血品",                                    // [string] 血品群組名稱
+                        "items": [                                              // 血品清單
                             {
-                                "code":     "000PP011",               // [string] 血品代碼
-                                "name":     "Packed RBC",             // [string] 血品名稱
-                                "unit":     "U",                      // [string] 血品單位
-                                "frqUsed":  true                      // [boolean] 是否常用
+                                "code":     "000PP011",                         // [string] 血品代碼
+                                "title":    "Packed RBC",                       // [string] 血品顯示名稱
+                                "unit":     "U",                                // [string] 血品單位
+                                "frqUsed":  true,                               // [boolean] 是否常用
+                                "note": [                                       // [optional] 備註欄位需要元件 若無則不用回傳
+                                    {
+                                        "title": "使用新鮮血",                    // [string] 顯示標題
+                                        "returnKey": "c_use_fresh_blood",       // [string] 回傳結果時該元件所對應的鍵值
+                                        "type": "C",                            // [string] 問題種類，如日期為 D，checkbox 為 C
+                                        "required": true                        // [boolean] 問題是否為必填項目
+                                    },
+                                    ...
+                                ]
                             },
                             {
-                                "code":     "000PP141",               // [string] 血品代碼
-                                "name":     "Leukocyte-Poor RBC",     // [string] 血品名稱
-                                "unit":     "U",                      // [string] 血品單位
-                                "frqUsed":  true                      // [boolean] 是否常用
+                                "code":     "000PP141",                         // [string] 血品代碼
+                                "title":    "Leukocyte-Poor RBC",               // [string] 血品顯示名稱
+                                "unit":     "U",                                // [string] 血品單位
+                                "frqUsed":  true                                // [boolean] 是否常用
                             },
                             ...
                         ],
                         "adaptations": [    // 輸血適應症清單
                             {
-                                "title": "開刀前或侵襲術式前備血",        // [string] 該選項所顯示的標題
-                                "return_value": "RBC_001"             // [string] 該選項選取時的回傳值
+                                "title": "開刀前或侵襲術式前備血",                  // [string] 該選項所顯示的標題
+                                "code": "RBC_001"                               // [string] 該選項選取時回傳用的適應症代碼
                             },
                             {
-                                "title": "大量輸血",                    // [string] 該選項所顯示的標題
-                                "return_value": "RBC_002"             // [string] 該選項選起時的回傳值
+                                "title": "大量輸血",                              // [string] 該選項所顯示的標題
+                                "code": "RBC_002"                               // [string] 該選項選取時回傳用的適應症代碼
                             },
                             ...
                         ],
@@ -3743,7 +3671,7 @@ HOST: http://www.wantoto.com
             }
         }
 
-## 血品備血醫囑 [/account/{accountNo}/bloodOrderSheets{?sessionKey}]
+## 血品備血醫囑 [/account/{accountNo}/blood/prepareOrders{?sessionKey}]
 ### 取得備血醫囑清單 [GET]
 + Parameters
     + sessionKey        (string) ... SessionKey
@@ -3754,27 +3682,30 @@ HOST: http://www.wantoto.com
         {
             "content": [
                 {
-                    "sheetNo": "2004681",                               // [string] 備血單號
-                    "blood": {                                          // 血品相關資訊
-                        "name": "Packed RBC",                           // [string] 血品名稱
-                        "unit": "U"                                     // [string] 血品單位
-                    },
-                    "totalAmount": 6,                                   // [number] 總備血量
-                    "issuedAmount": 3,                                  // [number] 已開血量
-                    "issueOrders": [                                    // 輸血醫囑清單 [optional] 若無則不用回傳
+                    "orderRecordId": "2004681",                                 // [string] 備血醫囑對應之 unique ID
+                    "bloods": [                                                 // 血品相關資訊
                         {
-                            "issueNo": "2004681-01",                    // [string] 提血單號
-                            "amount": 3,                                // [number] 提血血量
-                            "status": "(待血庫接單)(醫囑未確認)"           // [string] 提血單狀態描述
+                            "name": "Packed RBC",                               // [string] 血品名稱
+                            "unit": "U",                                        // [string] 血品單位
+                            "totalAmount": 6,                                   // [number] 總備血量
+                            "issuedAmount": 3,                                  // [number] 已開血量
+                            "transfusionOrders": [                              // 輸血醫囑清單 [optional] 若無則不用回傳
+                                {
+                                    "orderRecordId": "2004681-01",              // [string] 輸血醫囑之 unique ID
+                                    "amount": 3,                                // [number] 輸血血量
+                                    "status": "(待血庫接單)(醫囑未確認)"            // [string] 狀態描述
+                                },
+                                ...
+                            ]
                         },
                         ...
                     ],
-                    "creatorNo": "111291",                              // [string] 開立醫師員編
-                    "creatorName": "王大明",                             // [string] 開立醫師姓名
-                    "createdTime": 1436256491,                          // [number(timestamp)] 開立時間
-                    "expectedIssueDay": 1436260091,                     // [number(timestamp)] 預計輸血日期
-                    "verified": false,                                  // [boolean] 醫囑是否被確認
-                    "additionalInfo": [
+                    "creatorNo": "111291",                                      // [string] 開立醫師員編
+                    "creatorName": "王大明",                                     // [string] 開立醫師姓名
+                    "createdTime": 1436256491,                                  // [number(timestamp)] 開立時間
+                    "expectedIssueDay": 1436260091,                             // [number(timestamp)] 預計輸血日期
+                    "verified": false,                                          // [boolean] 醫囑是否被確認
+                    "additionalInfo": [                                         // [optional] 額外資訊 若無則不用回傳
                         {
                             "title": "用血時機",
                             "content": "先行備血, 分批輸血, 由護理師啟動提血"
@@ -3784,7 +3715,8 @@ HOST: http://www.wantoto.com
                             "content": "待血庫接單(醫囑未確認)"
                         }
                     ]
-                }
+                },
+                ...
             ]
         }
 
@@ -3794,34 +3726,39 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "dictateBloodType": "type_0",                           // [string] 口述血型代碼
-                "newBornInfo": {                                        // [optional] 新生兒資料，若不需要填寫不會傳入
-                    "motherBloodType": "type_A",                        // [string] 母親口述血型
-                    "fatherBloodType": "type_unknown",                  // [string] 父親口述血型
-                    "hadTransfused": "T",                               // [string] 使否曾經輸血 T:為是 F:為否 U:不清楚
-                    "hadExchanged": "U",                                // [string] 使否曾經換血 T:為是 F:為否 U:不清楚
-                    "needPedipack": false                               // [boolean] 是否需要分裝血品
+                "dictateBloodType": "type_0",                                   // [string] 口述血型代碼
+                "newbornInfo": {                                                // [optional] 新生兒資料，若不需要填寫不會傳入
+                    "motherBloodType": "type_A",                                // [string] 母親口述血型
+                    "fatherBloodType": "type_unknown",                          // [string] 父親口述血型
+                    "hadTransfused": "T",                                       // [string] 使否曾經輸血 T:為是 F:為否 U:不清楚
+                    "hadExchanged": "U",                                        // [string] 使否曾經換血 T:為是 F:為否 U:不清楚
+                    "needPedipack": false                                       // [boolean] 是否需要分裝血品
                 },
-                "code": "000PP011",                                     // [string] 欲開立之血品代碼
-                "amount": 2,                                            // [number] 開立血品之數量
-                "adaptation": "RBC_001",                                // [string] 開立血品之適應症代碼
-                "destination": {                                        // 送達地點
-                    "code": "T01",                                      // [string] 送達地點代號
-                    "description": "11B-07-01"                          // [string] 送達地點資訊
-                },
-                "transfuseTime": {                                      // 輸血時機
-                    "code": "BeforSurgery",                             // [string] 輸血時機代碼
-                    "Operation": "OPERATION_TYPE",                      // [string, optional] 術式說明 手術/處置前備血用
-                    "date": 1435744800,                                 // [number(timestamp), optional] 日期 手術/處置前備血用
-                    "description": "DESCRIPTION_CONTENT"                // [string] 其他描述
-                },
-                "flowSpeed": {                                          // 輸血流速
-                    "code": "01",                                       // [string] 流速代碼
-                    "description": "DESCRIPTION_CONTENT"                // [string] 其他說明
-                },
-                "notification": "NOTIFICATION_CONTENT"                  // [string] 其他敘述
+                "bloodTypes": [                                                 // 血品資訊
+                    {
+                        "code": "000PP011",                                     // [string] 欲開立之血品代碼
+                        "amount": 2,                                            // [number] 開立血品之數量
+                        "adaptation": "RBC_001",                                // [string] 開立血品之適應症代碼
+                        "destination": {                                        // 送達地點
+                            "code": "T01",                                      // [string] 送達地點代號
+                            "description": "11B-07-01"                          // [string] 送達地點資訊
+                        },
+                        "transfuseTime": {                                      // 輸血時機
+                            "code": "BeforSurgery",                             // [string] 輸血時機代碼
+                            "Operation": "OPERATION_TYPE",                      // [string, optional] 術式說明 手術/處置前備血用
+                            "date": 1435744800,                                 // [number(timestamp), optional] 日期 手術/處置前備血用
+                            "description": "DESCRIPTION_CONTENT"                // [string] 其他描述
+                        },
+                        "flowSpeed": {                                          // 輸血流速
+                            "code": "01",                                       // [string] 流速代碼
+                            "description": "DESCRIPTION_CONTENT"                // [string] 其他說明
+                        },
+                        "notification": "NOTIFICATION_CONTENT"                  // [string] 其他敘述
+                    },
+                    ...
+                ]
             },
-            "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"            // [string] SessionKey
+            "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"                    // [string] SessionKey
         }
 
 + Response 201 (application/json)
@@ -3830,16 +3767,16 @@ HOST: http://www.wantoto.com
         {
             "success": true,
             "content": {
-                "sheetNo": "2004681"                                    // [string]  備血醫囑單號
+                "orderRecordId": "2004681"                                      // [string]  備血醫囑單號
             }
         }
 
 
-## 血品輸血醫囑清單 [/account/{accountNo}/bloodIssueOrders{?sessionKey,amount,expectedIssueDay,destCode,destDescription,sheetNo}]
+## 血品輸血醫囑清單 [/account/{accountNo}/blood/transfusionOrders{?sessionKey,amount,expectedIssueDay,destCode,destDescription,prepareOrderId}]
 ### 開立輸血醫囑 [POST]
 + Parameters
     + sessionKey        (string) ... SessionKey
-    + sheetNo           (string) ... 對應的備血單單號
+    + prepareOrderId    (string) ... 對應的備血醫囑 ID
     + amount            (number) ... 提血數量
     + expectedIssueDay  (number) ... 預計輸血日期 unix timestamp 格式
     + destCode          (string) ... 送達地點代碼
@@ -3850,11 +3787,11 @@ HOST: http://www.wantoto.com
         {
             "success": true,
             "content": {
-                "issueNo": "2004681-1"
+                "orderRecordId": "2004681-1"
             }
         }
 
-## 血品輸血醫囑 [/account/{accountNo}/bloodIssueOrder/{issueNo}{?sessionKey}]
+## 血品輸血醫囑 [/account/{accountNo}/transfusionOrders/{orderRecordId}{?sessionKey}]
 ### 取得輸血醫囑內容 [GET]
 
 + Parameters
@@ -3865,14 +3802,14 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "issueNo": "2004681-1",                             // [string] 輸血醫囑單號
-                "blood": {                                          // 血品相關資訊
-                    "name": "Packed RBC",                           // [string] 血品名稱
-                    "unit": "U"                                     // [string] 血品單位
+                "orderRecordId": "2004681-1",                                   // [string] 輸血醫囑 ID
+                "blood": {                                                      // 血品相關資訊
+                    "name": "Packed RBC",                                       // [string] 血品名稱
+                    "unit": "U"                                                 // [string] 血品單位
                 },
-                "status": "待血庫接單 (醫囑未確認)",                   // [string] 狀態描述
-                "amount": 2,                                        // [number] 數量
-                "verified": false,                                  // [boolean] 是否被確認
+                "status": "待血庫接單 (醫囑未確認)",                                // [string] 狀態描述
+                "amount": 2,                                                    // [number] 數量
+                "verified": false,                                              // [boolean] 是否被確認
                 "additionalInfo": [
                     {
                         "title": "送達地",
@@ -3889,12 +3826,11 @@ HOST: http://www.wantoto.com
 
 # Group 排程相關
 
-## 6/23 醫令交易檔 ID 所對應之排程 [/account/{accountNo}/orderRecord/{orderRecordId}/schedule{?examRoomCode,date,weekDay,session,selectedOrder,orderSeqNo,sessionKey}]
+## 6/23 醫令交易檔 ID 所對應之排程 [/account/{accountNo}/orderRecord/{orderRecordId}/schedule{?examRoomCode,date,session,selectedOrder,sessionKey}]
 
 ### 取得排程內容 [GET]
 + Parameters
     + sessionKey    (string) ... SessionKey
-    + orderSeqNo    (string) ... 醫令序號
 
 + Response 200 (application/json)
 
@@ -3904,7 +3840,7 @@ HOST: http://www.wantoto.com
                 "date": "20150623",
                 "weekDay": 2,
                 "session": "A",
-                "order": 10,
+                "order": 10
             }
         }
 
@@ -3918,13 +3854,11 @@ HOST: http://www.wantoto.com
 
 ### 登記修改排程時間 [PUT]
 + Parameters
-    + examRoomCode  (string) ... 檢查室代號
-    + orderSeqNo    (string) ... 醫令序號
-    + date          (string) ... 排程日期, 依照格式為 "YYYYmmdd"
-    + weekDay       (number) ... 星期日期
-    + session       (string) ... 排程時段, 上午為 A 下午為 P 晚上為 N
-    + selectedOrder (number) ... 使用者指定的排程順序
-    + sessionKey    (string) ... SessionKey
+    + examRoomCode  (string)            ... 檢查室代號
+    + date          (string)            ... 排程日期, 依照格式為 "YYYYmmdd"
+    + session       (string)            ... 排程時段, 上午為 1 下午為 2 晚上為 3
+    + selectedOrder (number,optional)   ... 使用者指定的排程順序
+    + sessionKey    (string)            ... SessionKey
 
 + Response 200 (application/json)
 
@@ -3939,11 +3873,11 @@ HOST: http://www.wantoto.com
             "error": 400         // [number] error code
         }
 
-## 6/18 醫令碼 orderCode 所對應的排程資訊 [/order/{orderCode}/schedules{?accountNo,startDate,endDate,searchAll,limit,offset,sessionKey}]
+## 6/18 醫令碼 orderCode 所對應的排程資訊 [/order/{orderCode}/schedules{?accountNo,startDate,endDate,orderRecordId,searchAll,limit,offset,sessionKey}]
 ### 取得排成資訊 [GET]
 + Parameters
     + accountNo     (string) ... 記帳帳號
-    + orderCode     (string) ... 醫令碼
+    + orderRecordId (string) ... 對應的醫令交易記錄 ID 第一碼為醫令種類代碼
     + startDate     (number) ... 起始時間 timestamp
     + endDate       (number) ... 結束時間 timestamp
     + searchAll     (boolean) ... 是否要搜尋所有包含目前不可預約之排程，預設為否
@@ -3958,7 +3892,7 @@ HOST: http://www.wantoto.com
                 {
                     "weekDay":          1,              // [number] 星期日期, 如星期一為 1
                     "date":             "20150213",     // [string] 排程日期, 依照格式 "YYYYmmdd"
-                    "session":          "A",            // [string] 排程時段, 上午為 A 下午為 P 晚上為 N
+                    "session":          1,              // [number] 排程時段, 上午為 1 下午為 2 晚上為 3
                     "examRoomCode":     "CTAB",         // [string] 檢查室代碼
                     "examRoomName":     "CTAB_檢查室",   // [string] 檢查室名稱
                     "ErOpdBookCount":   10,             // [number] 門診/急診 登記個數
@@ -3975,11 +3909,11 @@ HOST: http://www.wantoto.com
             "total": 20         // [number] 搜尋結果總筆數
         }
 
-## 6/18 檢查室之排程資訊 [/examRoom/{examRoomCode}/schedules{?date,weekDay,session,accountNo,selectedOrder,orderRecordId,sessionKey}]
+## 6/18 檢查室之排程資訊 [/examRoom/{examRoomCode}/schedules{?orderRecordId,date,session,sessionKey}]
 ### 取得排程內容 [GET]
 + Parameters
+    + orderRecordId (string) ... 對應的醫令交易記錄 ID 第一碼為醫令種類代碼
     + date          (string) ... 排程日期, 依照格式為 "YYYYmmdd"
-    + weekDay       (number) ... 星期日期
     + session       (string) ... 排程時段
     + sessionKey    (string) ... SessionKey
 
@@ -4006,58 +3940,28 @@ HOST: http://www.wantoto.com
         }
 
 # Group 多媒體相關 Media Relative Service
-## 6/5 - ProgressNote 上傳 [/patients/{chartNo}/progressNote{?image%5B%5D,accountNo,uploader,description,reviewer}]
-### 新增 ProgressNote [POST]
+## 6/5 - 影像上傳 [/patients/{chartNo}/images{?title,accountNo,uploader,description,reviewer,compression,type}]
+### 新增影像資料 [POST]
+Content-type: multipart/form-data 影像用 [filename]: [content] 形式上傳
+
 + Parameters
-    + image%5B%5D (array[binary])   ... 上傳之影像byte array(可多張image)
-    + accountNo (string)            ... 帳號編號
-    + uploader (string)             ... 上傳者之員工編號
-    + description (string)          ... 上傳之 ProgressNote 之描述
-    + reviewer (string, optional)   ... 欲請求簽章之員工編號
+    + accountNo     (string)             ... 帳號編號
+    + uploader      (string)             ... 上傳者之員工編號
+    + compression   (string)             ... 影像壓縮指示 'l' 為低壓縮 'r' 為正常壓縮
+    + type          (string)             ... 上傳影像類別 'p' 為 ProgressNote 't' 為暫存資料庫
+    + title         (string, optional)   ... ProgressNote 標題
+    + description   (string, optional)   ... 上傳之 ProgressNote 之描述
+    + reviewer      (string, optional)   ... 欲請求簽章之員工編號
 
 + Response 200 (application/json)
 
 
         {
-            "success": true,
-            "content": {
-
-            }
-        }
-
-# 6/5 - 暫存空間照片上傳 [/patients/{chartNo}/tempStorage{?image%5B%5D,uploader}]
-### 新增照片至暫存空間 [POST]
-+ Parameters
-    + image%5B%5D (array[binary])   ... 上傳影像之byte array(可多張image)
-    + uploader (string)             ... 上傳者之員工編號
-
-+ Response 200 (application/json)
-
-        {
-            "success": true,
-            "content": {
-
-            }
-        }
-
-## 4/08 - 多媒體上傳 [/patients/{chartNo}/media/upload{?image%5B%5D,accountNo}]
-### 上傳 [POST]
-
-+ Parameters
-    + image%5B%5D (array[binary])    ... 上傳之影像byte array(可多張image)
-    + accountNo (string, optional)   ... 帳號編號
-
-+ Response 200 (application/json)
-
-
-        {
-            "success" : true,
-            "content": {
-            }
+            "success": true
         }
 
 # Group 候床、配床 waitBed
-## 6/12 - 候床 [/patients/{charNo}/waitBed{?wards,piority,wardClass}]
+## 6/12 - 候床 [/patients/{charNo}/waitBed{?wards,priority,wardClass}]
 ### 取得候床資訊[GET]
 
 + Response 200 (application/json)
@@ -4078,12 +3982,12 @@ HOST: http://www.wantoto.com
                     },
                     ...
                 ],
-                "piority" : {
-                    "default" : "piorityA", //預設選項
+                "priority" : {
+                    "default" : "priorityA", //預設選項
                     "option": [
                         {
                             "displayName": "A",
-                            "piorityCode": "piorityA"
+                            "priorityCode": "priorityA"
                         },
                         ...
                     ]
@@ -4111,7 +4015,7 @@ HOST: http://www.wantoto.com
 + Parameters
 
     + wards (array[string])    ... 病房
-    + piority (string)   ... 候床優先順序
+    + priority (string)   ... 候床優先順序
     + wardClass (array[string], optional) ... 床等
 
 + Response 200 (application/json)
@@ -4161,7 +4065,7 @@ HOST: http://www.wantoto.com
                     "patSexCode" : "M",                     //性別[string]（男性："M";女性："F"）
                     "patBirthday" : 1406938026,             //出生日期[number(timestamp)]
                     "chartNo" : "12345678",                 //病歷號[string]
-                    "piority" : "Ａ",                        //優先順序[string]
+                    "priority" : "Ａ",                        //優先順序[string]
                     "waitStartDate": 1416938026,              //候床起始時間 [number(timestamp)]
                     "waitEndDate": 1416938326,                //候床結束時間 [number(timestamp), optional] 若無則不用回傳
                     "source" : "轉",                         //來源[string]
@@ -4206,18 +4110,19 @@ HOST: http://www.wantoto.com
                "treatment" : {   //診療行為
                   "category" : "一般住院",  //類別[string]
                   "item" : "一般住院",   //項目[string]
-                  "treatmentCode" : "L000001" //診療代碼[string]
+                  "treatmentCode" : "L000001", //診療代碼[string]
                   "insurance" : "健保"   //保險別[string]
                },
                "wards" : [ //床位
                   {
-                     wardTitle : "內科部 03A2",
-                     beds:[
+                     "wardTitle" : "內科部 03A2",
+                     "beds": {
                            "bedNo" : "01-01",
                            "bedClass" : "雙人",
                            "outDate" : 1406938026,
                            "bedCode" : "03A2-01-01",
-                           "bedStatus" : "empty"  //床狀態[string](空床：“empty”;住院中，無人預定:"occupied";住院中，後有預定:"nonAvailable";預定出院:"available")                     ]
+                           "bedStatus" : "empty"  //床狀態[string](空床：“empty”;住院中，無人預定:"occupied";住院中，後有預定:"nonAvailable";預定出院:"available")
+                     }
                   },
                   ...
                ]
@@ -4238,5 +4143,5 @@ HOST: http://www.wantoto.com
 + Response 200 (application/json)
 
         {
-          "success": true
+            "success": true
         }
