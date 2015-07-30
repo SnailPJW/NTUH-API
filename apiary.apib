@@ -1076,8 +1076,11 @@ HOST: http://www.wantoto.com
             "message": "不可瀏覽指定之病患"
         }
 
-## 6/4 -非處方醫囑 [/patients/{chartNo}/order]
+## 7/27 -非處方醫囑 [/patients/{chartNo}/order{?sessionKey,modifiable}]
 ### 取得病歷資料 [GET]
++ Parameters
+    + sessionKey        (string) ... SessionKey
+    + modifiable        (boolean, optional) ... 如果要抓可編輯刪除清單 會多傳這個參數並且其值為 true
 
 + Response 200 (application/json)
 
@@ -1120,6 +1123,9 @@ HOST: http://www.wantoto.com
                         "filterCode" : [    //篩選類別
                             "image"
                         ],
+                        "accountNo": "I15T07315840",                            // [string] 開立醫囑時對應的帳號
+                        "editable": true,                                       // [boolean] 是否可以編輯
+                        "deletable": true,                                      // [boolean] 是否可以刪除
                         "report" : {    //如有報告則回傳 [optional]
                             "reportType" : "HTML",                              // 報告型態，HTML或PDF
                             "reportPath" : "/ImageReport/{ImageReportID}",      // 報告路徑
@@ -1631,7 +1637,7 @@ HOST: http://www.wantoto.com
         }
 
 # Group 院內訊息通知系統
-## 3/15 - 醫師所屬之通知訊息 [/notifications/doctor/{empNo}{?startDate,endDate,offset,limit}]
+## 7/30 - 醫師所屬之通知訊息 [/notifications/doctor/{empNo}{?startDate,endDate,offset,limit}]
 ### 取得醫師所屬之通知訊息內容 [GET]
 + Parameters
     + offset (number, optional) ... 資料偏移數，需與 limit 一起傳入
@@ -1649,6 +1655,7 @@ HOST: http://www.wantoto.com
                     "message":    "this is the example notification.",  // The message content of the notification. [string]
                     "datetime":   1406938026,                           // The time when the notification was issues [number(timestamp)]
                     "type":       "TEST_TYPE",                          // The type of the notification [string]
+                    "typeCode":   "critical",                           // The typeCode of the notification (危急: "critical", 異常： "unusual")[string]
                     "confirmed":  false                                 // The flag indicated that the notification had been confirmed [boolean]
                 }, ...
             ],
@@ -1670,8 +1677,8 @@ HOST: http://www.wantoto.com
                 "title":      "TITLE",                              // The title [string]
                 "message":    "this is the example notification.",  // The message content of the notification. [string]
                 "datetime":   1406938026,                           // The time when the notification was issues. [number(timestamp)]
-                "typeCode":     "consult",                          // The type code of the notification. [string]
-                "displayName":  "會診",                             // The type display name of the notification. [string]
+                "typeCode":     "critical",                          // The type code of the notification. [string]
+                "displayName":  "危急",                             // The type display name of the notification. [string]
                 "confirmed":  false                                 // The flag indicated that the notification had been confirmed. [boolean]
             }
         }
@@ -1801,6 +1808,18 @@ HOST: http://www.wantoto.com
     + authGroup (string)    ... 設定開放權限, 'A'=私人, 'B'=開放所有人瀏覽, 'C'=開放所有人編輯
     + sessionKey (string)   ... Session Key
 
++ Request AppendTopic (application/json)
+
+        {
+            "content": {
+                "title": "THE_TOPIC_TITLE",
+                "content": "the content of the topic should be here",
+                "authGroup": "B"
+            },
+            "empNo": "111281",
+            "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
+        }
+
 + Response 200 (application/json)
 
 
@@ -1887,6 +1906,21 @@ HOST: http://www.wantoto.com
     + chartNo (string)      ... 病例號碼
     + authGroup (string)    ... 設定開放權限, 'A'=私人, 'B'=開放所有人瀏覽, 'C'=開放所有人編輯
 
++ Request ModifyTheTopic (application/json)
+
+        {
+            "content": {
+                "topicId": "topic_001",
+                "title": "NEW_TITLE",           // [optional] 有需要修改才會上傳
+                "content": "new content",       // [optional] 有需要修改才會上傳
+                "authGroup": "A"                // [optional] 有需要修改才會上傳
+            },
+            "empNo": "111281",
+            "chartNo": "E11532111",
+            "empNo":    "111281",
+            "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
+        }
+
 + Response 200 (application/json)
 
         {
@@ -1970,6 +2004,17 @@ HOST: http://www.wantoto.com
     + content (string)      ... The message content for the replay.
     + sessionKey (string)   ... Session Key
 
++ Request AppendFeedback (application/json)
+
+        {
+            "content": {
+                "topicId": "topic_001",
+                "content": "put the feedback message here"
+            },
+            "empNo": "111281",
+            "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
+        }
+
 + Response 200 (application/json)
 
         {
@@ -2030,6 +2075,17 @@ HOST: http://www.wantoto.com
     + empNo (string)        ... 請求更新之使用者帳號
     + content (string)      ... 更新之訊息內容
     + sessionKey (string)   ... Session Key
+
++ Request ModifyTheFeedback (application/json)
+
+        {
+            "content": {
+                "replyId": "rep_001",
+                "content": "put the updated message here"
+            },
+            "empNo": "111281",
+            "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
+        }
 
 + Response 200 (application/json)
 
@@ -2623,11 +2679,13 @@ HOST: http://www.wantoto.com
 
 # Group 開發中 Phase2 Order APIs
 
-## 7/21 - 科部清單 [/departments{?sessionKey}]
+## 7/21 - 科部清單 [/departments{?sessionKey,hospitalCode,patientClass}]
 ### 取得科部清單 [GET]
 
 + Parameters
     + sessionKey    (string) ... SessionKey
+    + hospitalCode  (string) ... 院區碼
+    + patientClass  (string) ... 病患門住急別
 
 + Response 200 (application/json)
 
@@ -2646,12 +2704,11 @@ HOST: http://www.wantoto.com
         }
 
 
-## 7/21 - 醫令套餐 [/orderPackages{?empNo,accountNo,type,department,sessionKey}]
+## 7/21 - 醫令套餐 [/orderPackages{?patientClass,type,department,sessionKey}]
 ### 取得醫令套餐清單 [GET]
 
 + Parameters
-    + empNo         (string, optional) ... 員工編號
-    + accountNo     (string, optional) ... 帳號編號 (第一碼為門住級別)
+    + patientClass  (string, optional) ... 病患門住急別 I 為住院 E 為急診
     + department    (string, optional) ... 欲搜尋套餐之科部
     + type          (string) ... 請求套餐種類 'general' 為 科部, 病房, 員工, 病人, 路徑 'catagory' 為 category 為 全部, 檢驗, 檢查, 影醫, 核醫, 病理, 治療, 醫囑
     + sessionKey    (string) ... SessionKey
@@ -2722,13 +2779,13 @@ HOST: http://www.wantoto.com
         }
 
 
-## 7/8 - 醫令搜尋 [/orders{?name,packageCode,accountNo}]
+## 7/8 - 醫令搜尋 [/orders{?name,packageCode,patientClass}]
 ### 取得藥物清單 [GET]
 
 + Parameters
-    + name (string, optional)           ...搜尋字串
-    + packageCode (string, optional)    ...套餐
-    + accountNo (string)                ...帳號編號 第一各字元為病患的門住急別
+    + name (string, optional)           ... 搜尋字串
+    + packageCode (string, optional)    ... 套餐
+    + patientClass (string)             ... 病患的門住急別
 
 + Response 200 (application/json)
 
@@ -2800,11 +2857,12 @@ HOST: http://www.wantoto.com
             "message": "找不到病患最近三個月的 cre 數值"         // [string] error message
         }
 
-## 7/07 - 影像醫學介面內容 [/interface/order/MI/{imageType}{?sessionKey}]
+## 7/07 - 影像醫學介面內容 [/interface/order/MI/{imageType}{?sessionKey,hospitalCode}]
 ### 取得介面內容 [GET]
 + Parameters
     + sessionKey        (string) ... SessionKey
-    + imageType         (string) ... 影像種類，例如: CT, MRI, Plain
+    + imageType         (string) ... 影像種類，例如 CT, MRI, Plain
+    + hospitalCode      (string) ... 醫院院區碼
 
 + Response 200 (application/json)
 
@@ -2981,11 +3039,12 @@ HOST: http://www.wantoto.com
             }
         }
 
-## 6/16 - 大型常用字彙集 [/questionDictionary/{dictionaryId}{?offset,limit,sessionKey}]
+## 6/16 - 大型常用字彙集 [/questionDictionary/{dictionaryId}{?offset,limit,hospitalCode,sessionKey}]
 ### 取得 dictionaryId 所對應之大型常用字彙集內容 [GET]
 + Parameters
     + offset        (number) ... 設定回傳資料偏移數
     + limit         (number) ... 設定最大回傳筆數
+    + hospitalCode  (string) ... 醫院院區碼
     + sessionKey    (string) ... SessionKey
 
 + Response 200 (application/json)
@@ -3568,7 +3627,7 @@ HOST: http://www.wantoto.com
         {
             "content": {
                 "bloodTypeInfo": {                                              // 檢驗血型資料
-                    "description": "此病人無檢驗血型資料",                          // [string] 血型資料內容
+                    "description": "此病人無檢驗血型資料",                         // [string] 血型資料內容
                     "hilight": true                                             // [boolean] 是否要 highlight資訊內容
                 },
                 "specimenInfo": "檢體: -- 採檢: -- 提血期限: 採檢後 3 日內",         // 有效檢體資訊
@@ -3612,10 +3671,11 @@ HOST: http://www.wantoto.com
             }
         }
 
-## 血品清單 [/bloodOrder/bloods{?sessionKey,displayAll}]
+## 血品清單 [/bloodOrder/bloods{?sessionKey,hospitalCode,displayAll}]
 ### 取得血品清單 [GET]
 + Parameters
     + sessionKey        (string) ... SessionKey
+    + hospitalCode      (string) ... 院區碼
     + displayAll        (string) ... 是否顯示完整清單 true/false 若為 false 則回傳常用血品 即 freqUsed=True 之血品即可
 
 + Response 200 (application/json)
@@ -3782,6 +3842,21 @@ HOST: http://www.wantoto.com
     + destCode          (string) ... 送達地點代碼
     + destDescription   (string, optional) ... 送達地點敘述
 
+
++ Request IssueTranfusionOrder (application/json)
+
+            {
+                "content": {
+                    "prepareOrderId": "xxx_001",
+                    "amount": 10,
+                    "expectedIssueDay": 1438250400,
+                    "destCode": "12C",
+                    "destDescription": "the additional description"     // [optional] 如果沒有需要填寫就不會上傳
+                },
+                "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
+            }
+
+
 + Response 201 (application/json)
 
         {
@@ -3839,7 +3914,7 @@ HOST: http://www.wantoto.com
                 "examRoomCode": "CTS",
                 "date": "20150623",
                 "weekDay": 2,
-                "session": "A",
+                "session": 1,
                 "order": 10
             }
         }
@@ -3852,13 +3927,26 @@ HOST: http://www.wantoto.com
         }
 
 
-### 登記修改排程時間 [PUT]
+### 登記排程時間 [POST]
 + Parameters
     + examRoomCode  (string)            ... 檢查室代號
     + date          (string)            ... 排程日期, 依照格式為 "YYYYmmdd"
-    + session       (string)            ... 排程時段, 上午為 1 下午為 2 晚上為 3
+    + session       (number)            ... 排程時段, 上午為 1 下午為 2 晚上為 3
     + selectedOrder (number,optional)   ... 使用者指定的排程順序
     + sessionKey    (string)            ... SessionKey
+
+
++ Request RegisterTimeSlot (application/json)
+
+        {
+            "content": {
+                "examRoomCode": "CTR",
+                "date": "20150101",
+                "session": 1,
+                "selectedOrder": 10         // [optional] 沒有指定就不會上傳
+            },
+            "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
+        }
 
 + Response 200 (application/json)
 
@@ -3914,7 +4002,7 @@ HOST: http://www.wantoto.com
 + Parameters
     + orderRecordId (string) ... 對應的醫令交易記錄 ID 第一碼為醫令種類代碼
     + date          (string) ... 排程日期, 依照格式為 "YYYYmmdd"
-    + session       (string) ... 排程時段
+    + session       (number) ... 排程時段
     + sessionKey    (string) ... SessionKey
 
 + Response 200 (application/json)
@@ -3942,7 +4030,7 @@ HOST: http://www.wantoto.com
 # Group 多媒體相關 Media Relative Service
 ## 6/5 - 影像上傳 [/patients/{chartNo}/images{?title,accountNo,uploader,description,reviewer,compression,type}]
 ### 新增影像資料 [POST]
-Content-type: multipart/form-data 影像用 [filename]: [content] 形式上傳
+Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上傳
 
 + Parameters
     + accountNo     (string)             ... 帳號編號
@@ -3983,7 +4071,7 @@ Content-type: multipart/form-data 影像用 [filename]: [content] 形式上傳
                     ...
                 ],
                 "priority" : {
-                    "default" : "priorityA", //預設選項
+                    "preset" : "prioity", //預設選項
                     "option": [
                         {
                             "displayName": "A",
@@ -3993,7 +4081,7 @@ Content-type: multipart/form-data 影像用 [filename]: [content] 形式上傳
                     ]
                 },
                 "wardClass": {
-                    "default": [
+                    "preset": [
                         "single",
                         ...
                     ],
@@ -4013,18 +4101,32 @@ Content-type: multipart/form-data 影像用 [filename]: [content] 形式上傳
 ### 回傳候床資訊[POST]
 
 + Parameters
-
     + wards (array[string])    ... 病房
     + priority (string)   ... 候床優先順序
     + wardClass (array[string], optional) ... 床等
 
++ Request WaitBedInfo (application/json)
+
+        {
+            "content": {
+                "wards": [
+                    "MED_ICU",
+                    ...
+                ],
+                "priority": "A",
+                "wardClass": [          // 後床級別排序, 依照優先順序編排
+                    "single",
+                    "double",
+                    ...
+                ]
+            },
+            "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
+        }
+
 + Response 200 (application/json)
 
         {
-            "success" : true,
-            "content" : {
-
-            }
+            "success" : true
         }
 
 ## 7/6 - 可配床細分科 [/assignBed/department]
@@ -4065,7 +4167,7 @@ Content-type: multipart/form-data 影像用 [filename]: [content] 形式上傳
                     "patSexCode" : "M",                     //性別[string]（男性："M";女性："F"）
                     "patBirthday" : 1406938026,             //出生日期[number(timestamp)]
                     "chartNo" : "12345678",                 //病歷號[string]
-                    "priority" : "Ａ",                        //優先順序[string]
+                    "priority": "Ａ",                        //優先順序[string]
                     "waitStartDate": 1416938026,              //候床起始時間 [number(timestamp)]
                     "waitEndDate": 1416938326,                //候床結束時間 [number(timestamp), optional] 若無則不用回傳
                     "source" : "轉",                         //來源[string]
@@ -4139,6 +4241,17 @@ Content-type: multipart/form-data 影像用 [filename]: [content] 形式上傳
    + chartNo (string)   ... 病歷號
    + bedCode (string)   ... 床位代碼
    + date (string)      ... 預定日期(格式為YYYYMMDD）
+
++ Request RegisterBed (application/json)
+
+        {
+            "content": {
+                "chartNo": "E124111",
+                "bedCode": "03A2-01-01",
+                "date": "20151103"
+            },
+            "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
+        }
 
 + Response 200 (application/json)
 
