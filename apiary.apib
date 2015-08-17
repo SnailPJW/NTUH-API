@@ -1,7 +1,7 @@
 FORMAT: 1A
 HOST: http://www.wantoto.com
 
-# 台大醫院行動醫療資訊系統 Web Service v1.4.2
+# 台大醫院行動醫療資訊系統 Web Service v1.6.0
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
 # Group 登入與取得或驗證 SessionKey
@@ -146,7 +146,7 @@ HOST: http://www.wantoto.com
                     "latestExamReportDateTime" : 1406938026,  //最新檢查時間 [number(timestamp)]
                     "latestConsultDateTime" : 1406938026,  //最新會診更新時間 [number(timestamp)]
                     "latestBulletinDateTime" : 1406938026,  //最新留言時間 [number(timestamp)]
-                    "orderNotComfirmed" : true,    //醫囑是否有未確認項目[boolean, optional]
+                    "orderNotConfirmed" : true,    //醫囑是否有未確認項目[boolean, optional]
                     "orderNotReceived" : true,    //醫囑是否有未簽收項目[boolean, optional]
                     "accountIDSE" : "14T05267794",           //帳號 [string, optional]
                     "patClassCode" : "I",                    //門住急別 [string, optional]
@@ -4182,7 +4182,7 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
             "total" : 50  //此次Query總筆數[number]
         }
 
-## 7/6 - 病患配床資訊 [/assignBed/patients/{chartNo}{?bedCode,date}]
+## 8/4 - 病患配床資訊 [/assignBed/patients/{chartNo}{?waitBedNo,bedCode,date,originDept,isolation}]
 ### 取得病患配床資訊[GET]
 
 + Parameters
@@ -4202,6 +4202,7 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
                    "TEL" : "02-123456",                //聯絡電話[string]
                    "mobile" : "0972111222"        //手機[string]
                },
+               "waitBedNo" : "1080922",   //候床單號[string]
                "waitBedInfo" : [ //候床資訊(除診療行為)
                   {
                      "title" : "候床單號",
@@ -4223,7 +4224,8 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
                            "bedClass" : "雙人",
                            "outDate" : 1406938026,
                            "bedCode" : "03A2-01-01",
-                           "bedStatus" : "empty"  //床狀態[string](空床：“empty”;住院中，無人預定:"occupied";住院中，後有預定:"nonAvailable";預定出院:"available")
+                           "bedStatus" : "empty",  //床狀態[string](空床：“empty”;住院中，無人預定:"occupied";住院中，後有預定:"nonAvailable";預定出院:"available")
+                           "isolation" : false  //是否可選擇隔離[boolean]
                      }
                   },
                   ...
@@ -4239,16 +4241,21 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
 + Parameters
 
    + chartNo (string)   ... 病歷號
+   + waitBedNo (string) ... 候床單號
    + bedCode (string)   ... 床位代碼
-   + date (string)      ... 預定日期(格式為YYYYMMDD）
+   + date (string)      ... 預定日期(格式為YYYYMMDD)
+   + isolation (string, optional)   ... 隔離原因，非隔離則不回傳
+   + originDept (string, optional)   ... 借床原始科別，非借床則不回傳
+
 
 + Request RegisterBed (application/json)
 
         {
             "content": {
-                "chartNo": "E124111",
+                "waitBedNo": "123456",
                 "bedCode": "03A2-01-01",
-                "date": "20151103"
+                "date": "20151103",
+                "isolation" : "一般隔離"
             },
             "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
         }
@@ -4257,4 +4264,725 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
 
         {
             "success": true
+        }
+
+## 8/4 - 病患配床原始科別資訊 [/assignBed/originDept]
+### 取得病患配床原始科別資訊[GET]
+
++ Response 200 (application/json)
+
+        {
+             "content" : [   //原始科別資訊
+                {   //原始科別資訊
+                    "displayName" : "內科部",  //顯示名稱[string]
+                    "children" : [   //次分科
+                        {
+                            "deptCode" : "MED",    //科別代碼[string]
+                            "displayName" : "內科"  //顯示名稱[string]
+                        },
+                        {
+                            "deptCode" : "CARD",    //科別代碼[string]
+                            "displayName" : "心臟內科"  //顯示名稱[string]
+                        },
+                        ...
+                    ]
+                },
+                ...
+             ],
+             "limit" : 50, //最大回傳筆數[number]
+             "offset" : 0, //回傳資料偏移數[number]
+             "total" : 50  //此次Query總筆數[number]
+        }
+
+# Group 病房行事曆、電子看板 ward
+## 8/14 - 病房病床狀態 [/wards/{wardCode}/bedStatus]
+### 取得病房病床狀態資訊[GET]
+
++ Parameters
+    + wardCode    (string) ... 病房代碼
+
++ Response 200 (application/json)
+
+        {
+            "content": [
+                {
+                    "bedNo" : "05D-08-02",    //床號[string]
+                    "bedStatus" : {
+                        "bedStatusCode" : "occupied", //病房狀態代碼[string]
+                        "displayName" : "",   //病房狀態(空床、待轉入、代轉出等)[string]
+                        "date" : 1406938026   //預計出入院、代轉、代入日期[number(timestamp),optional]
+                    },
+                    "patient" : {   //病患資訊，無病患則不回傳[optional]
+                        "patName" : "王小明",           //病患姓名[string]
+                        "patSexCode" : "M",             //性別[string]（男性："M";女性："F"）
+                        "patBirthday" : 1406938026,     //出生日期[number(timestamp)]
+                        "chartNo" : "12345678",         //病歷號[string]
+                        "personID" : "A123456789",      //身分證號[string]
+                        "bedInfo" : "5W3 01-01",        //病房病床號(住院與急診)，非住院或急診中則不回傳Key[string]
+                        "inDate" : 1406938026,          //入院日期(住院或急診檢傷時間)，非住院或在急診則不回傳Key [number(timestamp)]
+                        "bedTransferDate" : 1406938026,          //轉床日期，非住院或在急診則不回傳Key [number(timestamp)]
+                        "triageLevels" : "1",           //檢傷分級，非急診則不回傳 Key [string, optional]
+                        "_emp_VS" : {                   //主治醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)[string, optional]
+                            "empNo" : "111281",         //醫師員編[string]
+                            "name" : "葉小菜"
+                        },
+                        "_emp_RS" : {           //住院醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)[string, optional]
+                            "empNo" : "000123", //醫師員編[string]
+                            "name" : "蘇小宇"
+                        },
+                        "_emp_NP" : {           //護理師 [string, optional]
+                            "empNo" : "111111", //員編 [string]
+                            "name" : "謝小穎"
+                        },
+                        "status" : "住院中",    //狀態[string]
+                        "specialTag" : [        //特殊標記[string array] (ex:DNR,...)
+                            {
+                                "tagCode" : "DNR",      // [string]
+                                "displayName" : "DNR"   // [string]
+                            },
+                            ...
+                        ],
+                        "latestPacsReportDateTime" : 1406938026, //最新影像時間 [number(timestamp)]
+                        "latestLISReportDateTime" : 1406938026,  //最新檢驗時間 [number(timestamp)]
+                        "latestExamReportDateTime" : 1406938026,  //最新檢查時間 [number(timestamp)]
+                        "latestConsultDateTime" : 1406938026,  //最新會診更新時間 [number(timestamp)]
+                        "latestBulletinDateTime" : 1406938026,  //最新留言時間 [number(timestamp)]
+                        "orderNotConfirmed" : true,    //醫囑是否有未確認項目[boolean, optional]
+                        "orderNotReceived" : true,    //醫囑是否有未簽收項目[boolean, optional]
+                        "accountIDSE" : "14T05267794",           //帳號 [string, optional]
+                        "patClassCode" : "I",                    //門住急別 [string, optional]
+                        "visible": true,                         //是否可以瀏覽 [boolean]
+                        "waitBed": true,     //是否可被候床 [boolean, optional]
+                        "assignBed": true,     //是否可被配床 [boolean, optional]
+                        "schedule" : [  //未來五天內（包括今日）之排程資料，包含手術排程、檢查治療，照時間近至遠排列[optional]
+                            {
+                                "date" : 1406938026,    //日期[number(timestamp)]
+                                "displayName" : "心導管",    //顯示名稱[string]
+                                "itemCode" : "CC" //項目代碼[string]
+                            },
+                            ...
+                        ]
+                    }
+                },
+                {
+                    "bedNo" : "05D-09-01",    //床號[string]
+                    "bedStatus" : {
+                        "bedStatusCode" : "empty", //病房狀態代碼[string]
+                        "displayName" : "空床",   //病房狀態(空床、待轉入、代轉出等)[string]
+                        "date" : 1406938026   //預計出入院、代轉、代入日期[number(timestamp),optional]
+                    }
+                },
+                ...
+            ],
+            "limit" : 50,   //最大回傳筆數[number]
+            "offset" : 0,   //回傳資料偏移數[number]
+            "total" : 50    //此次Query總筆數[number]
+        }
+
+## 8/14 - 病房開刀病患狀態 [/wards/{wardCode}/OPExam/OPStatus{?queryDate}]
+### 取得病房開刀病患狀態資訊[GET]
+
++ Parameters
+    + wardCode    (string) ... 病房代碼
+    + queryDate (string, optional) ... 搜尋日期(格式為YYYYMMDD，無回傳則為當日)
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "field" : [    //欄位資訊(各API詳細欄位，請依照院方實際欄位回傳)
+                    {
+                        "fieldCode" : "date",
+                        "displayName" : "日期"
+                    },
+                    {
+                        "fieldCode" : "OPRoom",  //欄位代碼[string]
+                        "displayName" : "刀房" //欄位顯示名稱[string]
+                    },
+                    ...
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                            "date" : "8/13",
+                            "OPRoom" : "1",
+                            ...
+                        }
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number]
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            },
+            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
+        }
+
+## 8/14 - 病房心導管病患狀態 [/wards/{wardCode}/OPExam/cathStatus{?queryDate}]
+### 取得病房心導管病患狀態資訊[GET]
+
++ Parameters
+    + wardCode    (string) ... 病房代碼
+    + queryDate (string, optional) ... 搜尋日期(格式為YYYYMMDD，無回傳則為當日)
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "field" : [    //欄位資訊(各API詳細欄位，請依照院方實際欄位回傳)
+                    {
+                        "fieldCode" : "date",
+                        "displayName" : "日期"
+                    },
+                    {
+                        "fieldCode" : "time",  //欄位代碼[string]
+                        "displayName" : "時間" //欄位顯示名稱[string]
+                    },
+                    ...
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                            "date" : "8/13",
+                            "time" : "AM",
+                            ...
+                        }
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number]
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            },
+            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
+        }
+
+## 8/14 - 病房檢查治療病患狀態 [/wards/{wardCode}/OPExam/exam{?queryDate}]
+### 取得病房檢查治療病患狀態資訊[GET]
+
++ Parameters
+    + wardCode    (string) ... 病房代碼
+    + queryDate (string, optional) ... 搜尋日期(格式為YYYYMMDD，無回傳則為當日)
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "field" : [    //欄位資訊(各API詳細欄位，請依照院方實際欄位回傳)
+                    {
+                        "fieldCode" : "bed",
+                        "displayName" : "病床"
+                    },
+                    {
+                        "fieldCode" : "ptName",  //欄位代碼[string]
+                        "displayName" : "病患姓名"  //欄位顯示名稱[string]
+                    },
+                    ...
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                            "bed" : "3A1 01-01",
+                            "ptName" : "王小明",
+                            ...
+                        }
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number]
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            },
+            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
+        }
+
+## 8/14 - 病房入院病患狀態 [/wards/{wardCode}/admDis/admission{?queryDate}]
+### 取得病房入院病患狀態資訊[GET]
+
++ Parameters
+    + wardCode    (string) ... 病房代碼
+    + queryDate (string, optional) ... 搜尋日期(格式為YYYYMMDD，無回傳則為當日)
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "field" : [    //欄位資訊(各API詳細欄位，請依照院方實際欄位回傳)
+                    {
+                        "fieldCode" : "bed",
+                        "displayName" : "病床"
+                    },
+                    {
+                        "fieldCode" : "ptName",  //欄位代碼[string]
+                        "displayName" : "病患姓名"  //欄位顯示名稱[string]
+                    },
+                    ...
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                            "bed" : "3A1 01-01",
+                            "ptName" : "王小明",
+                            ...
+                        }
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number]
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            },
+            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
+        }
+
+## 8/14 - 病房出院病患狀態 [/wards/{wardCode}/admDis/discharge{?queryDate}]
+### 取得病房出院病患狀態資訊[GET]
+
++ Parameters
+    + wardCode    (string) ... 病房代碼
+    + queryDate (string, optional) ... 搜尋日期(格式為YYYYMMDD，無回傳則為當日)
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "field" : [    //欄位資訊(各API詳細欄位，請依照院方實際欄位回傳)
+                    {
+                        "fieldCode" : "bed",
+                        "displayName" : "病床"
+                    },
+                    {
+                        "fieldCode" : "ptName",  //欄位代碼[string]
+                        "displayName" : "病患姓名"  //欄位顯示名稱[string]
+                    },
+                    ...
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                            "bed" : "3A1 01-01",
+                            "ptName" : "王小明",
+                            ...
+                        }
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number]
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            },
+            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
+        }
+
+
+## 8/14 - 病房預約轉床病患狀態 [/wards/{wardCode}/admDis/transfer{?queryDate}]
+### 取得病房預約轉床病患狀態資訊[GET]
+
++ Parameters
+    + wardCode    (string) ... 病房代碼
+    + queryDate (string, optional) ... 搜尋日期(格式為YYYYMMDD，無回傳則為當日)
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "field" : [    //欄位資訊(各API詳細欄位，請依照院方實際欄位回傳)
+                    {
+                        "fieldCode" : "date",
+                        "displayName" : "登入日期"
+                    },
+                    {
+                        "fieldCode" : "bed",  //欄位代碼[string]
+                        "displayName" : "病床"    //欄位顯示名稱[string]
+                    },
+                    ...
+                ],
+                "data" : [
+                    {
+                        "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                            "bed" : "3A1 01-01",
+                            "date" : "8/3",
+                            ...
+                        }
+                    },
+                    ...
+                ],
+                "limit" : 50, //最大回傳筆數傳[number]
+                "offset" : 0, //回傳資料偏移數[number]
+                "total" : 100 //此次Query總筆數[number]
+            },
+            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
+        }
+
+
+## 8/14 - 病房三班病患狀態 [/wards/{wardCode}/shift/{shiftCode}{?queryDate}]
+### 取得病房三班病患狀態資訊[GET]
+
++ Parameters
+    + wardCode    (string) ... 病房代碼
+    + shiftCode (string, `day(白班)、evening(小夜)、night(大夜)`) ... 班別代碼
+    + queryDate (string, optional) ... 搜尋日期(格式為YYYYMMDD，無回傳則為當日)
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "statics" : {
+                        "total" : 10,   //病人總數[number]
+                        "admission" : 1,   //入院病人總數[number]
+                        "discharge" : 1,   //出院病人總數[number]
+                        "transferIn" : 1,   //轉入病人總數[number]
+                        "transferOut" : 1,   //轉出病人總數[number]
+                        "OP" : 1,   //手術病人總數[number]
+                        "delivery" : 1,   //生產病人總數[number]
+                        "NB" : 1,   //初生病人總數[number]
+                        "critical" : 1,   //病危病人總數[number]
+                        "dead" : 1   //死亡病人總數[number]
+                },
+                "table" : {
+                    "field" : [    //欄位資訊(各API詳細欄位，請依照院方實際欄位回傳)
+                        {
+                            "fieldCode" : "ptName",
+                            "displayName" : "病患姓名"
+                        },
+                        {
+                            "fieldCode" : "bedNo",  //欄位代碼[string]
+                            "displayName" : "床號" //欄位顯示名稱[string]
+                        },
+                        {
+                            "fieldCode" : "chartNo",  //欄位代碼[string]
+                            "displayName" : "病歷號" //欄位顯示名稱[string]
+                        },
+                        {
+                            "fieldCode" : "account",  //欄位代碼[string]
+                            "displayName" : "帳號" //欄位顯示名稱[string]
+                        },
+                        {
+                            "fieldCode" : "impression",  //欄位代碼[string]
+                            "displayName" : "診斷" //欄位顯示名稱[string]
+                        },
+                        ...
+                    ],
+                    "data" : [
+                        {
+                            "content" : {   //依據欄位填入資料，無資料則不回傳 [optional]
+                                "ptName" : "王小明",
+                                "bedNo" : "3A1 01-01",
+                                "chartNo" : "123456",
+                                "account" : "2342353452",
+                                "impression" : "xxx"
+                            }
+                        },
+                        ...
+                    ],
+                    "limit" : 50, //最大回傳筆數傳[number]
+                    "offset" : 0, //回傳資料偏移數[number]
+                    "total" : 100 //此次Query總筆數[number]
+                }
+            },
+            "startDate" : 1406938026,   // Query 起始日期，以時間序號表示 (包含此日期)
+            "endDate" : 1406938026      // Query 結束日期，以時間序號表示 (包含此日期)
+        }
+
+# Group 急救紀錄 ERRecrod
+## 8/10 - 急救紀錄 [/ERRecord]
+### 取得急救紀錄 [GET]
+
++ Response 200 (application/json)
+
+
+        {
+            "content": [
+                {
+                    "actions" : [
+                        {
+                            "buttonKey" : "A01",
+                            "displayName" : "評估意識", // 按鈕上要顯示的名字 [string]
+                            "optionName" : "意識評估",  // 記錄的時候要顯示的字 [string, optional]
+                            "orderCode" : "A01",    // [optional]
+                            "orderType" : "abcd",   // [optional]
+                            "relation" : [              // 做了此動作之後，會影響到其他按鈕狀態的話，則顯示 [optional]
+                                {
+                                    "buttonKey" : "A02",  // 會影響的按鈕的displayName [string]
+                                    "action" : "highlight"  // 按鈕的動作 [string]  ex: highlight, unhighlight, disable, enable
+                                }
+                            ],
+                            "defaultNote" : "E1M1V1"   // 預設的備註值  [string, optional]
+                        },
+                        {
+                            "buttonKey" : "A02",
+                            "displayName" : "評估呼吸",
+                            "popup" : {                       // [optional]
+                                "type": "option",
+                                "content": [
+                                    {
+                                        "displayName" : "無呼吸",
+                                        "optionName"  : "無呼吸",
+                                        "relation" : [  // [optional]
+                                            {
+                                                "buttonKey" : "B01",
+                                                "action" : "highlight"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "displayName" : "頻死呼吸",
+                                        "optionName" : "頻死呼吸",
+                                        "orderCode" : "B01",    // [optional]
+                                        "orderType" : "abcd"    // [optional]
+                                    },
+                                    {
+                                        "displayName" : "自發性呼吸",
+                                        "optionName" : "自發性呼吸",
+                                        "orderCode" : "B02",    // [optional]
+                                        "orderType" : "abcd"    // [optional]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "category" : "Airway+Breathing",    // 分類的名字  [string, optional]
+                    "actions" : [
+                        {
+                            "buttonKey" : "B01",
+                            "displayName" : "打開呼吸道",
+                            "popup" : { // [optional]
+                                "type" : "option",
+                                "content" : [
+                                    {
+                                        "displayName" : "壓額抬下巴",
+                                        "optionName" : "壓額抬下巴",
+                                        "orderCode" : "C01",
+                                        "orderType" : "abcd",
+                                        "relation" : [  // [optional]
+                                            {   //取消顏色提示
+                                                "buttonKey" : "評估呼吸",   // [optional]
+                                                "action" : "unhighlight"
+                                            },
+                                            {   //顏色提示
+                                                "buttonKey" : "使用Ambu", // [optional]
+                                                "action" : "highlight"
+                                            },
+                                            {   //使按鈕無法使用
+                                                "buttonKey" : "打開呼吸道",  // [optional]
+                                                "action" : "disable"
+                                            },
+                                            {   //播放音效
+                                                "action" : "playSound",
+                                                "soundKey" : "chest",   // [optional]
+                                                "playSoundDelay" : 120,   //幾秒後播放 [optional]
+                                                "repeat" : 1   //播放次數(0為重複播放) [optional]
+                                            },
+                                            {   //Adaflag 開啟
+                                                "action" : "adaflagOn"
+                                            },
+                                            {   //Adaflag 關閉
+                                                "action" : "adaflagOff"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "displayName" : "下顎推前",
+                                        "optionName" : "下顎推前",
+                                        "orderCode" : "C02",
+                                        "orderType" : "abcd"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "buttonKey" : "B02",
+                            "displayName" : "輔助呼吸道",
+                            "popup" : { // [optional]
+                                "type" : "checkbox",
+                                "content" : [
+                                    {
+                                        "displayName" : "置入口咽呼吸道",
+                                        "optionName" : "置入口咽呼吸道",
+                                        "orderCode" : "D01",
+                                        "orderType" : "abcd"
+                                    },
+                                    {
+                                        "displayName" : "置入鼻咽呼吸道",
+                                        "optionName" : "置入鼻咽呼吸道",
+                                        "orderCode" : "D02",
+                                        "orderType" : "abcd"
+                                    },
+                                    {
+                                        "displayName" : "置入咬口器",
+                                        "optionName" : "置入咬口器",
+                                        "orderCode" : "D03",
+                                        "orderType" : "abcd"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "buttonKey" : "B03",
+                            "displayName" : "使用Ambu",
+                            "optionName" : "進行Ambu-Bagging",    // [optional]
+                            "orderCode" : "E01",    // [optional]
+                            "orderType" : "abcd"    // [optional]
+                        },
+                        {
+                            "buttonKey" : "B04",
+                            "displayName" : "確認插管",
+                            "popup" : { // [optional]
+                                "type" : "checkbox",
+                                "content" : [
+                                    {
+                                        "displayName" : "聽診確認插管正確",
+                                        "optionName" : "聽診確認插管正確",
+                                        "orderCode" : "F01",
+                                        "orderType" : "abcd"
+                                    },
+                                    {
+                                        "displayName" : "使用EtCO2",
+                                        "optionName" : "使用EtCO2",
+                                        "orderCode" : "F02",
+                                        "orderType" : "abcd"
+                                    }
+                                ],
+                                "defaultNote" : "EtCO2: mmHg"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "category" : "Circulation+Medication",  // 分類的名字  [string, optional]
+                    "actions" : [
+                        {
+                            "buttonKey" : "C01",
+                            "displayName" : "檢查脈博",
+                            "popup" : { // [optional]
+                                "type" : "checkbox",
+                                "content" : [
+                                    {
+                                        "displayName" : "無脈博",
+                                        "optionName" : "無脈博",
+                                        "orderCode" : "G01",
+                                        "orderType" : "abcd",
+                                        "relation" : [  // [optional]
+                                            {
+                                                "buttonKey" : "壓胸",
+                                                "action" : "highlight"
+                                            },
+                                            {
+                                                "buttonKey" : "接上心電圖機",
+                                                "action" : "highlight"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "displayName" : "頸動脈",
+                                        "optionName" : "頸動脈",
+                                        "orderCode" : "G02",
+                                        "orderType" : "abcd"
+                                    },
+                                    {
+                                        "displayName" : "股動脈",
+                                        "optionName" : "股動脈",
+                                        "orderCode" : "G03",
+                                        "orderType" : "abcd"
+                                    },
+                                    {
+                                        "displayName" : "肱動脈",
+                                        "optionName" : "肱動脈",
+                                        "orderCode" : "G04",
+                                        "orderType" : "abcd"
+                                    },
+                                    {
+                                        "displayName" : "橈動脈",
+                                        "optionName" : "橈動脈",
+                                        "orderCode" : "D03",
+                                        "orderType" : "abcd"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "buttonKey" : "C02",
+                            "displayName" : "壓胸",
+                            "popup" : { // [optional]
+                                "type" : "option",
+                                "content" : [
+                                    {
+                                        "displayName" : "人工壓胸",
+                                        "optionName" : "人工壓胸",
+                                        "orderCode" : "H01",
+                                        "orderType" : "abcd"
+                                    },
+                                    {
+                                        "displayName" : "機械壓胸",
+                                        "optionName" : "機械壓胸",
+                                        "orderCode" : "H02",
+                                        "orderType" : "abcd"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "buttonKey" : "C03",
+                            "displayName" : "Adrenaline 1mg/amp",
+                            "optionName" : "Adrenaline 1mg/amp iv", // [optional]
+                            "recordKey" : "H03 [%d] 次",    // [optional]
+                            "count" : true  // 需計算使用次數[optional]
+                        }
+                    ]
+                },
+                {
+                    "category" : "Defibrillation",  // 分類的名字  [string, optional]
+                    "actions" : [
+                        {
+                            "buttonKey" : "C03",
+                            "displayName" : "接上心電圖機",
+                            "optionName" : "接上心電圖監視器",  // [optional]
+                            "recordKey" : "I01" // [optional]
+                        },
+                        {
+                            "buttonKey" : "C04",
+                            "displayName" : "檢查心律",
+                            "popup" : { // [optional]
+                                "type" : "option",
+                                "content" : [
+                                    {
+                                        "displayName" : "心室頻脈(VT)",
+                                        "optionName" : "心室頻脈(VT)",
+                                        "recordKey" : "J01"
+                                    },
+                                    {
+                                        "displayName" : "心室顫動(VF)",
+                                        "optionName" : "心室顫動(VF)",
+                                        "recordKey" : "J02"
+                                    },
+                                    {
+                                        "displayName" : "無脈博電器活動(PEA)",
+                                        "optionName" : "無脈博電器活動(PEA)",
+                                        "recordKey" : "J03"
+                                    },
+                                    {
+                                        "displayName" : "無心率(Asystole)",
+                                        "optionName" : "無心率(Asystole)",
+                                        "recordKey" : "J04"
+                                    },
+                                    {
+                                        "displayName" : "有脈博心律",
+                                        "optionName" : "有脈博心律",
+                                        "recordKey" : "J05"
+                                    }
+                                ],
+                                "defaultNote" : "EtCO2:  mmHg"
+                            }
+                        }
+                    ]
+                }
+            ]
         }
