@@ -1,7 +1,7 @@
 FORMAT: 1A
 HOST: http://www.wantoto.com
 
-# 台大醫院行動醫療資訊系統 Web Service v1.6.1
+# 台大醫院行動醫療資訊系統 Web Service v1.6.3
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
 # Group 登入與取得或驗證 SessionKey
@@ -117,9 +117,9 @@ HOST: http://www.wantoto.com
                     "patBirthday" : 1406938026,     //出生日期[number(timestamp)]
                     "chartNo" : "12345678",         //病歷號[string]
                     "personID" : "A123456789",      //身分證號[string]
-                    "bedInfo" : "5W3 01-01",        //病房病床號(住院與急診)，非住院或急診中則不回傳Key[string]
-                    "inDate" : 1406938026,          //入院日期(住院或急診檢傷時間)，非住院或在急診則不回傳Key [number(timestamp)]
-                    "bedTransferDate" : 1406938026,          //轉床日期，非住院或在急診則不回傳Key [number(timestamp)]
+                    "bedInfo" : "5W3 01-01",        //病房病床號(住院與急診)，非住院或急診中則不回傳 [string, optional]
+                    "inDate" : 1406938026,          //入院日期(住院或急診檢傷時間)，非住院或在急診則不回傳 [number(timestamp), optional]
+                    "bedTransferDate" : 1406938026,          //轉床日期，非住院或在急診則不回傳 [number(timestamp), optional]
                     "triageLevels" : "1",           //檢傷分級，非急診則不回傳 Key [string, optional]
                     "_emp_VS" : {                   //主治醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)[string, optional]
                         "empNo" : "111281",         //醫師員編[string]
@@ -1124,14 +1124,17 @@ HOST: http://www.wantoto.com
                             "image"
                         ],
                         "accountNo": "I15T07315840",                            // [string] 開立醫囑時對應的帳號
-                        "editable": true,                                       // [boolean] 是否可以編輯
-                        "deletable": true,                                      // [boolean] 是否可以刪除
                         "report" : {    //如有報告則回傳 [optional]
                             "reportType" : "HTML",                              // 報告型態，HTML或PDF
                             "reportPath" : "/ImageReport/{ImageReportID}",      // 報告路徑
                             "encoding" : "utf-16",                              // 編碼 (utf-8 or utf-16，為utf-8時可不回傳) [string, optional]
                             "baseURL" : "http://baseUrl.ntuh.gov.tw"            // 報告基礎連結(報告中如有相對連結時回傳)[string, optional]
                         },
+                        "recordId": "D11232000112",                             // [string] 本筆記錄所對應的交易檔 ID (orderRecordId/medicationRecordId)
+                        "editable": true,                                       // [boolean] 是否可被編輯
+                        "deletable": true,                                      // [boolean] 是否可被刪除
+                        "holdable": true,                                       // [boolean] 是否可被暫停 (是為暫停藥囑用 醫囑一律為 false)
+                        "recordType": "medication",                             // [string] 本筆記錄所對應的是醫囑 (order) 或是藥囑 (medication)
                         "bgColor" : "FFFFFF" //如需調整此列背景顏色則回傳16進位色碼[string,optional]
                     },
                     ...
@@ -1578,6 +1581,29 @@ HOST: http://www.wantoto.com
 
 
 # Group 其他 Other Web Service
+
+## 9/03-SMS [/SMS/{empNo}/{status}{?sessionKey}]
+## 發送簡訊 [POST]
+
++ Parameters
+    + empNo (string) ... 使用者帳號
+    + status (string) ... 發送狀態 N:立即發送 T:待早上8點發送 W:待上班8點發送
+
++ Request SendSMSRequest (application/json)
+
+        {
+            "content": {
+                "message": "MESSAGE_TO_SEND"        // [string] 需要傳送的訊息
+            },
+            "sessionKey": "1112131321aqwdqwd"       // [string] SessionKey
+        }
+
++ Response 200 (application/json)
+
+        {
+            "success": true
+        }
+
 ## 9/24-通訊錄 [/contacts{?offset,limit}]
 ### 取得資料 [GET]
 
@@ -1722,6 +1748,7 @@ HOST: http://www.wantoto.com
 + Request CheckMultipleNotifications (application/json)
 
         {
+            "sessionKey": "B06CAB943EE0456EBFDAE0F3C4600327",
             "request_001": {
                 "path": "/notification/notification_id_001",
                 "method": "PUT",
@@ -2425,7 +2452,7 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "defaultAccount" : "I000B1C2D3",     // 預設 [string]
+                "preset" : "I000B1C2D3",     // 預設 [string]
                 "list" : [
                     {
                         "accountNo" : "I000B1C2D3",                 // [string] 第一個字元為帳號的門住急別
@@ -2745,15 +2772,16 @@ HOST: http://www.wantoto.com
             ]
         }
 
-## 7/21 - 醫令套餐 [/orderPackages{?patientClass,type,department,wardCode,pathCode,accountNo,sessionKey}]
+## 7/21 - 醫令套餐 [/orderPackage{?patientClass,type,department,wardCode,pathCode,accountNo,hospitalCode,sessionKey}]
 ### 取得醫令套餐清單 [GET]
 
 + Parameters
-    + patientClass  (string, optional) ... 病患門住急別 I 為住院 E 為急診
+    + patientClass  (string) ... 病患門住急別 I 為住院 E 為急診
+    + hospitalCode  (string) ... 院區別 如 台大本院為 T0
     + department    (string, optional) ... 欲搜尋套餐之科部
     + wardCode      (string, optional) ... 欲搜尋套餐之病房
     + accountNo     (string, optional) ... 欲搜尋病患之帳號
-    + type          (string) ... 'catagory' 為 全部, 檢驗, 檢查, 影醫, 核醫, 病理, 治療, 醫囑 'ward' 為病房 'department' 為科部 'employment' 為員工 'patient' 為病患 'path' 為路徑
+    + type          (string) ... 'category' 為 全部, 檢驗, 檢查, 影醫, 核醫, 病理, 治療, 醫囑 'ward' 為病房 'department' 為科部 'employment' 為員工 'path' 為路徑
     + sessionKey    (string) ... SessionKey
 
 + Response 200 (application/json)
@@ -2822,14 +2850,17 @@ HOST: http://www.wantoto.com
         }
 
 
-## 7/8 - 醫令搜尋 [/orders{?name,packageCode,patientClass,orderType}]
+## 7/8 - 醫令搜尋 [/orders{?name,packageCode,orderType,patientClass,hospitalCode,accountNo,searchType,sessionKey}]
 ### 取得藥物清單 [GET]
 
 + Parameters
     + name (string, optional)           ... 搜尋字串
     + packageCode (string, optional)    ... 套餐
     + orderType (string, optional)      ... 指定要搜尋醫令的醫令種類
-    + patientClass (string)             ... 病患的門住急別
+    + patientClass (string, optional)   ... 病患的門住急別
+    + hospitalCode (string, optional)   ... 院區碼 如台大本院為 T0
+    + accountNo (string, optional)      ... 病患帳號
+    + searchType (string)               ... 搜尋來源種類 P 為來自醫令套餐 A 為來自病患帳號 N 為來自字串搜尋
 
 + Response 200 (application/json)
 
@@ -2852,7 +2883,9 @@ HOST: http://www.wantoto.com
                 ],
                 "data" : [
                     {
-                        "orderCode" : "T000L0114",  // 醫令碼 [string, required]
+                        "orderCode" : "T0_00L0114_T",   // [string, required] 醫令碼
+                        "searchType": "P",              // [string] 搜尋來源類別
+                        "orderIdse": "128351",          // [string, optional] 醫囑預設參數識別碼如果沒有例如 searchType == N 不回傳
                         "content" : {
                             "DisplayCode" : "000L0114",
                             "orderType" : "治療",
@@ -2860,7 +2893,9 @@ HOST: http://www.wantoto.com
                         }
                     },
                     {
-                        "orderCode" : "T000L0113",
+                        "orderCode" : "T000L0113",      // [string, required] 醫令碼
+                        "searchType": "P",              // [string] 搜尋來源類別
+                        "orderIdse": "321110123",       // [string, optional] 醫囑預設參數識別碼如果沒有例如 searchType == N 不回傳
                         "content" : {
                             "DisplayCode" : "000L0113",
                             "orderType" : "治療",
@@ -2868,7 +2903,9 @@ HOST: http://www.wantoto.com
                         }
                     },
                     {
-                        "orderCode" : "T000L0112",
+                        "orderCode" : "T000L0112",      // [string, required] 醫令碼
+                        "searchType": "P",              // [string] 搜尋來源類別
+                        "orderIdse": "11023",           // [string, optional] 醫囑預設參數識別碼如果沒有例如 searchType == N 不回傳
                         "content" : {
                             "DisplayCode" : "000L0112",
                             "orderType" : "治療",
@@ -2973,11 +3010,15 @@ HOST: http://www.wantoto.com
         }
 
 
-## 6/25 - 醫令碼所對應的醫令 [/order/{orderCode}{?sessionKey}]
+## 6/25 - 醫令碼所對應的醫令 [/order/{orderCode}{?sessionKey,searchType,patientClass,orderIdse,accountNo}]
 ### 取得醫令資訊 [GET]
 
 + Parameters
     + sessionKey        (string) ... SessionKey
+    + searchType        (string) ... 搜尋來源類別
+    + patientClass      (string) ... 門急住別
+    + orderIdse         (string, optional) ... 醫囑預設參數識別碼
+    + accountNo         (string, optional) ... 病患帳號
 
 + Response 200 (application/json)
 
@@ -3243,7 +3284,7 @@ HOST: http://www.wantoto.com
 
 
         {
-            "cointent": {
+            "content": {
                 "payment": "PAYMENT_SELECTION_SELF",            // [optional] 以下為表格填寫的資料
                 "indication": "",                               // [optional]
                 "whole_brain_flag": true                        // [optional]
@@ -3449,11 +3490,12 @@ HOST: http://www.wantoto.com
 
 # Group MedicationOrder
 
-## 處方醫令資訊 [/medicationOrder/{medicationCode}{?sessionKey,stateIndex}]
+## 處方醫令資訊 [/medicationOrder/{medicationCode}{?sessionKey,stateIndex,accountNo}]
 ### 取得處方醫令屬性資料 [GET]
 + Parameters
     + sessionKey    (string) ... SessionKey
     + stateIndex    (number) ... 請求階段 index 開始為 0
+    + accountNo     (string) ... 病患的 account number
 
 + Response 200 (application/json)
 
@@ -3536,6 +3578,16 @@ HOST: http://www.wantoto.com
             }
         }
 
+
++ Response 400 (application/json)
+
+        {
+            "error": 805,                                       // [number] error code
+            "content": {
+                "message": "THE MESSAGE TO DISPLAY",            // [string] error message to display
+                "link": "EXTERNAL LINK"                         // [string] the redirect link for the Safari
+            }
+        }
 
 ## 處方醫令開令記錄 [/account/{accountNo}/medicationRecords{?sessionKey,stateIndex,medicationRecordId}]
 ### 開立處方醫令 [POST]
@@ -3656,6 +3708,85 @@ HOST: http://www.wantoto.com
                 },
                 ...
             ]
+        }
+
+## 平板無法開立藥品品項之外部連結 [/medicationOrder/externalLinks{?sessionKey,hospitalCode}]
+### 取得連結 [GET]
+
++ Parameters
+    + sessionKey (string)   ... SessionKey
+    + hospitalCode (string) ... 院區碼
+
++ Response 200 (application/json)
+
+        {
+            "content": {
+                "TPN": "THE EXTERNAL LINK FOR TPN",         // [string] TPN 藥品外部連結的 base url
+                ...
+            }
+        }
+
+## 藥囑交易記錄之暫停醫囑相關資訊 [/account/{accountNo}/medicationRecord/{medicationRecordId}/holdInfo{?sessionKey}]
+### 取得藥囑暫停功能相關資訊 [GET]
+
++ Parameters
+    + sessionKey (string) ...   SessionKey
+
++ Response 200 (application/json)
+
+        {
+            "content": {
+                "description": "Alparazalam ((管4)) 安博寧",         // [string] 暫停
+                "unit": "Dose",                                     // [string] 暫停醫囑使用單位
+                "optionas": [
+                    1,                                              // [number] 暫停醫囑選項清單
+                    2,
+                    ...
+                ],
+                "executionTimes": [
+                    1406938026,                                     // [number(timestamp)] 開始時間選項
+                    1406948026,                                     // [number(timestamp)]
+                    1406958026,                                     // [number(timestamp)]
+                    ...
+                ],
+                "canRestart": false,                                // [boolean] 此藥囑交易記錄是否可以開立重啟醫囑
+                "holdRecords": [
+                    {
+                        "creator": "111271",            // [string] 開立人之員工編號
+                        "createdTime": 1406938026,      // [number(timestamp)] 醫囑開立時間
+                        "executionTime": 1406938026,    // [number(timestamp), optional] 執行開始時間 暫停醫囑使用
+                        "type": "hold",                 // [string] 暫停醫囑: hold 重啟醫囑: restart
+                        "verifier": "111281",           // [string,optional] 確認者, 若無不用回傳
+                        "option": 1,                    // [number, optional] 暫停醫囑選項 重啟醫囑不用回傳
+                        "recordId": "13-01"             // [string] 暫停/重啟 醫囑交易記錄 ID
+                    },
+                    ...
+                ]
+            }
+        }
+
+## 藥囑交易記錄之暫停和重啟醫囑清單 [/account/{accountNo}/medicationRecord/{medicationRecordId}/holdOrders{?sessionKey}]
+### 開立暫停/重啟醫囑 [POST]
+
++ Request IssueHoldOrder (application/json)
+
+        {
+            "content": {
+                "creator": "111287",                // [string] 開立人
+                "executionTime": 1406948026,        // [number(timestamp), optional] 執行開始時間 暫停醫囑使用
+                "option": 10,                       // [number, optional] 暫停醫囑選項(值)
+                "type": "hold"                      // [string] 醫囑種類 暫停醫囑為 hold 重啟醫囑為 restart 
+            },
+            "sessionKey": "1112131321aqwdqwd"       // [string] SessionKey
+        }
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "content": {
+                "recordId": "13-8"     // 本次編輯後的 暫停/重啟 醫囑記錄 ID
+            }
         }
 
 # Group Blood Order
@@ -3958,7 +4089,7 @@ HOST: http://www.wantoto.com
                 "examRoomCode": "CTS",
                 "date": "20150623",
                 "weekDay": 2,
-                "session": 1,
+                "session": "1",
                 "order": 10
             }
         }
@@ -3986,7 +4117,7 @@ HOST: http://www.wantoto.com
             "content": {
                 "examRoomCode": "CTR",
                 "date": "20150101",
-                "session": 1,
+                "session": "1",
                 "selectedOrder": 10         // [optional] 沒有指定就不會上傳
             },
             "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
@@ -4024,7 +4155,7 @@ HOST: http://www.wantoto.com
                 {
                     "weekDay":          1,              // [number] 星期日期, 如星期一為 1
                     "date":             "20150213",     // [string] 排程日期, 依照格式 "YYYYmmdd"
-                    "session":          1,              // [number] 排程時段, 上午為 1 下午為 2 晚上為 3
+                    "session":          "1",            // [string] 排程時段, 上午為 1 下午為 2 晚上為 3
                     "examRoomCode":     "CTAB",         // [string] 檢查室代碼
                     "examRoomName":     "CTAB_檢查室",   // [string] 檢查室名稱
                     "ErOpdBookCount":   10,             // [number] 門診/急診 登記個數
@@ -4046,7 +4177,7 @@ HOST: http://www.wantoto.com
 + Parameters
     + orderRecordId (string) ... 對應的醫令交易記錄 ID 第一碼為醫令種類代碼
     + date          (string) ... 排程日期, 依照格式為 "YYYYmmdd"
-    + session       (number) ... 排程時段
+    + session       (string) ... 排程時段
     + sessionKey    (string) ... SessionKey
 
 + Response 200 (application/json)
@@ -4055,7 +4186,7 @@ HOST: http://www.wantoto.com
             "content": {
                 "weekDay":          1,
                 "date":             "20150213",
-                "session":          "A",
+                "session":          "1",
                 "examRoomCode":     "CTAB",
                 "examRoomName":     "CTAB_檢查室",
                 "ErOpdBookCount":   10,
@@ -4117,7 +4248,7 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
                     ...
                 ],
                 "priority" : {
-                    "preset" : "prioity", //預設選項
+                    "preset" : "priorityA", //預設選項
                     "option": [
                         {
                             "displayName": "A",
@@ -4159,7 +4290,7 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
                     "MED_ICU",
                     ...
                 ],
-                "priority": "A",
+                "priority": "priorityA",
                 "wardClass": [          // 後床級別排序, 依照優先順序編排
                     "single",
                     "double",
@@ -4197,12 +4328,11 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
 
 
 
-## 7/6 - 待配床清單 [/assignBed/department/{deptCode}]
+## 7/6 - 待配床清單 [/assignBed/department/{departmentCode}]
 ### 取得待配床病患清單[GET]
 
 + Parameters
-
-    + deptCode (string)    ... 科別代碼
+    + departmentCode (string)    ... 科別代碼
 
 + Response 200 (application/json)
 
@@ -4268,10 +4398,10 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
                      "beds": {
                            "bedNo" : "01-01",
                            "bedClass" : "雙人",
-                           "outDate" : 1406938026,
+                           "outDate" : 1406938026,      // [optional] 如果沒有指定時間就不用回傳
                            "bedCode" : "03A2-01-01",
-                           "bedStatus" : "empty",  //床狀態[string](空床：“empty”;住院中，無人預定:"occupied";住院中，後有預定:"nonAvailable";預定出院:"available")
-                           "isolation" : false  //是否可選擇隔離[boolean]
+                           "bedStatus" : "empty",       //床狀態[string](空床：“empty”;住院中，無人預定:"occupied";住院中，後有預定:"nonAvailable";預定出院:"available")
+                           "isolation" : false          //是否可選擇隔離[boolean]
                      }
                   },
                   ...
@@ -4301,7 +4431,8 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
                 "waitBedNo": "123456",
                 "bedCode": "03A2-01-01",
                 "date": "20151103",
-                "isolation" : "一般隔離"
+                "isolation" : "一般隔離",
+                "originDept": "MED_ICU"         // [optional] 借床原始科別，非借床則不回傳
             },
             "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2"
         }
@@ -4312,8 +4443,8 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
             "success": true
         }
 
-## 8/4 - 病患配床原始科別資訊 [/assignBed/originDept]
-### 取得病患配床原始科別資訊[GET]
+## 8/4 - 醫師可指定之病患配床原始科別資訊 [/assignBed/originDept]
+### 取得醫師可指定之病患配床原始科別資訊[GET]
 
 + Response 200 (application/json)
 
@@ -4364,9 +4495,9 @@ Content-type: multipart/form-data 影像用 [filename]: [content_file] 形式上
                         "patBirthday" : 1406938026,     //出生日期[number(timestamp)]
                         "chartNo" : "12345678",         //病歷號[string]
                         "personID" : "A123456789",      //身分證號[string]
-                        "bedInfo" : "5W3 01-01",        //病房病床號(住院與急診)，非住院或急診中則不回傳Key[string]
-                        "inDate" : 1406938026,          //入院日期(住院或急診檢傷時間)，非住院或在急診則不回傳Key [number(timestamp)]
-                        "bedTransferDate" : 1406938026,          //轉床日期，非住院或在急診則不回傳Key [number(timestamp)]
+                        "bedInfo" : "5W3 01-01",        //病房病床號(住院與急診)，非住院或急診中則不回傳 [string, optional]
+                        "inDate" : 1406938026,          //入院日期(住院或急診檢傷時間)，非住院或在急診則不回傳 [number(timestamp), optional]
+                        "bedTransferDate" : 1406938026,          //轉床日期，非住院或在急診則不回傳 [number(timestamp), optional]
                         "triageLevels" : "1",           //檢傷分級，非急診則不回傳 Key [string, optional]
                         "_emp_VS" : {                   //主治醫師(如遇回傳資料為醫師者，變數皆為_emp_開頭)[string, optional]
                             "empNo" : "111281",         //醫師員編[string]
