@@ -2,7 +2,7 @@ FORMAT: 1A
 HOST: http://www.wantoto.com
 
 
-# 台大醫院行動醫療資訊系統 Web Service v1.7.1
+# 台大醫院行動醫療資訊系統 Web Service v1.7.2
 
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
@@ -2982,6 +2982,8 @@ HOST: http://www.wantoto.com
                         "searchType": "P",              // [string] 搜尋來源類別
                         "orderIdse": "128351",          // [string, optional] 醫囑預設參數識別碼如果沒有例如 searchType == N 不回傳
                         "isVirtualOrder":   false,      // [boolean] 是否為虛擬醫令 如果是的話不能做 cache
+                        "canProcess": true,                     // [boolean] 是否可以在 iPortal 上處理
+                        "externalLinks": "/link/to/the/order",  // [string, optional] 如果不可在 iPortal 上開立時要再 Safari 開啟的 link
                         "display": "order",             // [string] a reference key to the data in the content; the data will be used as the display title
                         "content" : {
                             "DisplayCode" : "000L0114",
@@ -2990,11 +2992,13 @@ HOST: http://www.wantoto.com
                         }
                     },
                     {
-                        "orderCode" : "T0_00L0224_T",   // [string, required] 醫令碼
-                        "searchType": "P",              // [string] 搜尋來源類別
-                        "orderIdse": "321110123",       // [string, optional] 醫囑預設參數識別碼如果沒有例如 searchType == N 不回傳
-                        "isVirtualOrder":   false,      // [boolean] 是否為虛擬醫令
-                        "display": "order",             // [string] a reference key to the data in the content; the data will be used as the display title
+                        "orderCode" : "T0_00L0224_T",           // [string, required] 醫令碼
+                        "searchType": "P",                      // [string] 搜尋來源類別
+                        "orderIdse": "321110123",               // [string, optional] 醫囑預設參數識別碼如果沒有例如 searchType == N 不回傳
+                        "isVirtualOrder": false,                // [boolean] 是否為虛擬醫令
+                        "canProcess": true,                     // [boolean] 是否可以在 iPortal 上處理
+                        "externalLinks": "/link/to/the/order",  // [string, optional] 如果不可在 iPortal 上開立時要再 Safari 開啟的 link
+                        "display": "order",                     // [string] a reference key to the data in the content; the data will be used as the display title
                         "content" : {
                             "DisplayCode" : "000L0113",
                             "orderType" : "治療",
@@ -3006,6 +3010,8 @@ HOST: http://www.wantoto.com
                         "searchType": "P",              // [string] 搜尋來源類別
                         "orderIdse": "11023",           // [string, optional] 醫囑預設參數識別碼如果沒有例如 searchType == N 不回傳
                         "isVirtualOrder":   false,      // [boolean] 是否為虛擬醫令
+                        "canProcess": true,                     // [boolean] 是否可以在 iPortal 上處理
+                        "externalLinks": "/link/to/the/order",  // [string, optional] 如果不可在 iPortal 上開立時要再 Safari 開啟的 link
                         "display": "order",             // [string] a reference key to the data in the content; the data will be used as the display title
                         "content" : {
                             "DisplayCode" : "000L0112",
@@ -3153,22 +3159,26 @@ HOST: http://www.wantoto.com
                     "orderCode":        "T0_123123_T",              // [string] 醫令碼包含 院區碼_ID_醫令類別
                     "hospitalCode":     "HQ",                       // [string] 院區碼
                     "orderName":        "測試醫令",                  // [string] 醫令名稱
+                    "canEditOrderName": true,                       // [boolean, optional] K 類醫囑使用 是否可以修改醫囑
                     "screenNote":       "重要提示",                  // [string, optional] 重要提示 顯示於介面中
-                    "allowEmergency":   true,                       // [boolean] 是否支援急做
+                    "isEmergency":      true,                       // [boolean] 是否支援急做
                     "subType":          "N",                        // [string, optional] orderType = T 時使用 一般為 N, 手術為 O, 麻醉為 A, 齒位為 D, 技工所為 E, 復健為 P
-                    "requireCreInfo":   false,                      // [boolean] 是否需要顯示 cre 介面,
+                    "requireCreInfo":   0,                          // [number] 是否需要顯示 cre 介面以及顯示介面的種類, 0. 為不需要顯示 1. 為只需要顯示目前取得之 cre 值 2. 為還需要顯示生命危急和加開 creatimine 的選項
                     "planExecutionTimeFormat": "yyyy/mmdd HH",      // [string] 預計執行時間的 format
                     "specimenList":     [                           // [optional] orderType = L 時使用
                         {
                             "code": "ts1",                  // [string] 檢體代號
-                            "title": "TEST_SPECIMEN_1",     // [string] 檢體名稱
-                            "selected": false               // [boolean] 預設選取的時候回傳 True 否則回傳 False
+                            "title": "TEST_SPECIMEN_1"      // [string] 檢體名稱
                         },
                         {
                             "code": "ts2",                  // [string] 檢體代號
-                            "title": "TEST_SPECIMEN_2",     // [string] 檢體名稱
-                            "selected": true                // [boolean] 預設選取的時候回傳 True 否則回傳 False
+                            "title": "TEST_SPECIMEN_2"      // [string] 檢體名稱
                         },
+                        ...
+                    ],
+                    "frequencyList": [                 // [optional] K類醫囑常用頻率
+                        "QD",
+                        "Q2H",
                         ...
                     ],
                     "appendOrders":     [                   // [optional] 附帶醫令，若無則不用回傳
@@ -3258,7 +3268,7 @@ HOST: http://www.wantoto.com
     + hospitalCode      (string) ... 院區碼
     + orderIdse         (string, optional) ... 搜尋藥囑而外識別碼
     + planExecutionTime (string, optional) ... 預設預計執行時間
-    + orderStage        (number, optional) ... 預設預計執行階段代碼
+    + orderStage        (string, optional) ... 預設預計執行階段代碼
 
 + Response 200 (application/json)
 
@@ -3269,16 +3279,17 @@ HOST: http://www.wantoto.com
                     "isPAT": true,                          // [boolean] 是否需要預設 (入院檢查) 到 orderName 之中顯示（以及開立時上傳）
                     "quantity": 3,                          // [number, optional] 預設的 quantity 如果沒有預設不用會傳
                     "billType": "U",                        // [string, optional] 預設的計價別 (U內含的話顯示內含不可打勾、Z自費打勾、E則不勾) 如果沒有預設不用會傳
-                    "orderStage": 1,                        // [number, optional] 預設執行階段的代號 如果沒有預設不用會傳
+                    "orderStage": "1",                      // [string, optional] 預設執行階段的代號 如果沒有預設不用會傳
                     "specialInstruction": "特殊醫囑敘述",     // [string, optional] 預設特殊醫囑的帶入值 如果沒有預設不用會傳
                     "frequency": "STAT",                    // [string, optional] orderType = K 時使用 如果沒有預設不用回傳
-                    "endActiveDatetime": "20151301",        // [string, optional] orderType = K 時使用 如果沒有預設不用回傳
+                    "endActivateDatetime": 1438423200,      // [number(timestamp), optional] 醫令有效迄日 K類醫囑使用
                     "specimenValue": "BLO",                 // [string, optional] orderType = L 時使用 如果沒有預設不用回傳
                     "planExecutionTime": {                  // 預計執行時間相關資訊
                         "value": 130032013,                 // [number(timestamp), optional] 預計執行時間預設值之 unix timestamp 如果沒有不用回傳
                         "editable": true,                   // [boolean] 是否可以修改
                         "message": "不需排程"                 // [string, optional] 如果有回傳的話 不會顯示時間額是改顯示 message 的文字內容
-                    }
+                    },
+                    "requestSheetNo": "T0159100468"         // [string, optional] 檢查單號 檢查E 影醫X 核醫N 使用
                 },
                 ...
             ]
@@ -3296,7 +3307,7 @@ HOST: http://www.wantoto.com
                     "requestID": "20150907_111281_001", // [string] 開立請求ID 於回傳開立結果時使用
                     "orderCode": "T0_0001234_T",        // [string] 醫令碼
                     "orderName": "TEST_ORDER_001",      // [string] 醫令名稱
-                    "orderStage": 0,                    // [number] 醫令階段代碼
+                    "orderStage": "0",                  // [string] 醫令階段代碼
                     "frequency": "STAT",                // [string, optional] K 類醫囑使用, 頻率
                     "endActiveDatetime": "20160201",    // [string, optional] K 類醫囑使用, 結束日期 YYYYMMDD(:HH)
                     "specimenValue": "BLO",             // [string, optional] L 類醫囑使用
@@ -3309,7 +3320,8 @@ HOST: http://www.wantoto.com
                     },
                     "creInfo": {                        // [optional] 當醫令 requireCreInfo=true 需要顯示 cre 介面時會回傳
                         "cre": 22.3,                    // [number, optional] 如果有需要填入 cre 值時所填入的數值 且有填入數值時會回傳
-                        "emergency": false              // [boolean] 生命危及之緊急狀況項目是否被勾選
+                        "emergency": false,             // [boolean] 生命危及之緊急狀況項目是否被勾選
+                        "creatinine": false             // [boolean] 加開 creatinine 是否被勾選
                     },
                     "specialInstruction": "Test 1",     // [string] 特殊醫囑
                     "questionaries": [                  // [optional] 問答題答案，若無則回傳空陣列
@@ -3424,6 +3436,8 @@ HOST: http://www.wantoto.com
                     "pherrior_fassa",
                     ...
                 ],
+                "orderStage": "0",                              // [string] 階段
+                "planExecutionTimeString": "2015/03/12",        // [string] 預計執行時間日期
                 "specialInstruction": "xxx",                    // [string] 特殊醫囑之輸入內容
                 "creInfo": {
                     "cre": 22.3,                                // [number, optional] 如果有需要填入 cre 值時所填入的數值 只有在系統查佈道病患 cre 值且使用者有填值時才會回傳
@@ -3499,14 +3513,15 @@ HOST: http://www.wantoto.com
                 "creator": "111281",                // [string] 開立醫囑者員工編號
                 "verifier": "111281",               // [string] 確認醫師員工編號
                 "isEmergency": false,               // [boolean] 是否急做
-                "orderStage": 0,                    // [number] 階段代碼 詳細對應資料從 dictionary 抓
+                "orderStage": "0",                  // [string] 階段代碼 詳細對應資料從 dictionary 抓
                 "status": "開立",                    // [string] 狀態
                 "specialInstruction": "特殊醫囑內容",  // [string] 特殊醫囑
                 "startActivateDatetime": 1435744800, // [number(timestamp), optional] 醫令有效起日 K類醫囑使用
                 "endActivateDatetime": 1438423200,   // [number(timestamp), optional] 醫令有效迄日 K類醫囑使用
                 "frequency": "QD",                   // [string] 頻率碼 K類醫囑使用
-                "isBedside": false,                  // [boolean, optional] 是否為床邊攝影 R類醫囑使用
+                "isBedside": false,                  // [boolean, optional] 是否為床邊攝影 X類醫囑使用
                 "specimenValue": "sp1",               // [string] 檢體代碼 L類醫囑使用
+                "requestSheetNo": "T0159100468",      // [string, optional] 檢查單號 檢查E 影醫X 核醫N 使用
                 "questionaries": [                     // [optional] 問題清單答案
                     {
                         "title": "SINGLE_SELECTION",            // [string] 問題顯示題目
@@ -3520,11 +3535,11 @@ HOST: http://www.wantoto.com
                         ],
                         "options": [                            // [optional] 選擇項目列表，當類型為 S, M 時使用
                             {
-                                "displayValue": "OPTIONA: A",   // [string] 選項顯示內容
+                                "title": "OPTIONA: A",          // [string] 選項顯示內容
                                 "returnValue": "optional_a"     // [string] 回傳時該選項所對應的值
                             },
                             {
-                                "displayValue": "OPTIONAL: B",  // [string] 項目顯示內容
+                                "title": "OPTIONAL: B",         // [string] 項目顯示內容
                                 "returnValue": "optiona_b"      // [string] 回傳時該選項所對應的值
                             },
                             ...
@@ -3568,59 +3583,57 @@ HOST: http://www.wantoto.com
     + verifier           (string) ... 確認醫師員工編號
     + isEmergency        (boolean) ... 是否急做
     + status             (string) ... 狀態
-    + orderStage         (number) ... 醫令階段代碼
+    + orderStage         (string) ... 醫令階段代碼
     + specialInstruction (string) ... 特殊醫囑內容
 
 + Request ModifyOrder (application/json)
 
         {
-            "content": [
-                {
-                    "requstID": "account_0001_0001",     // [string]
-                    "hospitalCode": "HQ",                // [string] 院區碼
-                    "quantity": 3,                       // [number] 數量
-                    "billType": "E",                     // [string] 記帳類別
-                    "confirmedTime": 1438423200,         // [number(timestamp)] 確認時間
-                    "verifier": "111283",                // [string]  確認醫師員工編號
-                    "isEmergency": false,                // [boolean] 是否急做
-                    "planExecutionTime": {              // [optional] 預計執行時間相關資訊
-                        "timestamp": 13001322,     // [number(timestamp)] 執行時間的 timestamp 數值
-                        "format": "YYYY/MM/DD"     // [string] 有關執行時間要如何顯示的 datetime format
+            "content": {
+                "requstID": "account_0001_0001",     // [string]
+                "hospitalCode": "HQ",                // [string] 院區碼
+                "quantity": 3,                       // [number] 數量
+                "billType": "E",                     // [string] 記帳類別
+                "confirmedTime": 1438423200,         // [number(timestamp)] 確認時間
+                "verifier": "111283",                // [string]  確認醫師員工編號
+                "isEmergency": false,                // [boolean] 是否急做
+                "planExecutionTime": {              // [optional] 預計執行時間相關資訊
+                    "timestamp": 13001322,     // [number(timestamp)] 執行時間的 timestamp 數值
+                    "format": "YYYY/MM/DD"     // [string] 有關執行時間要如何顯示的 datetime format
+                },
+                "specialInstruction": "Test 1",      // [string] 特殊醫囑
+                "startActivateDatetime": 1435744800, // [number(timestamp), optional] 醫令有效起日 K類醫囑使用
+                "endActivateDatetime": 1438423200,   // [number(timestamp), optional] 醫令有效迄日 K類醫囑使用
+                "frequency": "QD",                   // [string] 頻率碼 K類醫囑使用
+                "isBedside": false,                  // [boolean, optional] 是否為床邊攝影 X類醫囑使用
+                "orderStage": "0",                   // [string] 階段
+                "specimenValue": "sp1",              // [string] 檢體代碼 L類醫囑使用
+                "questionaries": [                   // [optional] 問答題答案，若無則不會傳入
+                    {
+                        "returnKey": "d_selection_example",     // [string] 問答題對應鍵值
+                        "type": "S",                            // [string] 問答題類型
+                        "selected": [                           // [optional] 選取之選項，若單選則 list 只會有一個值
+                            "option_001"                        // [string]
+                        ]
                     },
-                    "specialInstruction": "Test 1",      // [string] 特殊醫囑
-                    "startActivateDatetime": 1435744800, // [number(timestamp), optional] 醫令有效起日 K類醫囑使用
-                    "endActivateDatetime": 1438423200,   // [number(timestamp), optional] 醫令有效迄日 K類醫囑使用
-                    "frequency": "QD",                   // [string] 頻率碼 K類醫囑使用
-                    "isBedside": false,                  // [boolean, optional] 是否為床邊攝影 R類醫囑使用
-                    "orderStage": 0,                     // [number] 階段
-                    "specimenValue": "sp1",              // [string] 檢體代碼 L類醫囑使用
-                    "questionaries": [                   // [optional] 問答題答案，若無則不會傳入
-                        {
-                            "returnKey": "d_selection_example",     // [string] 問答題對應鍵值
-                            "type": "S",                            // [string] 問答題類型
-                            "selected": [                           // [optional] 選取之選項，若單選則 list 只會有一個值
-                                "option_001"                        // [string]
-                            ]
-                        },
-                        {
-                            "returnKey": "input_box_example",       // [string] 問答題對應鍵值
-                            "type": "T",                            // [string] 問答題類型
-                            "value": "this is the input content"    // [string, optional] 輸入之文字
-                        },
-                        {
-                            "returnKey": "d_selection_example",     // [string] 回傳結果時該問題所對應的鍵值
-                            "type": "D",                            // [string] 問題種類，如日期為 D，單選為 S
-                            "value": "20151001"                     // [string, optional] dateFormat 會依照 /order 回來的指示
-                        }
-                        ...
-                    ],
-                    "appendOrders": [ // [optional] 附帶醫令，若無則不會傳入
-                        "T0_SA123001_T",  // [string] 醫令碼 orderCode
-                        "T0_00123110_K",
-                        ...
-                    ]
-                }
-            ],
+                    {
+                        "returnKey": "input_box_example",       // [string] 問答題對應鍵值
+                        "type": "T",                            // [string] 問答題類型
+                        "value": "this is the input content"    // [string, optional] 輸入之文字
+                    },
+                    {
+                        "returnKey": "d_selection_example",     // [string] 回傳結果時該問題所對應的鍵值
+                        "type": "D",                            // [string] 問題種類，如日期為 D，單選為 S
+                        "value": "20151001"                     // [string, optional] dateFormat 會依照 /order 回來的指示
+                    }
+                    ...
+                ],
+                "appendOrders": [ // [optional] 附帶醫令，若無則不會傳入
+                    "T0_SA123001_T",  // [string] 醫令碼 orderCode
+                    "T0_00123110_K",
+                    ...
+                ]
+            },
             "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"
         }
 
@@ -3639,9 +3652,42 @@ HOST: http://www.wantoto.com
         }
 
 
-## 9/16 刪除多筆病患醫令記錄 [/order/batch]
-### 刪除多筆病患醫令記錄[POST]
-+ Reqeust Delete orderRecord(s)
+## 10/27 確認多筆病患醫令記錄 [/order/batch]
+### 確認或刪除多筆病患醫令記錄 [POST]
+
++ Request Confirm orderRecord(s)
+
+        {
+            "sessionKey": "DE44A33624064BFCB0BBAFDB9A509C16",
+            "requests": [
+                {
+                    "requestId": "request_001",
+                    "path": "/account/{accountNo}/orderRecord/T32132012",
+                    "method": "PATCH",
+                    "body": {
+                        "content": {
+                            "confirmedTime": 1438423200,         // [number(timestamp)] 確認時間
+                            "verifier": "111283"                 // [string]  確認醫師員工編號
+                        }
+                    }
+                },
+                {
+                    "requestId": "request_001",
+                    "path": "/account/{accountNo}/orderRecord/T32132013",
+                    "method": "PATCH",
+                    "body": {
+                        "content": {
+                            "confirmedTime": 1438423200,         // [number(timestamp)] 確認時間
+                            "verifier": "111283"                 // [string]  確認醫師員工編號
+                        }
+                    }
+                },
+                ...
+            ]
+        }
+
+
++ Request Delete orderRecord(s)
 
         {
             "sessionKey": "DE44A33624064BFCB0BBAFDB9A509C16",
@@ -3652,7 +3698,7 @@ HOST: http://www.wantoto.com
                     "method": "DELETE"
                 },
                 {
-                    "requestId": "request002"
+                    "requestId": "request002",
                     "path": "/account/{accountNo}/orderRecords?orderRecordId=T32132013",
                     "method": "DELETE"
                 },
@@ -3662,16 +3708,94 @@ HOST: http://www.wantoto.com
 
 + Response 200 (application/json)
 
+
         {
-            "request_001": {
-                "success": true
-            },
-            "request_002": {
-                "success": true
-            }
+            "requests": [
+                {
+                    "requestId": "request001",
+                    "success": true
+                },
+                {
+                    "requestId": "request002",
+                    "success": true
+                }
+                ...
+            ]
         }
 
 # Group MedicationOrder
+
+## 7/8 - 醫令搜尋 [/medications{?name,packageCode,orderType,patientClass,hospitalCode,accountNo,searchType,searchRange,sessionKey}]
+### 取得藥物清單 [GET]
+
++ Parameters
+    + name (string, optional)           ... 搜尋字串
+    + packageCode (string, optional)    ... 套餐代碼
+    + orderType (string, optional)      ... 指定要搜尋醫令的醫令種類
+    + patientClass (string, optional)   ... 病患的門住急別
+    + hospitalCode (string, optional)   ... 院區碼 如台大本院為 T0
+    + accountNo (string, optional)      ... 病患帳號
+    + searchType (string)               ... 搜尋來源種類 P 為來自醫令套餐 A 為來自病患帳號 N 為來自字串搜尋
+    + searchRange (number, optional)    ... 搜尋種類為 A 時指定搜尋日期範圍
+
++ Response 200 (application/json)
+
+        {
+            "content" : {
+                "field" : [
+                    {
+                        "fieldCode" : "orderType",
+                        "displayName" : "醫令類別"
+                    },
+                    {
+                        "fieldCode" : "DisplayCode",
+                        "displayName" : "醫令碼"
+                    },
+                    {
+                        "fieldCode" : "order",
+                        "displayName" : "醫令內容"
+                    },
+                    ...
+                ],
+                "data" : [
+                    {
+                        "orderCode" : "T0_00L0114_T",   // [string, required] 藥囑碼
+                        "searchType": "P",              // [string] 搜尋來源類別
+                        "orderIdse": "128351",          // [string, optional] 藥囑預設參數識別碼如果沒有例如 searchType == N 不回傳
+                        "display": "order",             // [string] a reference key to the data in the content; the data will be used as the display title
+                        "content" : {
+                            "DisplayCode" : "000L0114",
+                            "orderType" : "治療",
+                            "order"     : "複印全口顎Ｘ光照相"
+                        }
+                    },
+                    {
+                        "orderCode" : "T0_00L0224_T",   // [string, required] 藥囑碼
+                        "searchType": "P",              // [string] 搜尋來源類別
+                        "orderIdse": "321110123",       // [string, optional] 藥囑預設參數識別碼如果沒有例如 searchType == N 不回傳
+                        "display": "order",             // [string] a reference key to the data in the content; the data will be used as the display title
+                        "content" : {
+                            "DisplayCode" : "000L0113",
+                            "orderType" : "治療",
+                            "order"     : "複印咬合片Ｘ光照相 劑量: 20um"
+                        }
+                    },
+                    {
+                        "orderCode" : "T0_0033140_T",   // [string, required] 藥囑碼
+                        "searchType": "P",              // [string] 搜尋來源類別
+                        "orderIdse": "11023",           // [string, optional] 藥囑預設參數識別碼如果沒有例如 searchType == N 不回傳
+                        "display": "order",             // [string] a reference key to the data in the content; the data will be used as the display title
+                        "content" : {
+                            "DisplayCode" : "000L0112",
+                            "orderType" : "治療",
+                            "order"     : "複印根尖周Ｘ光照相"
+                        }
+                    },
+                    ...
+                ]
+            }
+        }
+
 
 ## 處方醫令資訊 [/medicationOrder/{medicationCode}{?sessionKey,stateIndex,accountNo}]
 ### 取得處方醫令屬性資料 [GET]
@@ -3691,12 +3815,13 @@ HOST: http://www.wantoto.com
                 "doseUnit":                 "mg",                     // [string] 藥品劑量使用單位名稱
                 "packUnit":                 "mg",                     // [string] 藥品包裝劑量使用單位名稱
                 "packConvertRate":          1,                        // [number] 一個包裝內有幾個 dose unit
+                "contentAmount":            10,                       // [number] contentAmount
+                "contentAmountDividerUnit": "ml",                     // [string] contentAmountDividerUnit
+                "contentAmountDivider":     1,                        // [number]
                 "billType":                 "Z",                      // [string] 記帳類別，自費為 Z 健保為 E 內含為 U
-                "createdTime":              1435744800,               // [number(timestamp)] 此項處方醫令編輯起始時間 (UI 介面顯示用)
                 "specialDose":              "TEXT_CONTENT ...",       // [string, optional] 特殊劑量 若無則不用回傳
                 "repeatReason":             "TEXT_CONTENT ...",       // [string, optional] 用要原因 若無則不用回傳
-                "isAllergic":               false,                    // [boolean] 過敏 是否需要預設勾選
-                "isADR":                    false,                    // [boolean] ADR 是否預設勾選
+                "needVaccinePanel":         false,                    // [boolean] 是否需要顯示疫苗相關介面
                 "supportedRoutes":  [                                 // [optional] 注射處方使用 若沒有對應的途徑則不用回傳
                     "IF",                                             // [string] 途徑代碼
                     "IV",
@@ -3708,11 +3833,6 @@ HOST: http://www.wantoto.com
                     ...
                 ],
                 "diluentInstructions": {                              // [optional] 稀釋液指示 注射處方式使用
-                    "default": [                                      // [optional] 預設稀釋液選項 若無不用回傳
-                        "NS",
-                        "D5W",
-                        ...
-                    ],
                     "IF": {                                           // [optional] 對應的鍵值為路徑代碼，陣列內容為該路徑所支援的稀釋液
                         "options": [
                             "NS",                                     // [string] 稀釋液
@@ -3790,10 +3910,19 @@ HOST: http://www.wantoto.com
                     "infusionTime": 10,                              // [number, optional] 預設輸注時間
                     "mlPerHour":  1,                                 // [number, optional] 預設流速
                     "OrderStage": "階段",                            // [string, optional] ???
+                    "isAllergic":               false,              // [boolean] 過敏 是否需要預設勾選
+                    "isADR":                    false,              // [boolean] ADR 是否預設勾選
                     "repeatedPattern": "QD",                        // [string, optional] 預設頻率
                     "route": "IF",                                  // [string, optional] 預設途徑
                     "useDays": 1,                                   // [number, optional] 預設􏲟開藥天數
-                    "orderReason":  "xxx"                           // [string, optional] 用藥原因 (例如事前檢核帶入的結果)
+                    "orderReason":  "xxx",                          // [string, optional] 用藥原因 (例如事前檢核帶入的結果)
+                    "creator": "111281",                            // [string] 開立者員編
+                    "billType": "Z",                                // [string] 記帳類別，自費為 Z 健保為 E 內含為 U
+                    "createdTime": 1435744800,                      // [number] 開立時間 timestamp
+                    "modifier": "111283",                           // [string, optional] 前次修改者員編 若沒有不用回傳
+                    "modifiedTime": 1435745800,                     // [number, optional] 前次修改時間 timestamp 若沒有不用回傳
+                    "verifier": "111301",                           // [string, optional] 前次確認者員編 若沒有不用回傳
+                    "confirmedTime": 1435745900                     // [number, optional] 前次確認時間 timestamp 若沒有不用回傳
                 },
                 ...
             ]
@@ -3810,12 +3939,12 @@ HOST: http://www.wantoto.com
                 "medicationCode":   "P1110023",                     // [string] 欲開立之處方代碼
                 "hospitalCode":     "HQ",                           // [string] 院區代碼
                 "stage":            "regular",                      // [string] 階段
-                "dose":             "1",                            // [string] 劑量
+                "dose":             1,                              // [number] 劑量
                 "route":            "IF",                           // [string] 路徑代碼
                 "repeatedPattern":  "QD",                           // [string] 頻率代碼
                 "useDays":          0,                              // [number] 使用天數
                 "billType":         "Z",                            // [string] 記帳類別，自費為 Z 健保為 E 內含為 U
-                "state":            false,                          // [boolean] STATE 選項是否被勾選
+                "stat":            false,                           // [boolean] STAT 選項是否被勾選
                 "startDate":        "20150702",                     // [string] 起始日期，依照格式 yyyymmDD
                 "startTime":        9,                              // [number] 起始時間 (小時, 24 時制)
                 "endDate":          "20150709",                     // [string, optional] 結束日期，依照格式 yyyymmDD 若使用者沒輸入不會傳入
@@ -3834,7 +3963,7 @@ HOST: http://www.wantoto.com
                     "infusionTime":     10,                         // [number] 輸注時間 注射處方使用
                     "mlPerHour":        1                           // [number] 流速 注射處方使用
                 },
-                "dispenseWay":  1,                                  // [number, optional] 調劑方式
+                    "dispenseWay":  1,                                  // [number, optional] 調劑方式
                 "dispenseDayList": [                                // [optional] 調劑指定日期
                     "20150707",                                     // [string] 調劑日期 依照格式 yyyymmDD
                     "20150714",
@@ -3887,11 +4016,11 @@ HOST: http://www.wantoto.com
 
         {
             "content": [
-                "早__{%f:dose1}__ __{%u}__, 午__{%f:dose2}__ __{%u}__, 晚__{%f:dose3}__ __{%u}__, 睡前__{%f:dose3}__ __{%u}__, __{%p:selection}__ 飯前 __{%p:selection}__ 飯後",
-                "__{%t:time1}__ __{%u}__, __{%t:time2}__ __{%u}__, __{%t:time3}__ __{%u}__, __{%t:time4}__ __{%u}__.",
+                "早__{%f:dose1}__ __{%u}__, 午__{%f:dose2}__ __{%u}__, 晚__{%f:dose3}__ __{%u}__, 睡前__{%f:dose3}__ __{%u}__, __{%p:selection:飯前:飯後}__ ",
+                "__{%t:time1}__ __{%u}__, __{%t:time2}__ __{%u}__, __{%t:time3}__ __{%u}__, __{%t:time4}__ __{%u}__",
                 "指定用法: __{%s:content}__",
-                "一日 __{%f:dose1}__ __{%u}__, 隔日 __{%f:dose2}__ __{%u}__交替使用. __{%p:timeSelection}__ 早(9AM) __{%p:timeSelection}__ 午(1PM) __{%p:timeSelection}__ 晚(6PM) __{%p:timeSelection}__ 睡前(9PM)",
-                "周一 __{%f:mon}__ __{%u}__, 周二 __{%f:tue}__ __{%u}__, 周三 __{%f:wed}__ __{%u}__, 周四 __{%f:thu}__ __{%u}__, 周五 __{%f:fri}__ __{%u}__, 周六 __{%f:sat}__ __{%u}__, 周日 __{%f:sun}__ __{%u}__. __{%p:timeSelection}__ 早(9AM) __{%p:timeSelection}__ 午(1PM) __{%p:timeSelection}__ 晚(6PM) __{%p:timeSelection}__ 睡前(9PM)",
+                "一日 __{%f:dose1}__ __{%u}__, 隔日 __{%f:dose2}__ __{%u}__交替使用, __{%p:timeSelection:早(9AM):午(1PM):晚(6PM):睡前(9PM)}__",
+                "周一 __{%f:mon}__ __{%u}__, 周二 __{%f:tue}__ __{%u}__, 周三 __{%f:wed}__ __{%u}__, 周四 __{%f:thu}__ __{%u}__, 周五 __{%f:fri}__ __{%u}__, 周六 __{%f:sat}__ __{%u}__, 周日 __{%f:sun}__ __{%u}__, __{%p:timeSelection:早(9AM):午(1PM):晚(6PM):睡前(9PM)}__",
                 ...
             ]
         }
@@ -3932,10 +4061,137 @@ HOST: http://www.wantoto.com
 
         {
             "content": {
-                "TPN": "THE EXTERNAL LINK FOR TPN",         // [string] TPN 藥品外部連結的 base url
-                ...
+                "TPN": "THE EXTERNAL LINK FOR TPN"          // [string] TPN 藥品外部連結的 base url
             }
         }
+
+
+## 藥囑途徑表 [/medicationOrder/supportedRoutes{?sessionKey}]
+### 取得藥囑頻率表 [GET]
+
++ Parameters
+    + sessionKey (string) ... SessionKey
+
++ Response 200 (application/json)
+
+        {
+            "content": [
+                {
+                    "code": "IF",                   // [string] 途徑代號
+                    "isContinue": false,            // [boolean] 是否連續
+                    "infusionTimeControl": 0,       // [number] 輸注時間管控碼 0為不需要 1為可編輯 2為必輸入
+                    "mlPerHourRequired": false      // [boolean] 是否要求輸入流速
+                },
+                ...
+            ]
+        }
+
+## 藥囑交易記錄之資訊 [/account/{accountNo}/medicationRecord/{medicationRecordId}{?sessionKey}]
+
+### 取得對應醫囑交易記錄內容 [GET]
+
++ Parameters
+    + sessionKey (string) ... SessionKey
+
++ Response 200 (application/json)
+
+        {
+            "content": {
+                "medicationCode":   "T0_P1110023",                  // [string] 處方代碼 院區碼_ID
+                "medicationName":   "TEST_ORDER_NAME",              // [string] 處方名稱
+                "hospitalCode":     "HQ",                           // [string] 院區代碼
+                "stage":            "regular",                      // [string] 階段
+                "dose":             1,                              // [number] 劑量
+                "route":            "IF",                           // [string] 路徑代碼
+                "repeatedPattern":  "QD",                           // [string] 頻率代碼
+                "useDays":          0,                              // [number] 使用天數
+                "billType":         "Z",                            // [string] 記帳類別，自費為 Z 健保為 E 內含為 U
+                "stat":            false,                           // [boolean] STAT 選項是否被勾選
+                "startDate":        "20150702",                     // [string] 起始日期，依照格式 yyyymmDD
+                "startTime":        9,                              // [number] 起始時間 (小時, 24 時制)
+                "endDate":          "20150709",                     // [string, optional] 結束日期，依照格式 yyyymmDD 若使用者沒輸入不會傳入
+                "endTime":          9,                              // [number, optional] 結束時間 (小時, 24 時制) 若使用者沒輸入不會傳入
+                "specialDose":      "TEXT CONTENT ...",             // [string, optional] 特殊劑量 若使用者沒輸入不會傳入
+                "repeatReason":     "TEXT CONTENT ...",             // [string, optional] 使用原因 若使用者沒輸入不會傳入
+                "isAllergic":       false,                          // [boolean] 過敏
+                "isADR":            false,                          // [boolean] ADR
+                "diluent":          {  // [optional] 稀釋液 注射處方使用
+                    "code":     "12332123",                         // [string] 稀釋液代碼
+                    "volume":   100                                 // [number] 稀釋液體積
+                },
+                "injection": {  // [optional] 注射處方指示
+                    "concentration":    100,                        // [number] 濃度 注射處方使用
+                    "flowVelocity":     100,                        // [number] 速度 注射處方使用
+                    "infusionTime":     10,                         // [number] 輸注時間 注射處方使用
+                    "mlPerHour":        1                           // [number] 流速 注射處方使用
+                },
+                "dispenseWay":  1,                                  // [number, optional] 調劑方式
+                "dispenseDayList": [                                // [optional] 調劑指定日期
+                    "20150707",                                     // [string] 調劑日期 依照格式 yyyymmDD
+                    "20150714",
+                    "20150721",
+                    ...
+                ],
+                "dailyAmount": 5,                               // [number, optional] 每日劑量, 若無則不會傳入
+                "createdTime": 1435744800,                      // [number] 開立時間 timestamp
+                "modifier": "111283",                           // [string, optional] 前次修改者員編 若沒有不用回傳
+                "modifiedTime": 1435745800,                     // [number, optional] 前次修改時間 timestamp 若沒有不用回傳
+                "verifier": "111301",                           // [string, optional] 前次確認者員編 若沒有不用回傳
+                "confirmedTime": 1435745900                     // [number, optional] 前次確認時間 timestamp 若沒有不用回傳
+            }
+        }
+
+### 修改醫囑 [PUT]
++ Request IssueMedicationOrder (application/json)
+
+        {
+            "content": {
+                "medicationCode":   "P1110023",                     // [string] 欲開立之處方代碼
+                "hospitalCode":     "HQ",                           // [string] 院區代碼
+                "stage":            "regular",                      // [string] 階段
+                "dose":             1,                              // [number] 劑量
+                "route":            "IF",                           // [string] 路徑代碼
+                "repeatedPattern":  "QD",                           // [string] 頻率代碼
+                "useDays":          0,                              // [number] 使用天數
+                "billType":         "Z",                            // [string] 記帳類別，自費為 Z 健保為 E 內含為 U
+                "stat":            false,                           // [boolean] STAT 選項是否被勾選
+                "startDate":        "20150702",                     // [string] 起始日期，依照格式 yyyymmDD
+                "startTime":        9,                              // [number] 起始時間 (小時, 24 時制)
+                "endDate":          "20150709",                     // [string, optional] 結束日期，依照格式 yyyymmDD 若使用者沒輸入不會傳入
+                "endTime":          9,                              // [number, optional] 結束時間 (小時, 24 時制) 若使用者沒輸入不會傳入
+                "specialDose":      "TEXT CONTENT ...",             // [string, optional] 特殊劑量 若使用者沒輸入不會傳入
+                "repeatReason":     "TEXT CONTENT ...",             // [string, optional] 使用原因 若使用者沒輸入不會傳入
+                "isAllergic":       false,                          // [boolean] 過敏
+                "isADR":            false,                          // [boolean] ADR
+                "diluent":          {  // [optional] 稀釋液 注射處方使用
+                    "code":     "12332123",                         // [string] 稀釋液代碼
+                    "volume":   100                                 // [number] 稀釋液體積
+                },
+                "injection": {  // [optional] 注射處方指示
+                    "concentration":    100,                        // [number] 濃度 注射處方使用
+                    "flowVelocity":     100,                        // [number] 速度 注射處方使用
+                    "infusionTime":     10,                         // [number] 輸注時間 注射處方使用
+                    "mlPerHour":        1                           // [number] 流速 注射處方使用
+                },
+                "dispenseWay":  1,                                  // [number, optional] 調劑方式
+                "dispenseDayList": [                                // [optional] 調劑指定日期
+                    "20150707",                                     // [string] 調劑日期 依照格式 yyyymmDD
+                    "20150714",
+                    "20150721",
+                    ...
+                ],
+                "dailyAmmount": 5                                   // [number, optional] 每日劑量, 若無則不會傳入
+            },
+            "stateIndex": 0,                                        // [number] 交易狀態的 state 從 0 開始
+            "sessionKey": "E0B27FAAAE68415BA9E011E569FE4009"        // [string] SessionKey
+        }
+
++ Response 200 (application/json)
+
+        {
+            "success": true
+        }
+
 
 ## 藥囑交易記錄之暫停醫囑相關資訊 [/account/{accountNo}/medicationRecord/{medicationRecordId}/holdInfo{?sessionKey}]
 ### 取得藥囑暫停功能相關資訊 [GET]
@@ -3976,7 +4232,8 @@ HOST: http://www.wantoto.com
             }
         }
 
-## 藥囑交易記錄之暫停和重啟醫囑清單 [/account/{accountNo}/medicationRecord/{medicationRecordId}/holdOrders{?sessionKey}]
+
+## 藥囑交易記錄之暫停和重啟醫囑清單 [/account/{accountNo}/medicationRecord/{medicationRecordId}/holdOrders{?sessionKey,recordId}]
 ### 開立暫停/重啟醫囑 [POST]
 
 + Request IssueHoldOrder (application/json)
@@ -3998,6 +4255,69 @@ HOST: http://www.wantoto.com
             "content": {
                 "recordId": "13-8"     // 本次編輯後的 暫停/重啟 醫囑記錄 ID
             }
+        }
+
+### 刪除暫停重起醫囑 [DELETE]
+
++ Parameters
+    + recordId (string) ... 待刪除之 id
+
++ Response 200 (application/json)
+
+        {
+            "success": true
+        }
+
+
+
+## 10/27 確認多筆病患醫令記錄 [/medication/confirmation/batch]
+### 確認多比病患醫令記錄 [POST]
++ Request Confirm orderRecord(s)
+
+        {
+            "sessionKey": "DE44A33624064BFCB0BBAFDB9A509C16",
+            "requests": [
+                {
+                    "requestId": "request_001",
+                    "path": "/account/{accountNo}/orderRecord/T32132012",
+                    "method": "PATCH",
+                    "body": {
+                        "content": {
+                            "confirmedTime": 1438423200,         // [number(timestamp)] 確認時間
+                            "verifier": "111283"                 // [string]  確認醫師員工編號
+                        }
+                    }
+                },
+                {
+                    "requestId": "request_001",
+                    "path": "/account/{accountNo}/orderRecord/T32132013",
+                    "method": "PATCH",
+                    "body": {
+                        "content": {
+                            "confirmedTime": 1438423200,         // [number(timestamp)] 確認時間
+                            "verifier": "111283"                 // [string]  確認醫師員工編號
+                        }
+                    }
+                },
+                ...
+            ]
+        }
+
++ Response 200 (application/json)
+
+
+        {
+            "requests": [
+                {
+                    "requestId": "request001",
+                    "success": true
+                },
+                {
+                    "requestId": "request002",
+                    "success": true
+                }
+                ...
+            ]
         }
 
 # Group Blood Order
@@ -4557,28 +4877,31 @@ Content-type: multipart/form-data
 
 
 
-## 7/6 - 待配床清單 [/assignBed/department/{departmentCode}]
+## 11/17 - 待配床清單 [/assignBed/list{?sessionkey,departmentCode,chartNo}]
 ### 取得待配床病患清單[GET]
 
 + Parameters
-    + departmentCode (string)    ... 科別代碼
+    + departmentCode (string, optional) ... 科別代碼
+    + chartNo (string, optional)  ... 病患病例號
 
 + Response 200 (application/json)
 
         {
             "content" : [   //病患資訊陣列
                 {   //病患資訊
-                    "patName" : "王小明",                    //病患姓名[string]
-                    "patSexCode" : "M",                     //性別[string]（男性："M";女性："F"）
-                    "patBirthday" : 1406938026,             //出生日期[number(timestamp)]
-                    "chartNo" : "12345678",                 //病歷號[string]
-                    "priority": "Ａ",                        //優先順序[string]
-                    "waitStartDate": 1416938026,              //候床起始時間 [number(timestamp)]
-                    "waitEndDate": 1416938326,                //候床結束時間 [number(timestamp), optional] 若無則不用回傳
-                    "source" : "轉",                         //來源[string]
-                    "hospital" : "總院",                      //原院[string]
-                    "department" : "腫瘤",                    //原科[string]
-                    "note" : "註記"                           //註[string]
+                    "patName" : "王小明",                          //病患姓名[string]
+                    "patSexCode" : "M",                         //性別[string]（男性："M";女性："F"）
+                    "patBirthday" : 1406938026,                 //出生日期[number(timestamp)]
+                    "chartNo" : "12345678",                     //病歷號[string]
+                    "priority": "Ａ",                            //優先順序[string]
+                    "waitStartDate": 1416938026,                //候床起始時間 [number(timestamp)]
+                    "waitEndDate": 1416938326,                  //候床結束時間 [number(timestamp), optional] 若無則不用回傳
+                    "source" : "轉",                            //來源[string]
+                    "originalHospital" : "總院",                //原院[string]
+                    "originalDepartmentName" : "腫瘤",          //原科[string]
+                    "note" : "註記",                             //註[string]
+                    "departmentName": "內科",                    //[string, optional] 候床科別名稱(直接配床則回傳直接配床)
+                    "waitBedNo": "1408992"                      //[string, optional] 候床代號(直接配床則不回傳)
                 },
                 ...
             ],
@@ -4587,12 +4910,12 @@ Content-type: multipart/form-data
             "total" : 50  //此次Query總筆數[number]
         }
 
-## 9/22 - 病患配床資訊 [/assignBed/patients/{chartNo}{?waitBedNo,bedCode,date,originDept,bedClassCode,isolationReasonCode,isolationReasonFreeText}]
+## 11/17 - 病患配床資訊 [/assignBed/patients/{chartNo}{?waitBedNo,bedCode,date,originDept,bedClassCode,isolationReasonCode,isolationReasonFreeText}]
 ### 取得病患配床資訊[GET]
 
 + Parameters
-
-   + chartNo (string)    ... 病歷號
+    + chartNo (string)    ... 病歷號
+    + waitBedNo (string, optional)  ... 候床代號 (未回傳候床代號為直接配床)
 
 + Response 200 (application/json)
 
@@ -4786,8 +5109,8 @@ Content-type: multipart/form-data
                             "empNo" : "111111", //員編 [string]
                             "name" : "謝小穎"
                         },
-                        "status" : "住院中",    //狀態[string]
-                        "specialTag" : [        //特殊標記[string array] (ex:DNR,...)
+                        "status" : "住院中",     //狀態[string]
+                        "specialTag" : [        //特殊標記[optional] (ex:DNR,...)
                             {
                                 "tagCode" : "DNR",      // [string]
                                 "displayName" : "DNR"   // [string]
@@ -5167,229 +5490,32 @@ Content-type: multipart/form-data
             ]
         }
 
-## 9/21 - 急救紀錄事件按鈕 [/ERRecord/layout]
-### 取得急救紀錄事件按鈕 [GET]
+## 11/30 - 病患身分 [/ERRecord/patient{?chartNo,name,birthday}]
+## 取得病患身分資料 [GET]
+
++ Parameters
+    + chartNo (string)
+    + name (string, optional)
+    + birthday (string, optional) ... YYYYMMDD
 
 + Response 200 (application/json)
 
         {
-            "example": [
-                {
-                    "category": "S",    //類別代碼 [string]
-                    "displayName": "STATUS",    //類別顯示名稱 [string]
-                    "displayNameTC": "狀態評估",    //類別顯示名稱(中文) [string]
-                    "items": [    //類別含有的按紐
-                        {
-                            "itemCode": "SCON",   //步驟(元件)代碼  [string]
-                            "items": [  //下層選項  [optional]
-                                {
-                                    "itemCode" : "SCON1OP"
-                                }
-                            ]
-                        },
-                        {
-                            "itemCode": "SCON2",
-                            "items": [  //下層選項  [optional]
-                                {
-                                    "itemCode" : "SCON2E"
-                                },
-                                {
-                                    "itemCode" : "SCON2M"
-                                },
-                                {
-                                    "itemCode" : "SCON2V"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ],
-            "content": [
-            ]
-        }
-
-
-## 9/21 - 急救紀錄步驟 [/ERRecord/items]
-### 取得急救紀錄步驟 [GET]
-
-+ Response 200 (application/json)
-
-        {
-            "example": {
-                "SCON" : {  //example for button
-                    "type": "button",   //元件類別 (button, option, textfield, optionItem) [string]
-                    "displayName": "Consciousness", //元件顯示名稱 [string]
-                    "displayNameTC": "意識評估",    //元件顯示名稱(中文) [string]
-                    "count" : true, //此元件(按鈕)需要被計數，未回傳此參數時，預設為 false [boolean, optional]
-                    "isNeededSetDefault" : true,  //是否需要將使用者於此急救過程中第一次選擇的選項作為預設值，未回傳此參數時，預設為 false [boolean, optional]
-                    "default" : "SCON1U"   //此按鈕有預設值時回傳 itemCode，[string, optional]
-                },
-                "SCON2E" : {    //example for textfield
-                    "type": "textfield",   //元件類別 (button, option, textfield, optionItem) [string]
-                    "displayName": "E:",    //元件顯示名稱 [string]
-                    "displayNameTC": "E:",  //元件顯示名稱(中文) [string]
-                    "default": "1", //預設數值，未回傳此參數時，預設為空值 [string. optional]
-                    "number": true, //值是否只能填入數值，未回傳此參數時，預設為 false [string. optional]
-                    "require" : false //當require為 false 時，使用者可選擇不填入此數值，當使用者不填入數值時，不用紀錄此項，未回傳此參數時，預設為 true [boolean, optional]
-                },
-                "SCON1OP" : {   //example for option
-                    "type": "option",   //元件類別 (button, option, textfield, optionItem) [string]
-                    "options" : [   //選項 (optionItem)
-                        "SCON1A",
-                        "SCON1V",
-                        "SCON1P",
-                        "SCON1U"
-                    ]
-                },
-                "SCON1A" :{ //example for optionItem
-                    "type": "optionItem",
-                    "displayName": "A",
-                    "displayNameTC": "A",
-                    "textInput": true,  //當此選項有附帶欄位可讓使用者填入值，未回傳此參數時，預設為 false[boolean, optional]
-                    "default": "1",  //預設數值 [string. optional]
-                    "number" : true    //當此參數為 true 時，表示此欄位只能填入數值，未回傳此參數時，預設為 false [boolean, optional]
-                }
-            },
             "content": {
-
-            }
-
-        }
-
-
-## 9/21 - 急救紀錄元件紀錄內容 [/ERRecord/record]
-### 急救紀錄元件紀錄內容 [GET]
-
-+ Response 200 (application/json)
-
-        {
-            "example": {    //每一個record Object，皆會產生一筆紀錄，紀錄欄位為time[timestamp]、itemCode、recordNote、text(使用者輸入值)，當無參數 require = false 時，所有選項與欄位皆為必填。
-                "SCON2E" : "昏迷指數:E [\1]",    //當此 item 有使用者填入欄位時，使用者填入值已[\1]表示，如使用者填入值為 2 ，recordNote 將紀錄為 "昏迷指數:E 2"
-                "SCON1A" : "意識評估:清"
-            },
-            "content": {
-
-            }
-
-        }
-
-
-## 9/10 - 急救紀錄邏輯 [/ERRecord/logic]
-### 取得急救紀錄邏輯 [GET]
-
-+ Response 200 (application/json)
-
-        {
-            "example": {
-                "提示": [
-                    {
-                        "flag": "ABC",  //當flag存在時，執行 action [string, optional]
-                        "delay": 120,   //幾秒後執行 action [number, optional]
-                        "repeat": 0,    //重複執行次數，0為無限次 [number, optional]
-                        "interval": 200,    //重複時間間隔，以秒為單位 [number, optional]
-                        "repeatCode": "ABC",    //重複事件代碼，用於停止此重複事件與判別此重複事件是否存在，當重複事件以存在時，不再次產生重複事件[string, optional]
-                        "action": "highlight",
-                        "buttonCode": ""    //欲提示之按鈕
-                    }
-                ],
-                "關閉提示": [
-                    {
-                        "noFlag": "ABC",    //當flag不存在時，執行 action [string, optional]
-                        "action": "unhighlight",
-                        "buttonCode": ""
-                    }
-                ],
-                "關閉點擊": [
-                    {
-                        "action": "disable",
-                        "buttonCode": ""
-                    }
-                ],
-                "count++": [    //計數事件執行次數。
-                    {
-                        "action": "count",
-                        "itemCode": ""
-                    }
-                ],
-                "resetCount": [ //重置事件執行次數
-                    {
-                        "action": "resetCount",
-                        "itemCode": ""
-                    }
-                ],
-                "播放聲音": [
-                    {
-                        "action": "playSound",
-                        "soundCode": "chest",
-                        "delay": 120
-                    }
-                ],
-                "stopRepeat": [
-                    {
-                        "action": "stopRepeat",
-                        "repeatCode": "ABC"
-                    }
-                ],
-                "addFlag": [
-                    {
-                        "action": "addFlag",
-                        "flagCode": "ABC"
-                    }
-                ],
-                "removeFlag": [
-                    {
-                        "action": "removeFlag",
-                        "flagCode": "ABC"
-                    }
-                ],
-                "執行": [ //執行事件組合
-                    {
-                        "action": "execute",
-                        "excuteCode": "_PLAYCPR"
-                    }
-                ],
-                "ROSC": [
-                    {
-                        "action": "ROSC"
-                    }
-                ],
-                "terminate": [
-                    {
-                        "action": "terminate"
-                    }
-                ]
-            },
-            "content": {
-                "start": [  //當一開始時，需要執行的事件，事件依序執行。
-                    {
-                        "action": "highlight",
-                        "buttonKey": ""
-                    },
-                    {
-                        "action": "highlight",
-                        "buttonKey": ""
-                    },
-                    {
-                        "action": "highlight",
-                        "buttonKey": ""
-                    },
-                    {
-                        "action": "highlight",
-                        "buttonKey": ""
-                    }
-                ],
-                "評估呼吸": [   //當評估呼吸事件觸發時，需要執行的事件。
-                    {
-                        "action": "highlight",
-                        "buttonKey": ""
-                    },
-                    {
-                        "action": "highlight",
-                        "buttonKey": ""
-                    }
-                ]
+                "chartNo": "123123",
+                "name": "TEST",
+                "birthday": "19970202"
             }
         }
+
++ Response 400 (application/json)
+
+        {
+            "error": 104,
+            "message": "xxx is not found"
+        }
+
+
 
 ## 10/15 - 急救記錄 [/ERRecord/record]
 ### 回傳急救記錄[POST]
@@ -5411,37 +5537,33 @@ Content-type: multipart/form-data
                 "ERReason" : {
                     "commandDoctor" : "111281", //現場指揮醫師
                     "NS" : "123456",    //護理人員
-                    "cardicOrigin": [   //心臟因素
-                        "心律不整", //使用者有選擇或填寫時回傳
-                        "心肌梗塞",
-                        "使用者填入的其他原因"
-                    ],
-                    "respiratoryOrigin": [  //呼吸因素
-                        "呼吸",
-                        "使用者填入的其他原因"
-                    ],
-                    "neurologicalOrigin": [  //神經學因素
-                        "腦中風",
-                        "使用者填入的其他原因"
-                    ],
-                    "infectionOrigin": [  //感染因素
-                        "敗血症",
-                        "使用者填入的其他原因"
-                    ],
-                    "trauma": [  //創傷
-                        "外傷",
-                        "使用者填入的其他原因"
-                    ],
-                    "others": [  //其他
-                        "低血壓",
-                        "新陳代謝",
-                        "使用者填入的其他原因"
-                    ]
+                    "cardicOrigin": {   //心臟因素
+                        "code": "A01,A00",              // [string]
+                        "note": "xxxxx"             // [string, optional]
+                    },
+                    "respiratoryOrigin": {  //呼吸因素
+                        "code": "B01,B00",              // [string]
+                        "note": "測試資料"             // [string, optional]
+                    },
+                    "neurologicalOrigin": {  //神經學因素
+                        "code": "C00",              // [string]
+                        "note": "測試資料"             // [string, optional]
+                    },
+                    "infectionOrigin": {
+                        "code": "D01"               // [string]
+                    },
+                    "trauma": {
+                        "code": "E01"               // [string]
+                    },
+                    "others": {
+                        "code": "F00",              // [string]
+                        "note": "測試資料"             // [string, optional]
+                    }
                 },
                 "patientInfo": {
                     "type": 0,          // 急救記錄類別 0 for newborn, 1 for child, 2 for adult
-                    "weight": 200,      // [number, optional] weight (if type=1 in g; else in Kg)
-                    "age": "3_200"      // [string, optional] pattern: "y_d"
+                    "weight": 200,      // [number, optional] weight (if type=0 in g; else in Kg)
+                    "age": 3            // [number, optional] age
                 },
                 "ERRecord" : [
                     {
@@ -5461,90 +5583,45 @@ Content-type: multipart/form-data
                         "recordTime" : 1444638140,  //記錄時間[number(timestamp)]
                         "itemCode" : "ROSC",
                         "appendData" : {    //附屬欄位(ROSC,terminate使用)[object, optional]
-                            "vitalSignSPB": [       //收縮壓
-                                "100"
-                            ],
-                            "vitalSignDPB":[    //舒張壓
-                                "70"
-                            ],
-                            "vitalSignHR":[    //心跳
-                                "40"
-                            ],
-                            "vitalSignSpO2":[    //SpO2
-                                "10"
-                            ],
-                            "vitalSignEtCO2":[    //EtCO2
-                                "10"
-                            ],
-                            "vitalSignRR":[    //呼吸
-                                "20"
-                            ],
-                            "rhytm" : [
-                                "Sinus Rhythm",
-                                "Sinus tachycardia",
-                                "Sinus bradycardia",
-                                "AIVR",
-                                "Af/AF",
-                                "MAT",
-                                "Juntional",
-                                "使用者填入的其他原因"
-                            ],
-                            "management" : [
-                                "ECMO",
-                                "IABP",
-                                "Hypothermia",
-                                "Tracheostomy",
-                                "TCP",
-                                "Pericardiocentesis",
-                                "Nil",
-                                "使用者填入的其他原因"
-                            ],
-                            "neurologicalOutcomeGCSE" : [
-                                "1"
-                            ],
-                            "neurologicalOutcomeGCSV" : [
-                                "1"
-                            ],
-                            "neurologicalOutcomeGCSM" : [
-                                "1"
-                            ],
-                            "neurologicalOutcomePupilRight" : [
-                                "1"
-                            ],
-                            "neurologicalOutcomePupilLeft" : [
-                                "1"
-                            ],
-                            "neurologicalOutcomeLightRight" : [ //光反射左
-                                "1"
-                            ],
-                            "neurologicalOutcomeLightLeft" : [  //光反射右
-                                "1"
-                            ],
-                            "diposition" : [
-                                "加護病房",
-                                "留原單位",
-                                "重症區"
-                            ]
+                            "SPB": "100",       //收縮壓
+                            "DPB": "70",   //舒張壓
+                            "HR": "40",    //心跳
+                            "SpO2": "10",    //SpO2
+                            "EtCO2": "10",    //EtCO2
+                            "RR": "20",    //呼吸
+                            "rhytm" : {
+                                "code": "G01,G00",              // [string]
+                                "note": "測試資料"             // [string, optional]
+                            },
+                            "management" : {
+                                "code": "H01,H00",              // [string]
+                                "note": "測試資料"             // [string, optional]
+                            },
+                            "GCSE" : "1",
+                            "GCSV" : "1",
+                            "GCSM" : "1",
+                            "pupilRight" : "1",
+                            "pupilLeft" : "1",
+                            "lightRight" : "1", //光反射左
+                            "lightLeft" : "1",  //光反射右
+                            "diposition" : {
+                                "code": "I01,I00",              // [string]
+                                "note": "測試資料"             // [string, optional]
+                            }
                         }
                     },
                     {
                         "recordTime" : 1444638150,  //記錄時間[number(timestamp)]
                         "itemCode" : "terminate",
                         "appendData" : {    //附屬欄位(ROSC,terminate使用)[object, optional]
-                            "reason" : [
-                                "Futile",   //使用者有選擇或填寫時回傳
-                                "DNR"
-                            ],
-                            "EtCO2" : [
-                                "10.2"
-                            ],
-                            "rhytm" : [
-                                "PEA",
-                                "VT",
-                                "VF",
-                                "Asytole",
-                                "使用者填入的其他原因"
-                            ]
+                            "appendReason" : {
+                                "code": "J01,J02"              // [string]
+                            },
+                            "EtCO2" : "10.2",
+                            "appendRhytm" : {
+                                "code": "K01,K00",              // [string]
+                                "note": "測試資料"             // [string, optional]
+                            }
                         }
                     }
                 ]
