@@ -2,7 +2,7 @@ FORMAT: 1A
 HOST: http://www.wantoto.com
 
 
-# 台大醫院行動醫療資訊系統 Web Service v1.7.4
+# 台大醫院行動醫療資訊系統 Web Service v1.7.5
 
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
@@ -1133,6 +1133,7 @@ HOST: http://www.wantoto.com
                             "baseURL" : "http://baseUrl.ntuh.gov.tw"            // 報告基礎連結(報告中如有相對連結時回傳)[string, optional]
                         },
                         "recordId": "T0_11232000112_D",                         // [string] 本筆記錄所對應的交易檔 ID (orderRecordId/medicationRecordId)
+                        "orderCode": "AR3211123",                                   // [string, optional] 本筆記錄所對應的 orderCode 醫囑排程使用
                         "editable": true,                                       // [boolean] 是否可被編輯
                         "deletable": true,                                      // [boolean] 是否可被刪除
                         "holdable": true,                                       // [boolean] 是否可被暫停 (是為暫停藥囑用 醫囑一律為 false)
@@ -2904,11 +2905,12 @@ HOST: http://www.wantoto.com
         {
             "content": {
                 "cre": 31.2,
+                "timeString": "1228",                       // [string] 有關報告的日期內容
                 "note": "Cre值 > 2.2 除洗腎患者外需要..."     // [string,optional] 提示訊息 醫學影像介面使用
             }
         }
 
-+ Response 404 (application/json)
++ Response 400 (application/json)
 
 
         {
@@ -3034,7 +3036,7 @@ HOST: http://www.wantoto.com
                     "isEmergency":      true,                       // [boolean] 是否支援急做
                     "subType":          "N",                        // [string, optional] orderType = T 時使用 一般為 N, 手術為 O, 麻醉為 A, 齒位為 D, 技工所為 E, 復健為 P
                     "requireCreInfo":   0,                          // [number] 是否需要顯示 cre 介面以及顯示介面的種類, 0. 為不需要顯示 1. 為只需要顯示目前取得之 cre 值 2. 為還需要顯示生命危急和加開 creatimine 的選項
-                    "planExecutionTimeFormat": "yyyy/mmdd HH",      // [string] 預計執行時間的 format
+                    "planExecutionTimeFormat": "yyyy/MM/dd HH",      // [string] 預計執行時間的 format
                     "specimenList":     [                           // [optional] orderType = L 時使用
                         {
                             "code": "ts1",                  // [string] 檢體代號
@@ -3303,8 +3305,13 @@ HOST: http://www.wantoto.com
                 ],
                 "indication": "Follo Up",                       // [optional] CT 或 MRI 需要回傳
                 "selections": [                                 // 所有被選取的 item 的 return keys
-                    "whole_brain_scan",
-                    "pherrior_fassa",
+                    {
+                        "returnKey": "whole_brain_scan",
+                        "otherText": "xxx"                      // [optional] The additional input content
+                    },
+                    {
+                        "returnKey": "pherrior_fassa"
+                    }
                     ...
                 ],
                 "orderStage": "0",                              // [string] 階段
@@ -3455,7 +3462,6 @@ HOST: http://www.wantoto.com
         {
             "content": {
                 "requstID": "account_0001_0001",     // [string]
-                "hospitalCode": "HQ",                // [string] 院區碼
                 "quantity": 3,                       // [number] 數量
                 "billType": "E",                     // [string] 記帳類別
                 "confirmedTime": 1438423200,         // [number(timestamp)] 確認時間
@@ -3675,6 +3681,7 @@ HOST: http://www.wantoto.com
 
         {
             "success": false,
+            "error": 804,
             "content": [
                 {
                     "requestId": "request001",
@@ -4328,6 +4335,7 @@ HOST: http://www.wantoto.com
                 "total" : 100 //此次Query總筆數[number]
             }
         }
+        
 
 ## 12/25 - 確認醫藥囑 [/unconfirmedRecords/batch]
 ### 確認多筆醫藥囑記錄 [POST]
@@ -4868,7 +4876,8 @@ Content-type: multipart/form-data
                 "compression": "l",
                 "type": "p",
                 "title": "TEST TITLE",
-                "description": "TEST DESCRIPTION"
+                "description": "TEST DESCRIPTION",
+                "timestamp": 1453204964
             },
             "sessionKey": "DD07A0AF4E9F426C838185D8DD19EFE2",
             "accountNo": "E123512",
