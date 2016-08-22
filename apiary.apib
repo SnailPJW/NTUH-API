@@ -2,7 +2,7 @@ FORMAT: 1A
 HOST: http://www.wantoto.com
 
 
-# 台大醫院行動醫療資訊系統 Web Service v1.7.5
+# 台大醫院行動醫療資訊系統 Web Service v1.7.7
 
 採用 RESTful 架構規劃。所有字串編碼皆為UTF-8。
 
@@ -4307,6 +4307,12 @@ HOST: http://www.wantoto.com
                         ],
                         "accountNo": "I15T07315840",                            // [string] 開立醫囑時對應的帳號
                         "recordId": "T0_11232000112_D",                         // [string] 本筆記錄所對應的交易檔 ID
+                        "confirmRecordId": "T0_11232000112_D",                  // [string] 確認本筆記錄時所用的 recordId
+                        "orderType": "K",                                       // [string] 本筆記錄所對應的是醫囑或藥囑 type 醫囑: T, P, X, N,... 藥囑: R, ...
+                        "orderCode": "T03321220",
+                        "editable": true,
+                        "deletable": true,
+                        "schedulable": false,
                         "cofirmSelectionIndex": 0                               // [number] 0 表示不可選 1 表示預設不選 3 表示預設選取
                     },
                     ...
@@ -4335,7 +4341,7 @@ HOST: http://www.wantoto.com
                 "total" : 100 //此次Query總筆數[number]
             }
         }
-        
+
 
 ## 12/25 - 確認醫藥囑 [/unconfirmedRecords/batch]
 ### 確認多筆醫藥囑記錄 [POST]
@@ -4454,24 +4460,28 @@ HOST: http://www.wantoto.com
                     "hilight": true                                             // [boolean] 是否要 highlight資訊內容
                 },
                 "specimenInfo": "檢體: -- 採檢: -- 提血期限: 採檢後 3 日內",         // 有效檢體資訊
-                "inspectInfo": {                                                // 檢驗資訊
-                    "HB": {                                                     // [optional] HB相關 若無資料可以不用回傳
+                "inspectInfo": [                                                // 檢驗資訊
+                    {
+                        "title": "HB",
                         "value": 12.0,                                          // [number] 檢驗數值
                         "description": "(20150520-RL)"                          // [string] 檢驗描述
                     },
-                    "PLT": {                                                    // [optional] PLT相關 若無資料可以不用回傳
+                    {
+                        "title": "PLT",
                         "value": 472,                                           // [number] 檢驗數值
                         "description": "(20150520-RL)"                          // [string] 檢驗描述
                     },
-                    "PT": {                                                     // [optional] PT相關 若無資料可以不用回傳
+                    {
+                        "title": "PT",
                         "value": 12.0,                                          // [number] 檢驗數值
                         "description": "(20150520-CT)"                          // [string] 檢驗描述
                     },
-                    "PTT": {                                                    // [optional] PTT相關 若無資料可以不用回傳
+                    {
+                        "title": "PTT",
                         "value": 36.4,                                          // [number] 檢驗數值
                         "description": "(20150521-RL)"                          // [string] 檢驗描述
                     }
-                },
+                ],
                 "dictateBloodType": {                                           // 口述血型
                     "type": "type_unknown",                                     // [string] 血型代號
                     "description": "自過敏史取得口述血型, 資料來源為舊病歷資料"         // [string] 口述血型敘述
@@ -4742,7 +4752,7 @@ HOST: http://www.wantoto.com
             }
         }
 
-+ Response 404 (application/json)
++ Response 400 (application/json)
 
         {
             "error": 802,                               // [number] Error Code
@@ -5658,6 +5668,7 @@ Content-type: multipart/form-data
                 "ERReason" : {
                     "commandDoctor" : "111281", //現場指揮醫師
                     "NS" : "123456",    //護理人員
+                    "verifier" : "234567",  //紀錄確核醫師
                     "cardicOrigin": {   //心臟因素
                         "code": "A01,A00",              // [string]
                         "note": "xxxxx"             // [string, optional]
@@ -5745,7 +5756,60 @@ Content-type: multipart/form-data
                             }
                         }
                     }
-                ]
+                ],
+                "variables": [
+                    {
+                        "display": "3分鐘",
+                        "identifier": "{adrenaline}",
+                        "title": "Adrenaline",
+                        "value": "180"
+                    },
+                    {
+                        "display": "8 秒鐘",
+                        "identifier": "{respiration}",
+                        "title": "Respiration",
+                        "value": "8"
+                    },
+                    {
+                        "display": "120 beat/min",
+                        "identifier": "{heartrates}",
+                        "title": "HR Duration",
+                        "value": "0.5"
+                    },
+                    {
+                        "display": "120 beat/min",
+                        "identifier": "{heartratef}",
+                        "title": "HR Repeats",
+                        "value": "30"
+                    }
+                ],
+                "variableControls": [
+                    {
+                        "type": 0,
+                        "variables": [
+                            "{adrenaline}"
+                        ]
+                    },
+                    {
+                        "type": 0,
+                        "variables": [
+                            "{respiration}"
+                        ]
+                    },
+                    {
+                        "title": "Heart Rate", //[optional]
+                        "type": 0,
+                        "variables": [
+                            "{heartrates}",
+                            "{heartratef}"
+                        ]
+                    }
+                ],
+                "actionLogicVersion": "0.0.5",
+                "actionSetLogicVersion": "0.0.3",
+                "categoryLogicVersion": "0.0.3",
+                "elementLogicVersion": "0.0.5",
+                "suggestLogicVersion": "0.0.1"
             },
             "device" : "10.1.1.1",  //裝置IP
             "empNo": "111281",  //員工編號
